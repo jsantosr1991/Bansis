@@ -1,0 +1,34 @@
+<!-- Sidebar wrapper start -->
+<nav class="sidebar-wrapper">
+
+  <!-- Sidebar brand starts -->
+  <div class="sidebar-menu">
+    <div class="sidebarMenuScroll">
+      <ul>
+        <li *ngFor="let item of filteredMenu" class="sidebar-dropdown" [class.active]="item.active">
+          <a href="#" (click)="toggleDropdown(item)">
+            <i [class]="item.icon"></i>
+            <span class="menu-text">{{ item.title }}</span>
+          </a>
+          <div class="sidebar-submenu" *ngIf="item.submenus && item.submenus.length > 0">
+            <ul>
+              <li *ngFor="let submenu of item.submenus">
+                <a [routerLink]="submenu.route" routerLinkActive="current-page">{{ submenu.title }}</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- Sidebar brand starts -->
+  <!-- Sidebar menu starts -->
+  <!-- Sidebar menu ends -->
+  <!-- nav.component.html -->
+
+
+
+</nav>
+<!-- Sidebar wrapper end -->

@@ -1,0 +1,51 @@
+
+<div class="login-container">
+  <!-- Login box start -->
+  <form (ngSubmit) ="onSubmit()">
+    <div class="login-box">
+      <div class="login-form">
+        <a href="index.html" class="login-logo">
+          <img src="assets/images/logo.svg" alt="Vico Admin" />
+        </a>
+        <div class="login-welcome">
+          Welcome back, <br />Please login to your Vivo admin account.
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" 
+                id="username" name="username" [(ngModel)]="username" 
+                 class="form-control" [class.input-error]="invalidLogin"
+                 required />
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="form-label">Password</label>
+
+          </div>
+          <input type="password" id="password" name="password" [(ngModel)]="password" class="form-control"   [class.input-error]="invalidLogin"
+                 required />
+        </div>
+        <div class="login-form-actions">
+          <button type="submit" class="btn">
+
+            <span class="icon"> <i class="bi bi-arrow-right-circle"></i> </span>
+            Login
+          </button>
+
+          <!-- Mensaje de error -->
+          <div *ngIf="invalidLogin" class="error-message">
+            {{ errorMessage }}
+          </div>
+
+        </div>
+
+        <div class="login-form-footer">
+          <div class="additional-link">
+            Don't have an account? <a href="signup.html"> Signup</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- Login box end -->
+</div>

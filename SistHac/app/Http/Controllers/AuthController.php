@@ -21,7 +21,7 @@ class AuthController extends Controller
         $user = DB::table('users')
             ->where('username', $request->username)
             ->first();
-
+            //sino existe o es incorrecta el password
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['error' => 'Credenciales inválidas'], 401);
         }
@@ -32,37 +32,36 @@ class AuthController extends Controller
             'username' => $user->username,
             'email' => $user->email ?? null,
             'password' => $user->password,
+             'rol_id' => $user->rol_id,
+             'group_id' => $user->group_id,
         ];
 
-        $token = JWTAuth::fromUser(new \App\Models\FakeUser($customUser));
+
+       $userFake = new \App\Models\FakeUser($customUser);
+
+$token = JWTAuth::customClaims($userFake->getJWTCustomClaims())
+                ->fromUser($userFake);
+
+
+
 
         return response()->json([
-           /* 'access_token' => $token,
-            'token_type' => 'bearer',*/
-            'token' => $token, // para que puedas probarlo
+           
+           
             'message' => 'Login exitoso',
             'username' => $user->username,
             'email' => $user->email
+            'rol_id' => $user->rol_id
         ]);
     }
 
 
     public function logout()
     {
-        $token = JWTAuth::getToken();
+       auth()->logout;
 
-        if (!$token) {
-            return response()->json(['error' => 'Token no proporcionado'], 400);
-        }
+       return response()->json(['message' => 'sesion cerrada']);
 
-        try {
-            JWTAuth::invalidate($token);
-            return response()->json(['message' => 'Sesión cerrada correctamente']);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json(['error' => 'Token inválido'], 401);
-        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['error' => 'No se pudo cerrar la sesión'], 500);
-        }
     }
 
 
