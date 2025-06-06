@@ -17,5 +17,6 @@ export const MENU_CONFIG = [
       { title: 'Ver usuarios', route: '/usuarios', roles: [1], grupos: [1, 20] },
       { title: 'Crear usuario', route: '/usuarios/create', roles: [1], grupos: [1, 20] }
     ]
-  }
+  },
+  
 ];

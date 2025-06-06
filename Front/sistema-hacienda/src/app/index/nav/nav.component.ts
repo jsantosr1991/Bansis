@@ -11,9 +11,10 @@ import { MenuItem } from '../../settings/menu.interface';
   styleUrl: './nav.component.css'
 })
 export class NavComponent {
-  @Input() menuItems: any[] = [];
-  @Input() userRole!: number;
-  @Input() userGroup!: number;
+@Input() userRole!: number;
+@Input() userGroup!: number;
+@Input() menuItems: MenuItem[] = [];
+
 
   filteredMenu: any[] = [];
 

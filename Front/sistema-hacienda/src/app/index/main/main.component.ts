@@ -1,20 +1,21 @@
 
 import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
-
-import { AuthserviceService } from '../../auth/authservice.service';
-import { UserService } from '../../auth/user.service';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { UserService } from '../../services/user.service';
 import { MenuItem } from '../../settings/menu.interface';
-import { MenuService } from '../../settings/menu.service';
-import { NavComponent } from '../nav/nav.component';
-
+import { AuthserviceService } from '../../services/authservice.service';
+import { MenuService } from '../../services/menu.service';
+import { NavComponent } from "../nav/nav.component";
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [NavComponent,RouterModule],
+  imports: [CommonModule,RouterModule, NavComponent],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.css'
+  styleUrl: './main.component.css',
+   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class MainComponent implements OnInit {
   username: string = '';

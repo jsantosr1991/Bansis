@@ -1,1 +1,25 @@
-<p>listar works!</p>
+<app-data-table tableId="usuariosTable" [options]="dataTableOptions">
+  <thead>
+    <tr>
+      <th>Nombres</th>
+      <th>Usuario</th>
+      <th>Empresa</th>
+      <th>Rol</th>
+       <th>Grupo</th>
+        <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let u of usuarios">
+      <td>{{ u.nombres }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.empresa }}</td>
+      <td>{{ u.rol}}</td>
+      <td>{{ u.grupo }}</td>
+      <td>
+        <!-- Acciones -->
+      </td>
+    </tr>
+  </tbody>
+</app-data-table>
+
