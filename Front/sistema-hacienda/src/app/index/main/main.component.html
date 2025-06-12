@@ -1,18 +1,28 @@
-<app-nav 
-         [menuItems]="menuItems"
-         [userRole]="userRole"
-         [userGroup]="userGroup "></app-nav>
-
 
 <!-- *************
       ************ Main container start *************
     ************* -->
-<div class="main-container">
-
+<div class="main-container" [class.sidebar-visible]="isSidebarVisible">
+ <!-- Botón hamburguesa -->
+    <div class="toggle-sidebar" (click)="toggleSidebar()">
+   
+  <i class="bi bi-list"></i>
+  
+</div>
+<!-- Sidebar -->
+  <app-nav 
+         [menuItems]="menuItems"
+         [userRole]="userRole"
+         [userGroup]="userGroup "
+         [sidebarVisible]="isSidebarVisible">
+        
+        </app-nav>
+ <!-- Aquí el wrapper de contenido general -->
+  <div class="container-fluid">
   <!-- Page header starts -->
   <div class="page-header">
-
-    <div class="toggle-sidebar" id="toggle-sidebar"><i class="bi bi-list"></i></div>
+ 
+    <!-- main.component.html -->
 
     <!-- Breadcrumb start -->
     <ol class="breadcrumb">
@@ -100,22 +110,14 @@
   </div>
   <!-- Page header ends -->
   <!-- Content wrapper scroll start -->
-  <div class="content-wrapper-scroll">
+  <div class="">
 
     <!-- Content wrapper start -->
     <div class="content-wrapper">
 
-      <!-- Row start -->
-      <div class="row">
-        <div class="col-xxl-6 col-sm-12 col-12">
-
+ 
           <router-outlet></router-outlet>
-
-        </div>
-
-      </div>
-      <!-- Row end -->
-
+  
 
     </div>
     <!-- Content wrapper end -->

@@ -1,4 +1,8 @@
-<app-data-table tableId="usuariosTable" [options]="dataTableOptions">
+<div class="row">
+<div *ngIf="usuarios.length > 0 ">
+
+
+ <table id="usuariosTable" class="table table-bordered table-hover w-100" >
   <thead>
     <tr>
       <th>Nombres</th>
@@ -21,5 +25,13 @@
       </td>
     </tr>
   </tbody>
+ </table>
+ 
+ <app-data-table [tableId]="'usuariosTable'"
+  [options]="dataTableOptions"
+  [refreshTrigger]="refreshToken">
 </app-data-table>
 
+ </div>
+</div>
+ 

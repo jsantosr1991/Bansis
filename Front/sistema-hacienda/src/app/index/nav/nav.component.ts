@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges,  SimpleChanges } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from '../../settings/menu.interface';
 
@@ -10,31 +10,29 @@ import { MenuItem } from '../../settings/menu.interface';
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.css'
 })
-export class NavComponent {
+export class NavComponent implements OnChanges {
 @Input() userRole!: number;
 @Input() userGroup!: number;
 @Input() menuItems: MenuItem[] = [];
-
+@Input() sidebarVisible = true; // ⬅️ lo recibe desde el padre
 
   filteredMenu: any[] = [];
 
-  ngOnInit() {
-    this.filteredMenu = this.menuItems
-      .filter(item => this.hasAccess(item)) // filtra por rol/grupo
+  ngOnChanges(changes: SimpleChanges) {
+    if(changes['menuItems']){
+      this.filteredMenu = this.menuItems
+      .filter(item => this.hasAccess(item))
       .map(item => ({
         ...item,
-        submenus: item.submenus?.filter((sub: MenuItem) => this.hasAccess(sub)) || []
+        submenus: item.submenus?.filter(sub => this.hasAccess(sub)) || []
       }))
-      .filter(item =>
-        item.submenus?.length > 0 || !!item.route // ✅ conserva si tiene submenús o un route directo
-      );
-  }
+      .filter(item => item.submenus?.length || item.route);
+    }
+   }
 
 
   toggleDropdown(item: any) {
-    this.filteredMenu.forEach(i => {
-      if (i !== item) i.active = false;
-    });
+    this.filteredMenu.forEach(i => { if (i !== item) i.active = false; });
     item.active = !item.active;
   }
 

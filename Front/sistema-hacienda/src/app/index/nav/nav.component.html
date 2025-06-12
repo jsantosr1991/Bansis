@@ -1,7 +1,5 @@
 <!-- Sidebar wrapper start -->
-<nav class="sidebar-wrapper">
-
-  <!-- Sidebar brand starts -->
+<nav class="sidebar-wrapper" [class.hidden-sidebar]="!sidebarVisible">
   <div class="sidebar-menu">
     <div class="sidebarMenuScroll">
       <ul>
@@ -10,7 +8,7 @@
             <i [class]="item.icon"></i>
             <span class="menu-text">{{ item.title }}</span>
           </a>
-          <div class="sidebar-submenu" *ngIf="item.submenus && item.submenus.length > 0">
+          <div class="sidebar-submenu" *ngIf="item.submenus?.length > 0">
             <ul>
               <li *ngFor="let submenu of item.submenus">
                 <a [routerLink]="submenu.route" routerLinkActive="current-page">{{ submenu.title }}</a>
@@ -21,14 +19,6 @@
       </ul>
     </div>
   </div>
-
-
-  <!-- Sidebar brand starts -->
-  <!-- Sidebar menu starts -->
-  <!-- Sidebar menu ends -->
-  <!-- nav.component.html -->
-
-
-
 </nav>
+
 <!-- Sidebar wrapper end -->

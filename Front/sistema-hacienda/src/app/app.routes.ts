@@ -22,6 +22,11 @@ export const routes: Routes = [
         loadChildren: ()=>
           import('./modulos/usuarios/usuarios.routes').then(m=>m.USUARIOS_ROUTES),
         data: { title: 'Usuarios' } ,   
+      },
+      {
+        path:'hojasaldos',
+        loadChildren:()=> import('./modulos/HojaSaldo/hojasaldo.routes').then(m =>m.HOJASALDOS_ROUTES),
+        data:{title: 'Hoja de Saldos'},
       }
     ]
   },

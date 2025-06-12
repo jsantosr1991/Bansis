@@ -1,19 +1,27 @@
-
 import { Injectable } from '@angular/core';
 declare var $: any;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class DataTableService {
-  init(selector: string, options: any = {}): void {
-  setTimeout(() => {
-  if ($ && $.fn && $.fn.DataTable && !$.fn.DataTable.isDataTable(selector)) {
-    $(selector).DataTable(options);
-  }
-}, 0);
+  private dataTable: any;
 
+  init(selector: string, options: any) {
+    setTimeout(() => {
+      this.dataTable = $(selector).DataTable(options);
+    }, 0);
   }
 
-  destroy(selector: string): void {
+  reload(selector: string, newData: any[]) {
+    if (this.dataTable) {
+      this.dataTable.clear();
+      this.dataTable.rows.add(newData);
+      this.dataTable.draw();
+    }
+  }
+
+  destroy(selector: string) {
     const table = $(selector).DataTable();
     if (table) {
       table.clear().destroy();

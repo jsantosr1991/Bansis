@@ -42,7 +42,9 @@ class FakeUser implements Authenticatable, JWTSubject
     {
         return [
             'username' => $this->attributes['username'] ?? null,
-            'group_id' => $this->attributes['group_id'] ?? null,  
-             'rol_id' => $this->attributes['rol_id'] ?? null,      ]; // aquí puedes añadir claims personalizados si deseas
+            'rol_id' => $this->attributes['rol_id'] ?? null,
+            'group_id' => $this->attributes['group_id'] ?? null
+
+                   ]; // aquí puedes añadir claims personalizados si deseas
     }
 }

@@ -1,21 +1,18 @@
-
-import { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { NavComponent } from '../nav/nav.component';
 import { UserService } from '../../services/user.service';
-import { MenuItem } from '../../settings/menu.interface';
-import { AuthserviceService } from '../../services/authservice.service';
 import { MenuService } from '../../services/menu.service';
-import { NavComponent } from "../nav/nav.component";
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { AuthserviceService } from '../../services/authservice.service';
+import { MenuItem } from '../../settings/menu.interface';
+
 @Component({
-  selector: 'app-main',
+  selector: 'main-app',
   standalone: true,
-  imports: [CommonModule,RouterModule, NavComponent],
+  imports: [CommonModule, RouterModule, NavComponent],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.css',
-   schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  styleUrls: ['./main.component.css'],
 })
 export class MainComponent implements OnInit {
   username: string = '';
@@ -23,21 +20,39 @@ export class MainComponent implements OnInit {
   userRole = 0;
   userGroup = 0;
 
+  isSidebarVisible = true;
+
   constructor(
-    public userService: UserService,
+    private userService: UserService,
     private menuService: MenuService,
     private authService: AuthserviceService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.username = this.userService.getUsername() ?? '';
     this.userRole = Number(this.userService.getRolId()) || 0;
     this.userGroup = Number(this.userService.getGroupId()) || 0;
     this.menuItems = this.menuService.getMenuByUser(this.userRole, this.userGroup);
+    this.updateSidebarVisibility();
+  }
 
-    console.log('rol:', this.userRole, 'grupo:', this.userGroup);
-    console.log(this.menuItems)
+   @HostListener('window:resize', ['$event'])
+      onResize() {
+    this.updateSidebarVisibility();
+  }
+
+  updateSidebarVisibility() {
+//    if (window.innerWidth < 768) {
+   //   this.isSidebarVisible = false;
+  //  } else {
+  //    this.isSidebarVisible = true;
+  //  }
+  this.isSidebarVisible = window.innerWidth >= 768;
+  }
+
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
   }
 
   logout() {

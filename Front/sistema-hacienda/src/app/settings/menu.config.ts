@@ -18,5 +18,14 @@ export const MENU_CONFIG = [
       { title: 'Crear usuario', route: '/usuarios/create', roles: [1], grupos: [1, 20] }
     ]
   },
-  
+ {
+    title: 'Hoja de Saldo',
+    icon: 'bi bi-card-text',
+   
+    roles: [1],
+    submenus: [
+      { title: 'Ver Hoja de Saldos', route: '/hojasaldos', roles: [1], grupos: [1, 20] },
+      { title: 'Crear usuario', route: '/usuarios/create', roles: [1], grupos: [1, 20] }
+    ]
+ }
 ];

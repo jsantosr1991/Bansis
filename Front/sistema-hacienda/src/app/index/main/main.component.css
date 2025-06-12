@@ -1,0 +1,71 @@
+.main-container {
+  position: relative;
+  display: flex;
+}
+
+/* Sidebar fijo dentro del flujo (muy importante: no es fixed, es absolute dentro del relativo) */
+.sidebar-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background: #fff;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar oculto (por defecto en mobile) */
+.hidden-sidebar {
+  transform: translateX(-100%);
+}
+
+/* Ahora controlamos el espacio de contenido real */
+.content {
+  flex: 1;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .main-container.sidebar-visible .content {
+    margin-left: 250px;
+  }
+
+  .sidebar-wrapper {
+    transform: translateX(0);
+  }
+
+  .toggle-sidebar {
+    display: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .sidebar-wrapper {
+    transform: translateX(-100%);
+  }
+
+  .main-container.sidebar-visible .sidebar-wrapper {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0 !important;
+  }
+}
+
+/* Botón hamburguesa */
+.toggle-sidebar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10000;
+  background: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

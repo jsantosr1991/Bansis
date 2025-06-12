@@ -32,25 +32,20 @@ class AuthController extends Controller
             'username' => $user->username,
             'email' => $user->email ?? null,
             'password' => $user->password,
-             'rol_id' => $user->rol_id,
-             'group_id' => $user->group_id,
+            'rol_id' => $user->rol_id,
+            'group_id'=> $user->group_id
         ];
 
-
-       $userFake = new \App\Models\FakeUser($customUser);
-
-$token = JWTAuth::customClaims($userFake->getJWTCustomClaims())
-                ->fromUser($userFake);
-
-
-
+        $token = JWTAuth::fromUser(new \App\Models\FakeUser($customUser));
 
         return response()->json([
-           
+           'access_token' => $token,
+            'token_type' => 'bearer',
            
             'message' => 'Login exitoso',
             'username' => $user->username,
-            'email' => $user->email
+            'email' => $user->email,
+            'group_id' => $user->group_id,
             'rol_id' => $user->rol_id
         ]);
     }
