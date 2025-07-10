@@ -1,0 +1,25 @@
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
+
+/* ESTILO PARA TODA LA FILA DE TOTALES */
+table#tablaProduccion tbody tr.fila-total > td {
+  background-color: #ffe6b3 !important;
+  font-weight: bold !important;
+  color: #000 !important;
+}
+
+
+.length-div {
+  /* Alinea a la izquierda */
+}
+
+.search-div {
+  /* Alinea a la derecha */
+  text-align: right;
+}
+
+/* Opcional: hacer que el input de búsqueda sea un poco más ancho */
+.search-div input[type="search"] {
+  width: 200px;
+  display: inline-block;
+}

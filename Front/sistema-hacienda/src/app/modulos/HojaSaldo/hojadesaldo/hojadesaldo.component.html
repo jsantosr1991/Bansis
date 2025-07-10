@@ -1,1 +1,26 @@
-<p>hojadesaldo works!</p>
+<app-loader [loading]="loading"></app-loader>
+
+<div class="container">
+  <div class="container my-3">
+    <form [formGroup]="filtroForm" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Hacienda</label>
+        <select class="form-select" formControlName="idhacienda">
+          <option value="">Seleccione Hacienda</option>
+          <option *ngFor="let hacienda of haciendas" [value]="hacienda.id">{{ hacienda.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Código</label>
+        <input type="number" class="form-control" formControlName="codigo" placeholder="Ingrese código" />
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="datosPivotados.length > 0">
+    <table id="tablaProduccion" class="table table-bordered table-sm table-hover w-100"></table>
+  
+    
+  </div>
+</div>

@@ -30,13 +30,28 @@
             ],
             "styles": [
               "src/styles.css",
+              "src/assets/css/animate.css",
+              "src/assets/fonts/bootstrap/bootstrap-icons.css",
+               "src/assets/css/main.min.css",
+               "src/assets/vendor/overlay-scroll/OverlayScrollbars.min.css",
+               "src/assets/vendor/particles/particles.css",
+               "src/assets/vendor/datatables/dataTables.bs5.css",
+
               "node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
            
               "node_modules/datatables.net/js/dataTables.min.js",
-            "node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js"
+              "node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js",
+              "node_modules/datatables.net-buttons/js/dataTables.buttons.min.js",
+              "node_modules/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js",
+              "node_modules/datatables.net-buttons/js/buttons.html5.min.js",
+              "node_modules/datatables.net-buttons/js/buttons.print.min.js",
+              "node_modules/pdfmake/build/pdfmake.min.js",
+              "node_modules/pdfmake/build/vfs_fonts.js",
+              "node_modules/jszip/dist/jszip.min.js"
+
 
             ]
           },
@@ -52,13 +67,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "5MB",
+                  "maximumError": "6MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "30kB",
+                  "maximumError": "50kB"
                 }
               ],
               "outputHashing": "all"
