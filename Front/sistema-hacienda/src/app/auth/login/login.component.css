@@ -12,3 +12,24 @@
   padding: 8px;
   border-radius: 4px;
 }
+
+/* Spinner de pantalla completa */
+.overlay-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.6); /* Semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Asegúrate de que esté sobre todo */
+}
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #000 !important; /* color del texto */
+  transition: background-color 5000s ease-in-out 0s;
+}
+

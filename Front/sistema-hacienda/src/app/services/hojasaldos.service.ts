@@ -14,9 +14,9 @@ export class HojasaldosService {
   obtenerDatos(idhacienda:any, codigo:any):Observable<Hojasaldos[]>{
 
     const params = {idhacienda, codigo};
-    console.log(params);
+
     return this.http.post<Hojasaldos[]>(this.baseUrl+'/hojasaldos', params);
   }
 
-  
+
 }

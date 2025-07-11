@@ -16,7 +16,7 @@ interface JwtPayload {
 
 interface LoginResponse {
   access_token: string;
-  
+
   token_type: string;
   expires_in: number;
 }
@@ -31,7 +31,7 @@ export class AuthserviceService {
 
   private baseUrl = environment.apiUrl;
 
-  private tokenKey = 'jwt_token';
+  private tokenKey = 'access_token';
   private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
 
   constructor(private http: HttpClient, private userService: UserService) {
@@ -43,9 +43,9 @@ export class AuthserviceService {
           username: decoded.username,
           rol_id: decoded.rol_id,
           group_id: decoded.group_id
-          
+
         })
-        
+
       } catch (e) {
         console.error('Error al decodificar token en constructor', e);
         this.userService.clearUser();
@@ -54,7 +54,9 @@ export class AuthserviceService {
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
+
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, { username, password })
+
       .pipe(
         tap(response => {
           localStorage.setItem(this.tokenKey, response.access_token);

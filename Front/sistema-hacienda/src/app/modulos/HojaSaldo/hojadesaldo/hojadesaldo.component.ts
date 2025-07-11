@@ -65,6 +65,7 @@ export class HojadesaldoComponent implements OnInit {
     this.saldosService.obtenerDatos(idhacienda, codigo).subscribe({
       next: resp => {
         this.datos = resp;
+
         this.procesarSecciones();
         this.procesarDatos();
 

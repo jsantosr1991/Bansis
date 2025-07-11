@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../environment/environment';
+import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { UserService } from './user.service';
 
@@ -15,7 +15,7 @@ interface JwtPayload {
 
 interface LoginResponse {
   access_token: string;
-  
+
   token_type: string;
   expires_in: number;
 }
@@ -30,7 +30,7 @@ export class AuthserviceService {
 
   private baseUrl = environment.apiUrl;
 
-  private tokenKey = 'jwt_token';
+  private tokenKey = 'access_token';
   private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
 
   constructor(private http: HttpClient, private userService: UserService) {
@@ -42,9 +42,9 @@ export class AuthserviceService {
           username: decoded.username,
           rol_id: decoded.rol_id,
           group_id: decoded.group_id
-          
+
         })
-        
+
       } catch (e) {
         console.error('Error al decodificar token en constructor', e);
         this.userService.clearUser();
