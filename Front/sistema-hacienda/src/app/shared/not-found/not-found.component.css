@@ -1,0 +1,32 @@
+.error-page {
+  position: relative;
+  min-height: 100vh;
+  background-color: #ff0000; /* Fondo rojo */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  z-index: 0;
+}
+
+#particles-js {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: -1 !important;
+  background: transparent !important;
+}
+
+.countdown-bg {
+  display: none; /* Si no usas esta capa, la escondemos */
+}
+
+.error-screen {
+  position: relative;
+  z-index: 1;
+}

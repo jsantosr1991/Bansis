@@ -14,4 +14,11 @@ class Balanzas extends Controller
         $query = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC ObtenerSaldosCinta ?,?', [$hacienda,$cinta]);;
         return response()->json($query);
     }
+    public function HojaSaldosEnfunde(Request $request)
+    {
+        $cinta = $request->input('codigo');
+        $hacienda = $request->input('idhacienda');
+        $query = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC Sp_GetEnfunde ?,?', [$hacienda,$cinta]);;
+        return response()->json($query);
+    }
 }

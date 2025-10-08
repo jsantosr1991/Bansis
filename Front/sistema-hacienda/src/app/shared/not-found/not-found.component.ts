@@ -1,11 +1,14 @@
 
 import { Component, AfterViewInit } from '@angular/core';
+import {RouterLink} from '@angular/router';
 declare var particlesJS: any;
 
 @Component({
   selector: 'app-not-found',
   standalone: true,
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './not-found.component.html',
   styleUrl: './not-found.component.css'
 })
@@ -13,7 +16,6 @@ declare var particlesJS: any;
 export class NotFoundComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
-    particlesJS.load('particles-js', 'assets/vendor/particles/particles-custom.js');
+    particlesJS.load('particles-js', '/assets/vendor/particles/particles-config.json');
   }
-
 }

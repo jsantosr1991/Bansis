@@ -1,25 +1,33 @@
-@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
-@import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
-
-/* ESTILO PARA TODA LA FILA DE TOTALES */
-table#tablaProduccion tbody tr.fila-total > td {
-  background-color: #ffe6b3 !important;
-  font-weight: bold !important;
-  color: #000 !important;
+/* Asegurar que la tabla sea desplazable en pantallas pequeñas */
+.table-responsive {
+  overflow-x: auto;  /* Hacer la tabla desplazable horizontalmente */
 }
 
-
-.length-div {
-  /* Alinea a la izquierda */
+/* Fijar las cabeceras de la tabla */
+.table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;  /* Color de fondo para la cabecera */
+  z-index: 1000;  /* Asegura que la cabecera esté por encima del contenido */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);  /* Sombra para la cabecera para mejor visibilidad */
 }
 
-.search-div {
-  /* Alinea a la derecha */
-  text-align: right;
+/* Para hacer que las filas de totales se destaquen */
+.fila-total {
+  background-color: #f1f1f1; /* Un color claro para resaltar la fila total */
+  font-weight: bold;  /* Poner la fila total en negrita */
+  border-top: 2px solid #000;  /* Borde superior para diferenciarla */
 }
 
-/* Opcional: hacer que el input de búsqueda sea un poco más ancho */
-.search-div input[type="search"] {
-  width: 200px;
-  display: inline-block;
+/* Asegurar que las celdas no se estiren demasiado */
+.table td, .table th {
+  padding: 8px;
+  text-align: center;
+}
+
+/* Opcional: Ajustes en pantallas más pequeñas */
+@media (max-width: 768px) {
+  .table {
+    table-layout: auto; /* Hace que la tabla se ajuste automáticamente */
+  }
 }

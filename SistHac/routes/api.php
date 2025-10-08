@@ -34,6 +34,7 @@ Route::group([
 
     Route::get('/users',[UserController::class, 'index']);
     Route::post('/hojasaldos',[Balanzas::class,'HojaSaldos']);
+    Route::post('/hojasaldosenfunde',[Balanzas::class,'HojaSaldosEnfunde']);
 
 
 

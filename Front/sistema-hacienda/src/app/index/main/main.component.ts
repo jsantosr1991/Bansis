@@ -20,7 +20,7 @@ export class MainComponent implements OnInit {
   userRole = 0;
   userGroup = 0;
 
-  isSidebarVisible = true;
+  isSidebarVisible:boolean = false;
 
   constructor(
     private userService: UserService,
@@ -43,13 +43,10 @@ export class MainComponent implements OnInit {
   }
 
   updateSidebarVisibility() {
-//    if (window.innerWidth < 768) {
-   //   this.isSidebarVisible = false;
-  //  } else {
-  //    this.isSidebarVisible = true;
-  //  }
+
   this.isSidebarVisible = window.innerWidth >= 768;
   }
+
 
   toggleSidebar() {
     this.isSidebarVisible = !this.isSidebarVisible;

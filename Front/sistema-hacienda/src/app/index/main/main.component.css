@@ -1,9 +1,11 @@
+/* Contenedor principal */
 .main-container {
   position: relative;
   display: flex;
+  min-height: 100vh; /* Asegura que el contenedor ocupe todo el alto de la pantalla */
 }
 
-/* Sidebar fijo dentro del flujo (muy importante: no es fixed, es absolute dentro del relativo) */
+/* Sidebar: posición absoluta dentro del contenedor */
 .sidebar-wrapper {
   position: absolute;
   top: 0;
@@ -12,60 +14,74 @@
   height: 100%;
   background: #fff;
   z-index: 9999;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease; /* Transición suave para ocultar/mostrar */
 }
 
-/* Sidebar oculto (por defecto en mobile) */
+/* Sidebar oculto por defecto (en móviles) */
 .hidden-sidebar {
-  transform: translateX(-100%);
+  transform: translateX(-100%); /* Mueve el sidebar fuera de la pantalla */
 }
 
-/* Ahora controlamos el espacio de contenido real */
+/* Contenido principal */
 .content {
   flex: 1;
   margin-left: 0;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease; /* Transición para mover el contenido cuando se muestra el sidebar */
 }
 
-/* Desktop */
+/* Desktop: La barra lateral siempre visible */
 @media (min-width: 768px) {
   .main-container.sidebar-visible .content {
-    margin-left: 250px;
+    margin-left: 250px; /* Deja espacio para el sidebar */
   }
 
   .sidebar-wrapper {
-    transform: translateX(0);
+    transform: translateX(0); /* Sidebar visible */
   }
 
   .toggle-sidebar {
-    display: none;
+    display: block; /* El botón de hamburguesa sigue visible */
   }
 }
 
-/* Mobile */
+/* Mobile: El sidebar se oculta por defecto */
 @media (max-width: 767px) {
   .sidebar-wrapper {
-    transform: translateX(-100%);
+    transform: translateX(-100%); /* Sidebar oculto en dispositivos móviles */
   }
 
   .main-container.sidebar-visible .sidebar-wrapper {
-    transform: translateX(0);
+    transform: translateX(0); /* Sidebar visible cuando se activa */
   }
 
   .content {
-    margin-left: 0 !important;
+    margin-left: 0 !important; /* Sin margen cuando el sidebar está oculto */
   }
 }
 
-/* Botón hamburguesa */
+/* Botón hamburguesa siempre visible */
 .toggle-sidebar {
   position: fixed;
   top: 10px;
   left: 10px;
-  z-index: 10000;
+  z-index: 10000; /* Asegura que el botón esté por encima de otros elementos */
   background: #fff;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilo del icono dentro del botón hamburguesa */
+.toggle-sidebar i {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Estilo del sidebar en dispositivos móviles */
+@media (max-width: 767px) {
+  .toggle-sidebar {
+    left: 20px; /* Ajusta la posición si es necesario */
+    top: 10px;
+  }
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Hojasaldos } from '../interface/hojasaldos';
+import {forkJoin, Observable} from 'rxjs';
+import {Enfunde, Hojasaldos} from '../interface/hojasaldos';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -17,6 +17,14 @@ export class HojasaldosService {
 
     return this.http.post<Hojasaldos[]>(this.baseUrl+'/hojasaldos', params);
   }
-
-
+  obtenerValoresEnfunde(idhacienda: number, codigo: number): Observable<Enfunde[]> {
+    const body = { idhacienda, codigo };
+    return this.http.post<Enfunde[]>(`${this.baseUrl}/hojasaldosenfunde`, body);
+  }
+  obtenerEnfundeSaldos(idhacienda: number, codigo: number): Observable<{ saldos: Hojasaldos[], metas: Enfunde[] }> {
+    return forkJoin({
+      saldos: this.obtenerDatos(idhacienda, codigo),
+      metas: this.obtenerValoresEnfunde(idhacienda, codigo)
+    });
+  }
 }

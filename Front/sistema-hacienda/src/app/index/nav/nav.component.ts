@@ -19,6 +19,7 @@ export class NavComponent implements OnChanges {
   filteredMenu: any[] = [];
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log("rol:",this.userRole);
     if(changes['menuItems']){
       this.filteredMenu = this.menuItems
       .filter(item => this.hasAccess(item))
@@ -37,6 +38,7 @@ export class NavComponent implements OnChanges {
   }
 
   hasAccess(item: any): boolean {
+
     const roleAllowed = !item.roles || item.roles.includes(this.userRole);
     const groupAllowed = !item.grupos || item.grupos.includes(this.userGroup);
     return roleAllowed && groupAllowed;

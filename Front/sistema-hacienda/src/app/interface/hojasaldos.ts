@@ -7,4 +7,9 @@ export interface Hojasaldos {
   semana: string;
   periodo: string;
 }
-
+export interface Enfunde {
+  cs_seccion: string;
+  codigo: string;
+  color: string;
+  enfunde: string;
+}
