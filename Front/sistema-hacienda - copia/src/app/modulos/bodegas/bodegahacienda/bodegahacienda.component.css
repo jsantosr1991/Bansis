@@ -1,0 +1,54 @@
+/* Cabecera profesional */
+table.dataTable thead th {
+  background-color: #212529 !important; /* bootstrap dark */
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 8px !important;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Flechas de ordenamiento más discretas */
+table.dataTable thead th.sorting:before,
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:before,
+table.dataTable thead th.sorting_desc:before {
+  opacity: 0.4;
+}
+table.dataTable tbody td {
+  padding: 8px 8px;
+  vertical-align: middle;
+  font-size: 13px;
+}
+.col-documento {
+  font-weight: 600;
+  font-size: 13px;
+  color: #212529;
+  white-space: nowrap;
+}
+
+.usuario-nombre {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.usuario-area {
+  font-size: 11px;
+  color: #6c757d;
+}
+.badge-items {
+  background-color: #0dcaf0;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+.acciones button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.acciones i {
+  font-size: 14px;
+}

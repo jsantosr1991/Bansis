@@ -1,0 +1,16 @@
+<div class="page-wrapper">
+  <!-- <div class="page-header">
+    <div class="toggle-sidebar" id="toggle-sidebar" (click)="toggleSidebar()">
+      <i class="bi bi-list"></i> &lt;!&ndash; Ícono del botón hamburguesa &ndash;&gt;
+    </div>
+  </div>-->
+
+  <app-sidebar [menuItems]="menuItems" [sidebarVisible]="isSidebarVisible">
+  </app-sidebar>
+
+  <div class="main-container" [class.sidebar-visible]="isSidebarVisible">
+    <app-header></app-header>
+    <router-outlet></router-outlet>
+  </div>
+
+</div>

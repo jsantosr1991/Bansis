@@ -10,6 +10,7 @@ interface JwtPayload {
   username: string; // o usa el nombre real del campo con el username
   rol_id: number;
   group_id: number;// otros campos que incluya el token
+  codempleado: number;// otros campos que incluya el token
 }
 
 
@@ -41,9 +42,11 @@ export class AuthserviceService {
         this.userService.setUser({
           username: decoded.username,
           rol_id: decoded.rol_id,
-          group_id: decoded.group_id
+          group_id: decoded.group_id,
+          codempleado:decoded.codempleado
 
         })
+
 
       } catch (e) {
         console.error('Error al decodificar token en constructor', e);
@@ -60,10 +63,12 @@ export class AuthserviceService {
           this.loggedIn.next(true);
 
           const decoded = jwtDecode<JwtPayload>(response.access_token);
+
           this.userService.setUser({
             username: decoded.username,
             rol_id: decoded.rol_id,
-            group_id: decoded.group_id
+            group_id: decoded.group_id,
+            codempleado: decoded.codempleado
           });
         })
       );
@@ -80,6 +85,7 @@ export class AuthserviceService {
   }
 
   getToken(): string | null {
+
         return localStorage.getItem(this.tokenKey);
   }
 
@@ -87,20 +93,13 @@ export class AuthserviceService {
     return !!localStorage.getItem(this.tokenKey);
   }
 
-  getUserInfo(): string | null {
-    const token = this.getToken();
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        console.log(decoded)
-        return decoded.username; // cambia esto si el campo es distinto, como `username`
-      } catch (e) {
-        console.error('Token inválido:', e);
-        return null;
-      }
-    }
-    return null;
+
+  clearSession(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
   }
+
+
 
 
 

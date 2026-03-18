@@ -1,0 +1,28 @@
+<nav class="sidebar-wrapper" [class.visible]="sidebarVisible">
+  <div class="sidebar-brand">
+    <a routerLink="/dashboard" class="logo">
+      <img src="assets/images/SistemaHac/Logo/letter-v.svg" alt="Melon Admin Dashboard">
+    </a>
+  </div>
+  <div class="sidebar-menu">
+    <div class="sidebarMenuScroll">
+      <ul>
+        <li *ngFor="let item of filteredMenu" class="sidebar-dropdown" [class.active]="item.active">
+          <a href="javascript:void(0)" (click)="toggleDropdown(item)">
+            <div *ngIf="item.image" class="menu-icon-img"></div>
+            <i *ngIf="!item.image" [class]="item.icon"></i>
+            <span class="menu-text">{{ item.title }}</span>
+          </a>
+          <div class="sidebar-submenu" *ngIf="item.submenus && item.submenus.length">
+
+            <ul>
+              <li *ngFor="let submenu of item.submenus">
+                <a [routerLink]="submenu.route" routerLinkActive="current-page">{{ submenu.title }}</a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

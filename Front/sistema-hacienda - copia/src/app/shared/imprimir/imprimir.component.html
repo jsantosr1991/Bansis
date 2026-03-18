@@ -1,0 +1,60 @@
+<div class="container-fluid mt-0">
+  <!-- Contenedor general -->
+  <div class="container-fluid">
+
+  <!-- imprimir.component.html -->
+<div class="print-columns">
+  <div class="print-item" *ngIf="datos.detalle.length > 0">
+
+    <div class="print-header">
+      <img src="assets/images/star-selected.svg" class="logo" alt="Logo">
+      <div>
+        <h2>REPORTE SEMANAL</h2>
+        <p>Matas Caidas</p>
+
+      </div>
+
+    </div>
+
+  <div class="print-info">
+    <p><strong>Semana:</strong> {{ datos.cabecera.semana }}</p>
+    <p><strong>Año:</strong> {{ datos.cabecera.anio }}</p>
+    <p><strong>Empleado:</strong> {{ datos.cabecera.user }}</p>
+    <p><strong>Hacienda:</strong> {{ datos.cabecera.nombrehacienda }}</p>
+    <p><strong>Fecha:</strong> {{ datos.cabecera.created_at | date:'longDate' }}</p>
+
+  </div>
+
+
+    <hr>
+
+    <table class="print-table" >
+      <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Código</th>
+        <th>Cantidad</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of datos.detalle">
+        <td>{{ item.lote }}</td>
+        <td>{{ item.codigo }}</td>
+        <td>{{ item.cantidad }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="print-footer">
+      <p>Usuario:{{datos.cabecera.user}}</p>
+      <p>Generado el {{today | date:'short'}}</p>
+
+    </div>
+
+  </div>
+
+
+</div>
+
+  </div>
+</div>

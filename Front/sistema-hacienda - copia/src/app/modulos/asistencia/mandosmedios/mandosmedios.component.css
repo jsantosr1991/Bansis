@@ -1,0 +1,106 @@
+.legend-container {
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  background: white;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 15px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.legend-container > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-block;
+  border: 1px solid #ccc;
+}
+
+
+.table-title {
+  background-color: #0d6efd; /* azul corporativo */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: inline-block; /* Para que no tome todo el ancho si quieres */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+.table-titlesinmarcar {
+  background-color: #fa1f06; /* azul corporativo */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: inline-block; /* Para que no tome todo el ancho si quieres */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+.table-titlefalta {
+  background-color: #fa7406; /* azul corporativo */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: inline-block; /* Para que no tome todo el ancho si quieres */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+.table-titlevacaciones {
+  background-color: #bf00ff;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: inline-block; /* Para que no tome todo el ancho si quieres */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+.table-titlepermiso {
+  background-color: green;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: inline-block; /* Para que no tome todo el ancho si quieres */
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.table-title h4 {
+  margin: 0; /* Quitar margen por defecto */
+}
+
+/* Estilo para el encabezado de las tablas */
+.table thead th {
+  background-color: #26262b; /* Puedes cambiar el color que desees */
+  color: white; /* Texto blanco para resaltar */
+  font-weight: bold;
+  text-align: center; /* Centrado del texto (opcional) */
+}
+
+/* Para diferenciar aún más el cuerpo de la tabla */
+.table tbody td {
+  background-color: #f9f9f9; /* Color del cuerpo de la tabla */
+}
+
+/* Si necesitas modificar los bordes */
+.table th, .table td {
+  border: 1px solid #ddd; /* Bordes finos para las celdas */
+}
+

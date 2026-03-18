@@ -5,6 +5,7 @@ export interface User {
   username: string;
   rol_id: number;
   group_id: number;
+  codempleado: number;
   // otros campos si quieres
 }
 
@@ -19,7 +20,7 @@ export class UserService {
     this.user = {
 
       username: payload.username,
-    
+      codempleado:payload.codempleado,
       rol_id: payload.rol_id,
       group_id: payload.group_id
     };
@@ -27,6 +28,7 @@ export class UserService {
 
   setUser(user: User) {
     this.user = user;
+
   }
 
   getUser(): User | null {
@@ -35,6 +37,9 @@ export class UserService {
 
   getUsername(): string | null {
     return this.user?.username ?? 'Invitado';
+  }
+  getCodEmpleado(): number {
+    return this.user?.codempleado ?? 0 ;
   }
   getRolId(): number {
     return this.user?.rol_id ?? 0;

@@ -33,7 +33,7 @@ export class MainComponent implements OnInit {
     this.username = this.userService.getUsername() ?? '';
     this.userRole = Number(this.userService.getRolId()) || 0;
     this.userGroup = Number(this.userService.getGroupId()) || 0;
-    this.menuItems = this.menuService.getMenuByUser(this.userRole, this.userGroup);
+    this.menuItems = this.menuService.getMenuByUser();
     this.updateSidebarVisibility();
   }
 

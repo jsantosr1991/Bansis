@@ -1,1 +1,75 @@
+<div class="container-fluid mt-4">
+ <!-- <div class="container">
+    <h2 class="mb-4">Módulos habilitados</h2>
 
+    <div class="dashboard-grid">
+      <div
+        *ngFor="let item of filteredMenu; let i = index"
+        class="dashboard-item"
+        [ngClass]="'size-' + (i % 6)"
+      >
+        <div
+          class="card shadow-sm text-center p-3 dashboard-card"
+          (click)="irARuta(item.route ? item.route : item.submenus?.[0]?.route)"
+        >
+          <i [class]="item.icon + ' fs-1 mb-2 text-primary'"></i>
+          <h5>{{ item.title }}</h5>
+
+          <div *ngIf="item.submenus?.length" class="mt-3">
+            <button
+              *ngFor="let sub of item.submenus"
+              class="btn btn-outline-primary btn-sm me-1 mb-1"
+              (click)="sub.route && irARuta(sub.route)"
+            >
+              {{ sub.title }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+-->
+
+  <div class="container">
+    <h2 class="mb-4">Módulos habilitados</h2>
+
+    <!-- Mostrar "Cargando" mientras se filtra -->
+    <div *ngIf="cargando" class="text-center mt-5">
+      <p>Cargando módulos...</p>
+    </div>
+
+    <!-- Mostrar menú solo si hay items -->
+    <div class="dashboard-grid" *ngIf="!cargando && filteredMenu.length">
+      <div
+        *ngFor="let item of filteredMenu; let i = index"
+        class="dashboard-item"
+        [ngClass]="'size-' + (i % 6)"
+      >
+        <div
+          class="card shadow-sm text-center p-3 dashboard-card"
+          (click)="irARuta(item.route ? item.route : item.submenus?.[0]?.route)"
+        >
+          <i [class]="item.icon + ' fs-1 mb-2 text-primary'"></i>
+          <h5>{{ item.title }}</h5>
+
+          <div *ngIf="item.submenus?.length" class="mt-3">
+            <button
+              *ngFor="let sub of item.submenus"
+              class="btn btn-outline-primary btn-sm me-1 mb-1"
+              (click)="sub.route && irARuta(sub.route)"
+            >
+              {{ sub.title }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje si no hay módulos -->
+    <div *ngIf="!cargando && filteredMenu.length === 0" class="text-center mt-5">
+      <p>No tienes módulos habilitados con tu rol actual.</p>
+    </div>
+  </div>
+
+</div>

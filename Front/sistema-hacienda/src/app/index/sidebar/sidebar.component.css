@@ -1,26 +1,39 @@
 /* CSS del sidebar */
+/*
 .sidebar-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   height: 100%;
   width: 250px;
-  transition: transform 0.3s ease; /* Transición para deslizamiento */
-  transform: translateX(-100%);  /* Inicialmente oculto */
+  transition: transform 0.3s ease;
+  transform: translateX(-100%);  !* Inicialmente oculto *!
+}
+
+!* Establece un máximo para la altura del contenedor del menú, con scroll si es necesario *!
+.sidebar-menu {
+  max-height: 100%;    !* Asegúrate de que ocupe toda la altura disponible *!
+  overflow-y: auto;    !* Activa el scroll vertical *!
+}
+
+!* Scroll para los submenús *!
+.sidebarMenuScroll {
+  max-height: 100vh;   !* Asegura que el contenedor se ajuste a la altura de la ventana *!
+  overflow-y: auto;    !* Desplazamiento vertical si es necesario *!
 }
 
 .sidebar-wrapper.visible {
-  transform: translateX(0); /* Muestra el sidebar cuando tiene la clase 'visible' */
+  transform: translateX(0); !* Muestra el sidebar cuando tiene la clase 'visible' *!
 }
 
-/* Para pantallas grandes, donde el sidebar debería estar siempre visible */
+!* Para pantallas grandes, donde el sidebar debería estar siempre visible *!
 @media (min-width: 769px) {
   .sidebar-wrapper {
-    transform: translateX(0);  /* El sidebar siempre se muestra en pantallas grandes */
+    transform: translateX(0);  !* El sidebar siempre se muestra en pantallas grandes *!
   }
 }
 
-/* Responsividad para pantallas pequeñas */
+!* Responsividad para pantallas pequeñas *!
 @media (max-width: 768px) {
   .sidebar-wrapper {
     position: fixed;
@@ -29,10 +42,11 @@
     height: 100%;
     width: 250px;
     transition: transform 0.3s ease;
-    transform: translateX(-100%);  /* Sidebar oculto por defecto */
+    transform: translateX(-100%);  !* Sidebar oculto por defecto *!
   }
 
   .sidebar-wrapper.visible {
-    transform: translateX(0); /* Mueve el sidebar a la vista cuando se activa */
+    transform: translateX(0); !* Mueve el sidebar a la vista cuando se activa *!
   }
 }
+*/

@@ -1,0 +1,102 @@
+<div class="container-fluid mt-0">
+  <!-- Contenedor general -->
+  <div class="container-fluid">
+
+<table id="tablaHistorico" class="table table-bordered table-striped">
+
+  <thead>
+  <tr>
+
+    <th>Semana   </th>
+    <th>Año    </th>
+    <th>Empleado   </th>
+    <th>Hacienda   </th>
+    <th>Fecha    </th>
+    <th class="text-center">Acciones    </th>
+
+  </tr>
+  </thead>
+
+  <tbody>
+  <tr *ngFor="let r of registros">
+
+    <td class="text-center"> {{r.semana}}</td>
+    <td class="text-center"> {{r.anio}}</td>
+    <td> {{r.NOMBRE_CORTO}}</td>
+    <td> {{r.nombrehacienda}}</td>
+    <td> {{r.created_at | date:'dd/MM/yyyy'}}</td>
+    <td>
+      <div  class="d-flex gap-2 justify-content-center">
+        <button class="btn btn-sm btn-success"
+                (click)="reimprimir(r.id)">
+          <i class="bi bi-printer-fill"></i>
+
+        </button>
+        <button class="btn btn-sm btn-primary"
+                (click)="verdetalle(r.id)">
+          <i class="bi bi-eye"></i>
+
+        </button>
+      </div>
+
+
+    </td>
+
+  </tr>
+  </tbody>
+
+</table>
+  </div>
+</div>
+<!-- ===== VISTA PREVIA EN MODAL ===== -->
+<div class="modal fade" id="previewModal" tabindex="-1" >
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">{{datos.cabecera.nombrehacienda}}</h4>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- ?? MISMO CONTENIDO -->
+        <table id="vertablaHistorico" class="table table-bordered table-striped">
+
+          <thead>
+          <tr>
+
+            <th>Lote    </th>
+            <th>Codigo   </th>
+            <th class="text-center">Color   </th>
+            <th class="text-center"> Cantidad   </th>
+
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let d of datos.detalle">
+
+            <td>{{ d.lote }}</td>
+            <td>{{ d.codigo }}</td>
+            <td class="text-center fw-bold"
+              [style.backgroundColor]="getBackgroundColor(d.color)"
+              [style.color]="(d.color === 'BLANCO' || d.color === 'AMARILLO') ? 'black' : 'white'"
+            >{{ d.color }}</td>
+            <td class="text-center">{{ d.cantidad }}</td>
+
+          </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+      </div>
+
+    </div>
+  </div>
+</div>

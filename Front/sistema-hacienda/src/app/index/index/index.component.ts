@@ -31,12 +31,13 @@ export class IndexComponent implements OnInit {
     this.username = this.userService.getUsername() ?? '';
     this.userRole = Number(this.userService.getRolId()) || 0;
     this.userGroup = Number(this.userService.getGroupId()) || 0;
-    this.menuItems = this.menuService.getMenuByUser(this.userRole, this.userGroup);
+    this.menuItems = this.menuService.getMenuByUser();
 
   }
+
   toggleSidebar() {
     this.isSidebarVisible = !this.isSidebarVisible; // Alterna la visibilidad
-    console.log('Sidebar visible:', this.isSidebarVisible); // Para verificar en consola
+    //console.log('Sidebar visible:', this.isSidebarVisible); // Para verificar en consola
   }
 
 

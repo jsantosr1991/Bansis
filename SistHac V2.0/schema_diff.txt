@@ -1,0 +1,285 @@
+SCHEMA COMPARISON
+=================
+
+TABLE: solicitudes_conyuges_anteriores
+--- LOCAL ---
+CREATE TABLE `solicitudes_conyuges_anteriores` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `domicilio` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  `genero` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causa_separacion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_conyuges_anteriores_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_conyuges_anteriores` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causa_separacion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `domicilio` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  `genero` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_conyuges_anteriores_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_cursos
+--- LOCAL ---
+CREATE TABLE `solicitudes_cursos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `institucion` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre_curso` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `duracion` int DEFAULT NULL,
+  `anio` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_cursos_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_cursos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `institucion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre_curso` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `anio` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `duracion` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_cursos_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_experiencias
+--- LOCAL ---
+CREATE TABLE `solicitudes_experiencias` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `empresa` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `area` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `jefe_inmediato` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fecha_inicio` date DEFAULT NULL,
+  `fecha_fin` date DEFAULT NULL,
+  `tiempo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causa_salida` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sueldo_ultima_remun` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_experiencias_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_experiencias` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `empresa` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tiempo` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causa_salida` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sueldo_ultima_remun` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `area` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `jefe_inmediato` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fecha_inicio` date DEFAULT NULL,
+  `fecha_fin` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_experiencias_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_familiares_empresa
+--- LOCAL ---
+CREATE TABLE `solicitudes_familiares_empresa` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `empresa` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `area` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parentesco` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_familiares_empresa_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_familiares_empresa` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `empresa` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parentesco` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `area` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_familiares_empresa_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_hermanos
+--- LOCAL ---
+CREATE TABLE `solicitudes_hermanos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genero` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  `domicilio` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_hermanos_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_hermanos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genero` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `domicilio` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_hermanos_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_hijos
+--- LOCAL ---
+CREATE TABLE `solicitudes_hijos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genero` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  `ocupacion` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discapacidad` tinyint(1) NOT NULL DEFAULT '0',
+  `descripcion_discapacidad` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_hijos_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_hijos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genero` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edad` int DEFAULT NULL,
+  `ocupacion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `discapacidad` tinyint(1) NOT NULL DEFAULT '0',
+  `descripcion_discapacidad` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_hijos_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_referencias_laborales
+--- LOCAL ---
+CREATE TABLE `solicitudes_referencias_laborales` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `empresa` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contacto_nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_referencias_laborales_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_referencias_laborales` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `empresa` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `contacto_nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `cargo` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_referencias_laborales_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+
+TABLE: solicitudes_referencias_personales
+--- LOCAL ---
+CREATE TABLE `solicitudes_referencias_personales` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `empresa` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tiempo_conocerse` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `solicitudes_referencias_personales_solicitud_id_foreign` (`solicitud_id`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+
+--- PROD ---
+CREATE TABLE `solicitudes_referencias_personales` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `solicitud_id` bigint unsigned NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ocupacion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tiempo_conocerse` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `empresa` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cargo` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `solicitudes_referencias_personales_solicitud_id_foreign` (`solicitud_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+
+=================
+

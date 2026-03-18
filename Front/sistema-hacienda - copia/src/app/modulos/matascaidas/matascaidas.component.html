@@ -1,0 +1,175 @@
+<div class="container-fluid">
+  <div class="">
+    <!-- FILA DE CAMPOS (Select + Input + otros) -->
+    <div class="form-inline mb-3">
+      <div class="form-group" *ngIf="permisoService.tieneGrupo('mayordomo'); else administradores">
+        <label for="idhacienda" class="me-2">Hacienda:</label>
+        <select
+          class="form-control me-3"
+          id="idhacienda"
+          [(ngModel)]="idhaciendaSeleccionada"
+          (change)="onHaciendaSeleccionada()"
+          disabled >
+
+          <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
+        </select>
+      </div>
+
+      <ng-template #administradores>
+        <div class="form-group" *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')" >
+          <label for="idhacienda" class="me-3">Hacienda:</label>
+          <select
+            class="form-control me-3"
+            id="idhacienda"
+            [(ngModel)]="idhaciendaSeleccionada"
+            (change)="onHaciendaSeleccionada()"
+            >
+
+            <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
+          </select>
+        </div>
+      </ng-template>
+
+           <div class="form-group-auto">
+          <label for="semana" class="fw-bold">Semana:</label>
+          <input
+            id="semana"
+            class="form-control form-control-sm"
+            [(ngModel)]="semana"
+            (change)="cintasMatascaidas(semana)"
+          />
+        </div>
+
+        <div class="form-group-auto">
+          <label for="fecha" class="fw-bold">Fecha:</label>
+          <input
+            type="text"
+            id="fecha"
+            class="form-control form-control-sm"
+            [value]="today | date:'dd/MM/yyyy'"
+            disabled
+          />
+        </div>
+
+      <!-- Aquí puedes agregar más campos fácilmente -->
+      <div class="form-group" >
+        <div class="form-group" *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')" >
+          <label for="idmayordomo" class="me-2">Mayordomo:</label>
+          <select
+            class="form-control me-3"
+            id="idmayordomo"
+            [(ngModel)]="idmayordomoSeleccionado"
+            (change)="onMayordomoSeleccionado()">
+
+            <option *ngFor="let h of Mayordomo" [value]="h.codempleado">{{ h.NOMBRE_CORTO }}</option>
+          </select>
+        </div>
+      </div>
+            </div>
+
+            <!-- TABLA -->
+
+   <!-- <div class="grid-container">
+      <div class="matas-table-wrapper table-scroll">
+        <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
+          <table>
+            <thead>
+            &lt;!&ndash; 🔹 Primera fila: códigos &ndash;&gt;
+            <tr>
+              <th class="lote-header sticky-col text-center">
+
+              </th>
+              <th *ngFor="let column of columns" class="header-cell text-center text-black">
+                {{ column.codigo }}
+              </th>
+            </tr>
+
+            &lt;!&ndash; 🔹 Segunda fila: colores &ndash;&gt;
+            <tr>
+              <th class="lote-header sticky-col text-center"><label class="text-black">Lote </label> </th>
+              <th *ngFor="let column of columns"
+                  [style.backgroundColor]="getBackgroundColor(column.color)"
+                  [style.color]="(column.color === 'BLANCO' || column.color === 'AMARILLO') ? 'black' : 'white'"
+                  class="header-cell">
+                {{ column.color }}
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let row of rows">
+              <td class="sticky-col">{{ row }}</td>
+              <td *ngFor="let column of columns">
+                <input
+                  [formControlName]="row + column.codigo"
+                  (change)="onInputChange(row, column.codigo)"
+                  type="text"
+                  class="cell-input"
+                />
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+        </form>
+      </div>
+
+    </div>-->
+    <div class="grid-container">
+      <div class="matas-table-wrapper table-scroll">
+        <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
+          <table>
+
+            <thead>
+            <!-- ?? Primera fila: códigos -->
+            <tr>
+              <th class="lote-header sticky-col header-cell">
+
+              </th>
+              <th *ngFor="let column of columns"
+                  class="header-cell"
+                  [style.backgroundColor]="getBackgroundColor(column.color)"
+                  [style.color]="(column.color === 'BLANCO' || column.color === 'AMARILLO') ? 'black' : 'white'">
+                {{ column.color }}
+              </th>
+
+            </tr>
+
+            <!-- ?? Segunda fila: colores -->
+            <th class="lote-header sticky-col header-cell">
+              <label class="text-black">Lote</label>
+            </th>
+            <th *ngFor="let column of columns"
+                class="header-cell text-center text-black">
+              {{ column.codigo }}
+            </th>
+            <tr>
+
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let row of rows; trackBy: trackByRow">
+              <td class="sticky-col">{{ row }}</td>
+              <td *ngFor="let column of columns">
+                <input
+                  [formControlName]="row + column.codigo"
+                  (change)="onInputChange(row, column.codigo)"
+                  type="text"
+                  class="cell-input"
+                />
+              </td>
+            </tr>
+            </tbody>
+
+          </table>
+
+          <button type="submit" class="btn btn-primary mt-3">
+            Guardar
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>

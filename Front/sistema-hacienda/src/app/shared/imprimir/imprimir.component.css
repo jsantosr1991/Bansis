@@ -1,0 +1,81 @@
+.print-container {
+  font-family: Arial, sans-serif;
+  color: #000;
+}
+
+.print-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  width: 70px;
+}
+
+.print-info {
+  margin: 15px 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.print-table th,
+.print-table td {
+  border: 1px solid #000;
+  padding: 6px;
+  text-align: left;
+}
+
+.print-footer {
+  margin-top: 20px;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ??? SOLO IMPRESIÓN */
+@media print {
+@page  {
+  size: A4 landscape;
+  margin: 10mm;
+}
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-columns {
+    column-count: 2; /*bloques por pagina*/
+    column-gap: 10mm;
+  }
+  .print-item {
+    break-inside: avoid;
+  }
+
+
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* ? Quitar botones */
+  button {
+    display: none !important;
+  }
+}

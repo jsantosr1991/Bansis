@@ -9,14 +9,14 @@ export class MenuService {
   getMenuByUser(roleId: number, groupId: number): MenuItem[] {
     return MENU_CONFIG
       .filter(item =>
-        item.roles.includes(roleId) &&
-        (!item.grupos || item.grupos.includes(groupId))
+        item.roles.includes(String(roleId)) &&
+        (!item.grupos || item.grupos.includes(String(groupId)))
       )
       .map(item => ({
         ...item,
         submenus: item.submenus?.filter(sub =>
-          sub.roles.includes(roleId) &&
-          (!sub.grupos || sub.grupos.includes(groupId))
+          sub.roles.includes(String(roleId)) &&
+          (!sub.grupos || sub.grupos.includes(String(groupId)))
         ) || []
       }));
   }

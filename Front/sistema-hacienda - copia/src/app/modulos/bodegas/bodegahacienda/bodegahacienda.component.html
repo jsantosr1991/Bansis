@@ -1,0 +1,215 @@
+<app-loader [loading]="loading"></app-loader>
+
+  <!-- TÍTULO -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">
+      <i class="bi bi-box-seam me-2"></i>
+      Solicitudes Pendientes | {{namehacienda}}
+    </h4>
+
+
+  </div>
+
+      <div *ngIf="permisoService.tieneGrupo('bodega'); else gerencia">
+        <div class="row align-items-end">
+
+
+        </div>
+
+      </div>
+<ng-template #gerencia>
+  <div class="row align-items-end">
+    <!-- Hacienda -->
+    <div class="col-md-4">
+      <label for="hacienda-administrador">Escoja Hacienda</label>
+      <select id="hacienda-administrador" class="form-select"
+              [(ngModel)]="solicitud.idhacienda"
+              (change)="cargarSolicitudes()">
+        <option *ngFor="let h of hacienda" [value]="h.id">{{h.name}}</option>
+
+      </select>
+    </div>
+
+  </div>
+
+</ng-template>
+  <!-- TABLA -->
+  <div class="card shadow-sm mt-1">
+    <div class="card-body">
+      <div class="table-responsive" *ngIf="solicitudes.length > 0">
+
+        <table
+          class="table table-striped table-hover align-middle w-100"
+          id="tablaSolicitudes"
+          style="table-layout: auto;">
+          <thead class="table-dark">
+          <tr>
+
+            <th >Documento</th>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Ítems</th>
+            <th >Estado</th>
+            <th>Por despachar</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let s of solicitudes; let i = index">
+
+            <td class="col-documento">
+              {{ s.Documento }}
+            </td>
+
+            <td>{{ s.FechaEmision | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <div class="usuario-nombre">{{ s.usuario }}</div>
+
+            </td>
+            <td>
+  <span class="badge bg-success">
+    {{ s.detalle.length }} productos
+  </span>
+            </td>
+
+            <td  *ngIf="s.itemsPendientes === s.detalle.length;else pendiente">
+            <span class="badge bg-danger" >
+             <b>  Pendiente </b>
+            </span>
+            </td>
+            <ng-template #pendiente>
+              <td class="justify-content-center">
+                <span class="badge bg-warning" >
+                <b> Incompleto </b>
+                </span>
+
+              </td>
+
+            </ng-template>
+            <td class="justify-content-center">
+            <span class="fw-bolder text-center" *ngIf="s.itemsPendientes > 0">
+    {{ s.itemsPendientes }} ítems
+  </span>
+            </td>
+
+            <td class="text-center acciones">
+
+              <button class="btn btn-primary"
+                      (click)="verDetalle(s)">
+                <i class="bi bi-eye"></i>
+              </button>
+
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div    class="modal fade"   id="modalDetalle"    tabindex="-1"    aria-hidden="true"  >
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" >
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            Detalle de Solicitud: Nº   {{ solicitudSeleccionada?.Documento}}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+
+        <div class="modal-body"  *ngIf="solicitudSeleccionada" >
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Solicita:</strong><br />
+              {{ solicitudSeleccionada?.usuario}}
+            </div>
+            <div class="col-md-6">
+              <strong>Bodega:</strong><br />
+              {{solicitudSeleccionada?.hacienda}}
+            </div>
+          </div>
+          <!-- CHECK COMPLETO / PARCIAL -->
+<div class="table-responsive">
+  <table class="table table-bordered table-sm align-middle">
+    <thead class="table-light">
+    <tr>
+      <th>Despachar a:</th>
+      <th>Cod. Prod</th>
+      <th>Producto</th>
+      <th class="text-end">Cantidad Pendiente</th>
+      <th class="text-center">Completo</th>
+      <th class="text-end">Cantidad a despachar</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let d of solicitudSeleccionada?.detalle">
+
+      <td>{{ d.Solicitante }}</td>
+      <td>{{ d.codProd }}</td>
+      <td>{{ d.producto }}</td>
+
+      <td class="text-end">
+        {{ d.pendiente }}
+      </td>
+
+      <!-- CHECK POR ITEM -->
+      <td class="text-center">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          [(ngModel)]="d.completo"
+          (change)="onCheckItem(d)"
+          [disabled]="d.pendiente === 0"
+        >
+      </td>
+
+      <!-- INPUT PARCIAL -->
+      <td class="text-end">
+        <input
+          type="number"
+          class="form-control form-control-sm text-end"
+          min="0"
+          step="0.01"
+          [max]="d.pendiente"
+          [(ngModel)]="d.cantidadDespachar"
+          [disabled]="d.completo || d.pendiente === 0"
+        >
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+
+
+        </div>
+
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            data-bs-dismiss="modal" (click)="cerrarModal()"   >
+            Cerrar
+          </button>
+
+          <button
+            class="btn btn-success"
+            (click)="confirmarDespacho()"    >
+            Confirmar despacho
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,79 @@
+<app-loader [loading]="loading"></app-loader>
+
+<!-- TÍTULO -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fw-bold">
+    <i class="bi bi-box-seam me-2"></i>
+    Material Despachado
+  </h4>
+</div>
+
+
+<div class="row mb-3" *ngIf="permisoService.tieneGrupo('bodega');else gerencia">
+  <div class="col-md-4" >
+    <label class="form-label">Hacienda</label>
+    <select class="form-select"      >
+      <option > {{namehacienda}}
+
+      </option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Última fecha despacho</label>
+    <input type="date"
+           class="form-control"
+           [(ngModel)]="fechaSeleccionada"
+           [max]="hoy"
+           (change)="onFechaChange()">
+
+  </div>
+</div>
+
+<ng-template #gerencia>
+ <div class="row g-3">
+   <div class="col-md-4" >
+     <label class="form-label">Hacienda</label>
+     <select class="form-select"
+             [(ngModel)]="idhaciendaSeleccionada"
+             (change)="onHaciendaChange()">
+
+       <option value="">Seleccione hacienda</option>
+       <option *ngFor="let h of haciendas"
+               [value]="h.idhacienda">
+         {{ h.name }}
+       </option>
+     </select>
+   </div>
+
+   <div class="col-md-4">
+     <label class="form-label">Última fecha despacho</label>
+     <input type="date"
+            class="form-control"
+            [(ngModel)]="fechaSeleccionada"
+            [max]="hoy"
+            (change)="onFechaChange()">
+
+   </div>
+ </div>
+
+
+
+</ng-template>
+
+<div class="col-auto mt-2">
+  <table id="tablaDespachos" class="table table-striped ">
+    <thead class="table-dark">
+    <tr>
+      <th>Doc.</th>
+      <th>Fecha Emision</th>
+      <th>Producto</th>
+      <th>Solicitante:</th>
+      <th>Despachado a:</th>
+      <th>Cantidad</th>
+      <th>Fecha</th>
+    </tr>
+    </thead>
+    <tbody>  </tbody>
+  </table>
+</div>
+

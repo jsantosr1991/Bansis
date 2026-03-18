@@ -1,0 +1,341 @@
+/*
+.form-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; !* permite que se acomoden en varias líneas si no caben *!
+  gap: 1rem; !* espacio entre los elementos *!
+}
+
+.form-inline .form-group {
+  display: flex;
+  align-items: center;
+}
+
+.form-inline label {
+  font-weight: 500;
+}
+
+.form-control {
+  min-width: 160px;
+}
+
+.grid-container {
+  margin-top: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+th {
+  color: #fff;
+}
+
+
+!* ✅ Contenedor principal de la tabla *!
+!*.matas-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}*!
+.matas-table-wrapper {
+  max-height: 70vh;          !* ajusta según tu pantalla *!
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+}
+
+
+!* ✅ Tabla dentro del wrapper *!
+.matas-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+!* Encabezado fijo *!
+.matas-table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background-color: #6c757d; !* o blanco si prefieres *!
+}
+.matas-table-wrapper thead tr:nth-child(2) th {
+  top: 36px; !* altura real de la primera fila *!
+}
+
+
+
+!* ✅ Ajuste de celdas *!
+.matas-table-wrapper td,
+.matas-table-wrapper th {
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+}
+
+!* ✅ Inputs dentro de las celdas *!
+.matas-table-wrapper .cell-input {
+  width: 100%;
+  min-width: 60px;
+  max-width: 100px;
+  box-sizing: border-box;
+  padding: 3px;
+}
+
+!* ✅ Primera columna fija *!
+.matas-table-wrapper .sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  background-color: #f8f9fa;
+}
+
+!* ✅ Cabecera de la columna de lotes *!
+.matas-table-wrapper .lote-header {
+  width: 100px;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 6px;
+}
+
+!* ✅ Colores alternos *!
+.matas-table-wrapper tbody tr:nth-child(even) {
+  background-color: #fdfdfd;
+}
+
+!* Estilo general para los encabezados *!
+.header-cell {
+  padding: 4px 6px;
+  text-align: center;
+  font-weight: 600;
+  word-wrap: break-word;     !* Permite saltos de línea *!
+  white-space: normal;       !* Permite múltiples líneas *!
+  overflow-wrap: break-word; !* Divide palabras largas si es necesario *!
+  vertical-align: middle;    !* Centra el texto verticalmente *!
+  line-height: 1.1;
+  height: auto;              !* Deja que crezca si hay varias líneas *!
+  max-width: 100px;          !* Ajusta según tu tabla *!
+}
+
+
+!*nuevo *!
+!* 🔹 Grupo compacto que se ajusta al contenido *!
+.form-group-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;              !* Espacio entre label e input *!
+  margin-right: 10px;    !* Separación con el siguiente grupo *!
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+}
+
+!* 🔹 Input dentro de este grupo *!
+.form-group-auto .form-control {
+  width: auto !important;    !* Ajuste automático *!
+  display: inline-block;
+  padding: 2px 6px;
+  text-align: center;
+  min-width: 50px;           !* Evita que se encoja demasiado *!
+  flex: 0 0 auto;            !* No se expande *!
+}
+
+
+*/
+/* =========================
+   VARIABLES GLOBALES
+========================= */
+
+
+:root {
+  --thead-row-height: 64px;
+}
+/* =========================
+   CONTENEDOR PRINCIPAL
+========================= */
+.form-inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   GRUPOS NORMALES
+========================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #212529;
+}
+
+/* =========================
+   GRUPOS COMPACTOS (SEMANA / FECHA)
+========================= */
+.form-group-auto {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.form-group-auto label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* =========================
+   INPUTS Y SELECTS
+========================= */
+.form-group .form-control,
+.form-group-auto .form-control {
+  height: 34px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+/* =========================
+   AJUSTES BOOTSTRAP
+========================= */
+.form-control-sm {
+  height: 34px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .form-group,
+  .form-group-auto {
+    min-width: calc(50% - 10px);
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group,
+  .form-group-auto {
+    min-width: 100%;
+  }
+}
+
+/* =========================
+   CONTENEDOR SCROLL
+========================= */
+.matas-table-wrapper {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  border: 1px solid #dee2e6;
+}
+
+/* =========================
+   TABLA
+========================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+}
+
+/* =========================
+   ENCABEZADO FIJO (2 FILAS)
+========================= */
+.matas-table-wrapper thead th {
+  position: sticky;
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Primera fila */
+.matas-table-wrapper thead tr:first-child th {
+  top: 0;
+  z-index: 6;
+}
+
+/* Segunda fila */
+.matas-table-wrapper thead tr:nth-child(2) th {
+  top: var(--thead-row-height);
+  z-index: 5;
+}
+
+/* =========================
+   PRIMERA COLUMNA FIJA
+========================= */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  background-color: #f8f9fa;
+}
+
+/* Encabezado + columna fija */
+thead .sticky-col {
+  z-index: 7;
+}
+
+/* =========================
+   CELDAS Y INPUTS
+========================= */
+.header-cell {
+  font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.1;
+}
+
+.cell-input {
+  width: 100%;
+  min-width: 60px;
+  max-width: 100px;
+  padding: 3px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   FILAS ALTERNAS
+========================= */
+tbody tr:nth-child(even) {
+  background-color: #fdfdfd;
+}
+
+/* =========================
+   RESPONSIVE (MÓVIL)
+========================= */
+@media (max-width: 768px) {
+  .matas-table-wrapper {
+    max-height: calc(100vh - 220px);
+  }
+
+  .header-cell {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .cell-input {
+    font-size: 12px;
+  }
+}
+
+
