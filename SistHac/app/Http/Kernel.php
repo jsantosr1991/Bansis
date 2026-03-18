@@ -63,5 +63,15 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        // 🔒 Agrega estos para JWTAuth:
+        'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+        'jwt.refresh' => \Tymon\JWTAuth\Http\Middleware\RefreshToken::class,
+        'check.group' => \App\Http\Middleware\CheckUserGroup::class,
     ];
+  /* protected function schedule(Schedule $schedule)
+    {
+        // Ejecutar todos los días a medianoche
+        $schedule->command('privilegios:desactivar')->daily();
+    }*/
+
 }

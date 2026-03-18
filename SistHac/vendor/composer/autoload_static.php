@@ -109,6 +109,7 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
             'Psr\\Clock\\' => 10,
             'PhpParser\\' => 10,
             'PhpOption\\' => 10,
+            'PHPJasper\\' => 10,
         ),
         'N' => 
         array (
@@ -325,13 +326,13 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
         ),
         'Spatie\\LaravelIgnition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
-            1 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
         ),
         'Spatie\\Ignition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
-            1 => __DIR__ . '/..' . '/spatie/ignition/src',
+            0 => __DIR__ . '/..' . '/spatie/ignition/src',
+            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
         ),
         'Spatie\\FlareClient\\' => 
         array (
@@ -393,6 +394,10 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
         'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'PHPJasper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/geekcom/phpjasper/src',
         ),
         'NunoMaduro\\Collision\\' => 
         array (
@@ -550,11 +555,23 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\DesactivarPrivilegiosTemporales' => __DIR__ . '/../..' . '/app/Console/Commands/DesactivarPrivilegiosTemporales.php',
+        'App\\Console\\Commands\\SyncTareasDiarias' => __DIR__ . '/../..' . '/app/Console/Commands/SyncTareasDiarias.php',
+        'App\\Console\\Commands\\SyncTareasDiariasSofca' => __DIR__ . '/../..' . '/app/Console/Commands/SyncTareasDiariasSofca.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
+        'App\\Http\\Controllers\\Asistencia' => __DIR__ . '/../..' . '/app/Http/Controllers/Asistencia.php',
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
+        'App\\Http\\Controllers\\Balanzas' => __DIR__ . '/../..' . '/app/Http/Controllers/Balanzas.php',
+        'App\\Http\\Controllers\\BodegaHacienda' => __DIR__ . '/../..' . '/app/Http/Controllers/BodegaHacienda.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Estadisticas' => __DIR__ . '/../..' . '/app/Http/Controllers/Estadisticas.php',
+        'App\\Http\\Controllers\\PrivilegiosTemporales' => __DIR__ . '/../..' . '/app/Http/Controllers/PrivilegiosTemporales.php',
+        'App\\Http\\Controllers\\TalentoHumanoController' => __DIR__ . '/../..' . '/app/Http/Controllers/TalentoHumanoController.php',
+        'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
+        'App\\Http\\Middleware\\CheckUserGroup' => __DIR__ . '/../..' . '/app/Http/Middleware/CheckUserGroup.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',
         'App\\Http\\Middleware\\PreventRequestsDuringMaintenance' => __DIR__ . '/../..' . '/app/Http/Middleware/PreventRequestsDuringMaintenance.php',
         'App\\Http\\Middleware\\RedirectIfAuthenticated' => __DIR__ . '/../..' . '/app/Http/Middleware/RedirectIfAuthenticated.php',
@@ -563,6 +580,18 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\ValidateSignature' => __DIR__ . '/../..' . '/app/Http/Middleware/ValidateSignature.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
+        'App\\Models\\Empresa' => __DIR__ . '/../..' . '/app/Models/Empresa.php',
+        'App\\Models\\FakeUser' => __DIR__ . '/../..' . '/app/Models/FakeUser.php',
+        'App\\Models\\SolicitudConyugeAnterior' => __DIR__ . '/../..' . '/app/Models/SolicitudConyugeAnterior.php',
+        'App\\Models\\SolicitudCurso' => __DIR__ . '/../..' . '/app/Models/SolicitudCurso.php',
+        'App\\Models\\SolicitudEmpleo' => __DIR__ . '/../..' . '/app/Models/SolicitudEmpleo.php',
+        'App\\Models\\SolicitudExperiencia' => __DIR__ . '/../..' . '/app/Models/SolicitudExperiencia.php',
+        'App\\Models\\SolicitudFamiliarEmpresa' => __DIR__ . '/../..' . '/app/Models/SolicitudFamiliarEmpresa.php',
+        'App\\Models\\SolicitudHermano' => __DIR__ . '/../..' . '/app/Models/SolicitudHermano.php',
+        'App\\Models\\SolicitudHijo' => __DIR__ . '/../..' . '/app/Models/SolicitudHijo.php',
+        'App\\Models\\SolicitudObservacion' => __DIR__ . '/../..' . '/app/Models/SolicitudObservacion.php',
+        'App\\Models\\SolicitudReferenciaLaboral' => __DIR__ . '/../..' . '/app/Models/SolicitudReferenciaLaboral.php',
+        'App\\Models\\SolicitudReferenciaPersonal' => __DIR__ . '/../..' . '/app/Models/SolicitudReferenciaPersonal.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',
@@ -3633,6 +3662,12 @@ class ComposerStaticInita3a52f7658efbff201552be822848cd1
         'NunoMaduro\\Collision\\SolutionsRepositories\\NullSolutionsRepository' => __DIR__ . '/..' . '/nunomaduro/collision/src/SolutionsRepositories/NullSolutionsRepository.php',
         'NunoMaduro\\Collision\\Writer' => __DIR__ . '/..' . '/nunomaduro/collision/src/Writer.php',
         'Override' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/Override.php',
+        'PHPJasper\\Exception\\ErrorCommandExecutable' => __DIR__ . '/..' . '/geekcom/phpjasper/src/Exception/ErrorCommandExecutable.php',
+        'PHPJasper\\Exception\\InvalidCommandExecutable' => __DIR__ . '/..' . '/geekcom/phpjasper/src/Exception/InvalidCommandExecutable.php',
+        'PHPJasper\\Exception\\InvalidFormat' => __DIR__ . '/..' . '/geekcom/phpjasper/src/Exception/InvalidFormat.php',
+        'PHPJasper\\Exception\\InvalidInputFile' => __DIR__ . '/..' . '/geekcom/phpjasper/src/Exception/InvalidInputFile.php',
+        'PHPJasper\\Exception\\InvalidResourceDirectory' => __DIR__ . '/..' . '/geekcom/phpjasper/src/Exception/InvalidResourceDirectory.php',
+        'PHPJasper\\PHPJasper' => __DIR__ . '/..' . '/geekcom/phpjasper/src/PHPJasper.php',
         'PHPUnit\\Event\\Application\\Finished' => __DIR__ . '/..' . '/phpunit/phpunit/src/Event/Events/Application/Finished.php',
         'PHPUnit\\Event\\Application\\FinishedSubscriber' => __DIR__ . '/..' . '/phpunit/phpunit/src/Event/Events/Application/FinishedSubscriber.php',
         'PHPUnit\\Event\\Application\\Started' => __DIR__ . '/..' . '/phpunit/phpunit/src/Event/Events/Application/Started.php',

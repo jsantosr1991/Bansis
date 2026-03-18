@@ -38,10 +38,13 @@ class FakeUser implements Authenticatable, JWTSubject
         return $this->getAuthIdentifier(); // típicamente el ID
     }
 
-    public function getJWTCustomClaims()
-    {
-        return [
+    public function getJWTCustomClaims() {   return [
             'username' => $this->attributes['username'] ?? null,
+            'rol_id' => $this->attributes['rol_id'] ?? null,
+            'group_id' => $this->attributes['group_id'] ?? null,
+            'codempleado' => $this->attributes['codempleado'] ?? null,
+            'empe_nom'=> $this->attributes['empe_nom'] ?? null,
+            'empresa_id'=>  $this->attributes['empresa_id'] ?? null
 
                    ]; // aquí puedes añadir claims personalizados si deseas
     }
