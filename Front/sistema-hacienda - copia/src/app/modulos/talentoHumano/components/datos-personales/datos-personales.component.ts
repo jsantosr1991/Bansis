@@ -1,12 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ElementRef, ViewChild, inject } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, Validators, FormControl, FormsModule } from '@angular/forms';
 import { TalentoHumanoService } from '../../services/talentoHumano.service';
 
 @Component({
   selector: 'app-datos-personales',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div [formGroup]="form" class="card mb-3 shadow-sm border-0">
       <div class="card-header bg-primary text-white py-3">
@@ -176,13 +177,24 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
                    [readonly]="isReadOnly"
                    [class.is-invalid]="isInvalid('fechaNacimiento')" [class.is-valid]="isValid('fechaNacimiento')">
           </div>
-          <div class="col-md-6 col-lg-3">
-            <label class="form-label fw-semibold">Edad <small class="text-muted">(Solo lectura)</small></label>
+          <div class="col-md-6 col-lg-5">
+            <label class="form-label fw-semibold">Edad <small class="text-muted">(Calculada)</small></label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-calendar3"></i></span>
-              <input type="text" class="form-control bg-light" formControlName="edad" readonly>
+              <input type="text" class="form-control" [class.bg-light]="!isReadOnly" [class.fw-bold]="!isReadOnly" [class.text-primary]="!isReadOnly" [value]="edadTexto" [disabled]="isReadOnly">
             </div>
-            <div class="form-text mt-1 text-primary small"><i class="bi bi-info-circle me-1"></i>La edad se calcula automáticamente.</div>
+            <div class="form-text mt-1 text-primary small" *ngIf="!mostrarAlertaMenor"><i class="bi bi-info-circle me-1"></i>Edad en años y meses.</div>
+          </div>
+
+          <!-- Alerta Menor de Edad -->
+          <div class="col-12 animate-fade" *ngIf="mostrarAlertaMenor">
+            <div class="alert alert-warning border-warning shadow-sm d-flex align-items-center mb-0">
+              <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+              <div>
+                <h6 class="alert-heading mb-1 fw-bold">Usuario Menor de Edad</h6>
+                <p class="mb-0">El aspirante tiene <strong>{{edadTexto}}</strong>. Faltan <strong>{{tiempoPara18}}</strong> para cumplir los 18 años.</p>
+              </div>
+            </div>
           </div>
 
           <hr class="my-3 text-muted">
@@ -190,7 +202,7 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
           <!-- Información Física -->
           <div class="col-md-6 col-lg-4">
             <label class="form-label fw-semibold">Tipo de Sangre <span class="text-danger">*</span></label>
-            <select class="form-select" formControlName="tipoSangre" [class.is-invalid]="isInvalid('tipoSangre')" [class.is-valid]="isValid('tipoSangre')">
+            <select class="form-select" formControlName="tipoSangre" [class.is-invalid]="isInvalid('tipoSangre')" [class.is-valid]="isValid('tipoSangre')" [attr.disabled]="isReadOnly ? true : null">
               <option value="">Seleccione...</option>
               <option *ngFor="let s of tiposSangre" [value]="s">{{s}}</option>
             </select>
@@ -205,15 +217,24 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
             </div>
             <div class="form-text small">Ingrese la estatura en metros (ejemplo: 1.70).</div>
           </div>
-          <div class="col-md-6 col-lg-4">
-            <label class="form-label fw-semibold">Peso <small class="text-muted">(Libras)</small> <span class="text-danger">*</span></label>
+          <div class="col-md-6 col-lg-5">
+            <label class="form-label fw-semibold">Peso <span class="text-danger">*</span></label>
             <div class="input-group has-validation">
-              <input type="number" class="form-control" formControlName="peso" 
+              <input type="number" class="form-control" [formControl]="pesoUI" 
                      placeholder="Ej: 160" [class.is-invalid]="isInvalid('peso')" [class.is-valid]="isValid('peso')">
-              <span class="input-group-text">lb</span>
-              <div class="invalid-feedback">Rango permitido: 60 - 500 lb.</div>
+              <select class="form-select flex-grow-0 w-auto" style="min-width: 80px;" [(ngModel)]="pesoUnidad" [ngModelOptions]="{standalone: true}" (change)="onPesoUnidadChange()" [disabled]="isReadOnly">
+                <option value="LB">lb</option>
+                <option value="KG">kg</option>
+              </select>
+              <div class="invalid-feedback">Rango permitido: 60 - 500 lb (27 - 227 kg).</div>
             </div>
-            <div class="form-text small">Ingrese el peso en libras.</div>
+            <div class="form-text mt-1 fw-medium text-secondary">
+              <i class="bi bi-arrow-left-right me-1"></i>
+              Equivale a: 
+              <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3">
+                {{pesoUnidad === 'LB' ? (getPesoKG() | number:'1.2-2') + ' kg' : (getPesoLB() | number:'1.2-2') + ' lb'}}
+              </span>
+            </div>
           </div>
 
           <!-- Información Personal -->
@@ -223,7 +244,8 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
                    placeholder="Ej: Católica / Ninguna"
                    (input)="cleanLetters('religion')"
                    (blur)="trimField('religion')"
-                   [class.is-invalid]="isInvalid('religion')">
+                   [class.is-invalid]="isInvalid('religion')"
+                   [readonly]="isReadOnly">
             <div class="invalid-feedback" *ngIf="form.get('religion')?.errors?.['pattern']">
               La religión no puede iniciar con espacios o contener caracteres especiales.
             </div>
@@ -233,7 +255,8 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
             <div class="input-group has-validation">
               <span class="input-group-text"><i class="bi bi-envelope"></i></span>
               <input type="email" class="form-control" formControlName="correo" 
-                     placeholder="ejemplo@email.com" [class.is-invalid]="isInvalid('correo')" [class.is-valid]="isValid('correo')">
+                     placeholder="ejemplo@email.com" [class.is-invalid]="isInvalid('correo')" [class.is-valid]="isValid('correo')"
+                     [readonly]="isReadOnly">
               <div class="invalid-feedback">Verifique que su correo esté correctamente escrito.</div>
             </div>
           </div>
@@ -244,9 +267,9 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
           <div class="col-md-6">
             <label class="form-label fw-bold d-block pb-2">Afiliación al IESS <span class="text-danger">*</span></label>
             <div class="btn-group w-100" role="group">
-              <input type="radio" class="btn-check" [value]="true" formControlName="afiliadoIess" id="iessSi">
+              <input type="radio" class="btn-check" [value]="true" formControlName="afiliadoIess" id="iessSi" [attr.disabled]="isReadOnly ? true : null">
               <label class="btn btn-outline-primary py-2" for="iessSi"><i class="bi bi-check-circle me-2"></i>Sí, afiliación previa</label>
-              <input type="radio" class="btn-check" [value]="false" formControlName="afiliadoIess" id="iessNo">
+              <input type="radio" class="btn-check" [value]="false" formControlName="afiliadoIess" id="iessNo" [attr.disabled]="isReadOnly ? true : null">
               <label class="btn btn-outline-primary py-2" for="iessNo"><i class="bi bi-x-circle me-2"></i>No, primera vez</label>
             </div>
             <div class="text-danger small mt-1" *ngIf="isInvalid('afiliadoIess')">Debe seleccionar una opción.</div>
@@ -256,20 +279,50 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
             <label class="form-label fw-bold d-block pb-2">Vacunación COVID-19 <span class="text-danger">*</span></label>
             <div class="d-flex gap-3 pt-1">
               <div class="form-check form-switch p-2 border rounded bg-light flex-fill" [class.border-danger]="isInvalidVacuna()">
-                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid1" id="v1" (change)="validateVacunas()">
+                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid1" id="v1" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
                 <label class="form-check-label fw-semibold" for="v1">Dosis #1</label>
               </div>
               <div class="form-check form-switch p-2 border rounded bg-light flex-fill" [class.border-danger]="isInvalidVacuna()">
-                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid2" id="v2" (change)="validateVacunas()">
+                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid2" id="v2" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
                 <label class="form-check-label fw-semibold" for="v2">Dosis #2</label>
               </div>
               <div class="form-check form-switch p-2 border rounded bg-light flex-fill">
-                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid3" id="v3" (change)="validateVacunas()">
+                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid3" id="v3" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
                 <label class="form-check-label fw-semibold" for="v3">Dosis #3</label>
               </div>
             </div>
             <div class="text-danger small mt-1 animate-fade" *ngIf="isInvalidVacuna()">
               <i class="bi bi-exclamation-triangle-fill me-1"></i> Se requiere esquema básico completo (mínimo 2 dosis).
+            </div>
+          </div>
+
+          <hr class="my-3 text-muted">
+
+          <!-- FOTO CARNÉ -->
+          <div class="col-12">
+            <div class="d-flex align-items-start gap-4 flex-wrap">
+              <!-- Input oculto (Debe estar fuera del ngIf para que #fotoInput sea accesible desde el Preview) -->
+              <input #fotoInput type="file" accept="image/jpeg,image/png" class="d-none" (change)="onFotoSelected($event)">
+              
+              <!-- Preview -->
+              <div class="foto-carnet-wrapper" (click)="!isReadOnly && triggerFotoUpload()" [class.clickable]="!isReadOnly">
+                <img *ngIf="fotoSrc" [src]="fotoSrc" alt="Foto Carné" class="foto-carnet-img">
+                <div *ngIf="!fotoSrc" class="foto-carnet-placeholder">
+                  <i class="bi bi-person-bounding-box fs-1 text-secondary"></i>
+                  <p class="mb-0 small text-muted mt-1">Foto Carné</p>
+                </div>
+              </div>
+              <!-- Controles -->
+              <div class="d-flex flex-column justify-content-center gap-2" *ngIf="!isReadOnly">
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="triggerFotoUpload()">
+                  <i class="bi bi-upload me-1"></i> {{ fotoSrc ? 'Cambiar Foto' : 'Subir Foto' }}
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" *ngIf="fotoSrc" (click)="quitarFoto()">
+                  <i class="bi bi-trash me-1"></i> Quitar Foto
+                </button>
+                <div class="text-muted small"><i class="bi bi-info-circle me-1"></i>JPG o PNG, máx. 2 MB. Opcional.</div>
+                <div class="text-danger small" *ngIf="fotoError"><i class="bi bi-exclamation-triangle me-1"></i>{{ fotoError }}</div>
+              </div>
             </div>
           </div>
 
@@ -287,11 +340,26 @@ import { TalentoHumanoService } from '../../services/talentoHumano.service';
     input[type="text"]::placeholder, textarea::placeholder { text-transform: none; }
     .animate-fade { animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .foto-carnet-wrapper {
+      width: 110px; height: 140px; border: 2px dashed #ced4da;
+      border-radius: 8px; overflow: hidden; display: flex;
+      align-items: center; justify-content: center;
+      background: #f8f9fa; flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+    .foto-carnet-wrapper.clickable { cursor: pointer; }
+    .foto-carnet-wrapper.clickable:hover { border-color: #0d6efd; }
+    .foto-carnet-img { width: 100%; height: 100%; object-fit: cover; }
+    .foto-carnet-placeholder { text-align: center; padding: 8px; }
   `]
 })
-export class DatosPersonalesComponent implements OnInit {
+export class DatosPersonalesComponent implements OnInit, OnChanges {
   @Input() form!: FormGroup;
   @Input() isReadOnly: boolean = false;
+  @ViewChild('fotoInput') fotoInputRef?: ElementRef<HTMLInputElement>;
+
+  // Foto carné
+  fotoError: string | null = null;
 
   maxDate = new Date().toISOString().split('T')[0];
   tiposSangre = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
@@ -300,7 +368,23 @@ export class DatosPersonalesComponent implements OnInit {
   provinciasDisponibles: any[] = [];
   cantonesDisponibles: any[] = [];
 
+  // Propiedades para Edad
+  edadTexto: string = '0 años';
+  mostrarAlertaMenor: boolean = false;
+  tiempoPara18: string = '';
+
+  // Propiedades para Peso
+  pesoUnidad: 'LB' | 'KG' = 'LB';
+  pesoUI = new FormControl();
+
+  private sanitizer = inject(DomSanitizer);
   constructor(private thService: TalentoHumanoService) { }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isReadOnly']) {
+      this.updatePesoUIState();
+    }
+  }
 
   ngOnInit() {
     this.cargarPaises();
@@ -335,7 +419,127 @@ export class DatosPersonalesComponent implements OnInit {
 
     // Asegurar que los campos "Otros" y la edad se calculen/habiliten si hay datos
     this.checkManualFields();
+    this.initPesoUI();
     this.calcularEdad();
+  }
+
+  get fotoSrc(): SafeUrl | string | null {
+    if (!this.form) return null;
+    const value = this.form.get('foto_base64')?.value || this.form.get('foto_url')?.value;
+    if (!value) return null;
+    return value.toString().startsWith('data:image/') ? this.sanitizer.bypassSecurityTrustUrl(value) : value;
+  }
+
+  // ── Foto Carné ─────────────────────────────────────────────────
+  triggerFotoUpload() {
+    this.fotoInputRef?.nativeElement.click();
+  }
+
+  onFotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      this.fotoError = 'Solo se aceptan imágenes JPG o PNG.';
+      input.value = '';
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      this.fotoError = 'La imagen supera el límite de 2 MB.';
+      input.value = '';
+      return;
+    }
+
+    this.fotoError = null;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Send the full Data URI so the backend can extract the MIME type via regex
+      this.form.get('foto_base64')?.setValue(result);
+      this.form.get('foto_base64')?.markAsDirty();
+      // Limpiar la URL anterior para que el backend sepa que hay imagen nueva
+      this.form.get('foto_url')?.setValue(null, { emitEvent: false });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  quitarFoto() {
+    this.fotoError = null;
+    this.form.get('foto_base64')?.setValue(null);
+    this.form.get('foto_url')?.setValue(null, { emitEvent: false });
+    this.form.get('foto_base64')?.markAsDirty();
+  }
+
+  private initPesoUI() {
+    const pesoValue = this.form.get('peso')?.value;
+    this.pesoUI.setValue(pesoValue, { emitEvent: false });
+    
+    this.pesoUI.valueChanges.subscribe(val => {
+      this.actualizarPesoBase(val);
+    });
+    
+    // Si el formulario principal cambia el peso (ej: al cargar), sincronizar UI
+    this.form.get('peso')?.valueChanges.subscribe(val => {
+      if (this.pesoUnidad === 'LB') {
+        this.pesoUI.setValue(val, { emitEvent: false });
+      } else {
+        const kg = val / 2.20462;
+        this.pesoUI.setValue(parseFloat(kg.toFixed(2)), { emitEvent: false });
+      }
+    });
+    
+    this.updatePesoUIState();
+  }
+
+  private updatePesoUIState() {
+    if (this.isReadOnly) {
+      this.pesoUI.disable({ emitEvent: false });
+    } else {
+      this.pesoUI.enable({ emitEvent: false });
+    }
+  }
+
+  onPesoUnidadChange() {
+    const val = this.pesoUI.value;
+    if (val) {
+      if (this.pesoUnidad === 'KG') {
+        // Estaba en LB, pasó a KG
+        const kg = val / 2.20462;
+        this.pesoUI.setValue(parseFloat(kg.toFixed(2)), { emitEvent: false });
+      } else {
+        // Estaba en KG, pasó a LB
+        const lb = val * 2.20462;
+        this.pesoUI.setValue(parseFloat(lb.toFixed(2)), { emitEvent: false });
+      }
+    }
+  }
+
+  private actualizarPesoBase(val: any) {
+    if (!val) {
+      this.form.get('peso')?.setValue(null);
+      return;
+    }
+    
+    if (this.pesoUnidad === 'LB') {
+      this.form.get('peso')?.setValue(val);
+    } else {
+      const lb = val * 2.20462;
+      this.form.get('peso')?.setValue(parseFloat(lb.toFixed(2)));
+    }
+  }
+
+  getPesoKG(): number {
+    const val = this.pesoUI.value;
+    if (!val) return 0;
+    return this.pesoUnidad === 'LB' ? val / 2.20462 : val;
+  }
+
+  getPesoLB(): number {
+    const val = this.pesoUI.value;
+    if (!val) return 0;
+    return this.pesoUnidad === 'LB' ? val : val * 2.20462;
   }
 
   private checkManualFields() {
@@ -567,12 +771,63 @@ export class DatosPersonalesComponent implements OnInit {
     if (fechaNac) {
       const today = new Date();
       const birthDate = new Date(fechaNac);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+      
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
+
+      if (days < 0) {
+        months--;
+        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += lastMonth.getDate();
       }
-      this.form.patchValue({ edad: age >= 0 ? age : 0 });
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const totalAge = years >= 0 ? years : 0;
+      const totalMonths = months >= 0 ? months : 0;
+      
+      this.form.get('edad')?.setValue(totalAge, { emitEvent: false });
+      this.edadTexto = `${totalAge} años y ${totalMonths} meses`;
+
+      // Alerta para menores de 18
+      if (totalAge < 18) {
+        this.mostrarAlertaMenor = true;
+        let remYears = 17 - totalAge;
+        let remMonths = 11 - totalMonths;
+        let remDays = 0;
+
+        // Cálculo simplificado para "cuanto falta"
+        // Si hoy es 2024-03-19 y nació 2010-05-10
+        // Cumple 18 el 2028-05-10
+        const date18 = new Date(birthDate);
+        date18.setFullYear(birthDate.getFullYear() + 18);
+        
+        let diffYears = date18.getFullYear() - today.getFullYear();
+        let diffMonths = date18.getMonth() - today.getMonth();
+        let diffDays = date18.getDate() - today.getDate();
+
+        if (diffDays < 0) {
+          diffMonths--;
+          const lastMonth = new Date(date18.getFullYear(), date18.getMonth(), 0);
+          diffDays += lastMonth.getDate();
+        }
+        if (diffMonths < 0) {
+          diffYears--;
+          diffMonths += 12;
+        }
+
+        this.tiempoPara18 = `${diffYears} años, ${diffMonths} meses y ${diffDays} días`;
+      } else {
+        this.mostrarAlertaMenor = false;
+        this.tiempoPara18 = '';
+      }
+    } else {
+      this.edadTexto = '0 años';
+      this.mostrarAlertaMenor = false;
     }
   }
 }

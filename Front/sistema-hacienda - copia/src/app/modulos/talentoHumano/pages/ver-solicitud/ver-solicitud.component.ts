@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ElementRef, ViewChild, inject } from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TalentoHumanoService } from '../../services/talentoHumano.service';
@@ -43,6 +44,21 @@ import { UserService } from '../../../../services/user.service';
   ],
   template: `
     <div class="container-fluid fade-in p-4 py-5">
+      <!-- Banner Informativo para Fichas Históricas o Reingresos en Curso -->
+      <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-3 d-flex align-items-center justify-content-between animate-fade" 
+           *ngIf="ultimoIdRelacionado && ultimoIdRelacionado != solicitudId">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+          <div>
+            <h6 class="mb-1 fw-bold text-dark">Estás viendo una ficha histórica</h6>
+            <p class="mb-0 small text-muted">Existe un registro más reciente o un proceso de reingreso activo para este trabajador.</p>
+          </div>
+        </div>
+        <button class="btn btn-warning btn-sm rounded-pill px-4 fw-bold shadow-sm ms-3" (click)="irAFichaMasReciente()">
+          <i class="bi bi-arrow-right-circle me-2"></i>Ir a la Ficha más reciente
+        </button>
+      </div>
+
       <!-- Banner Informativo para Aprobados -->
       <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center animate-fade" *ngIf="isAprobado">
         <i class="bi bi-info-circle-fill fs-3 me-3 text-info"></i>
@@ -79,16 +95,23 @@ import { UserService } from '../../../../services/user.service';
           </div>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-success rounded-pill px-4 shadow-sm" *ngIf="!editMode && canPrint" (click)="imprimirFicha()">
+          <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" *ngIf="!editMode && canPrint" (click)="imprimirFicha()">
             <i class="bi bi-printer me-2"></i>Imprimir Ficha
           </button>
-          <button class="btn btn-outline-secondary rounded-pill px-4" *ngIf="!editMode" (click)="regresar()">
+          <button class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm" 
+                  *ngIf="!editMode && isAprobado && esElUltimoAprobado" 
+                  (click)="reingresar()"
+                  [disabled]="tieneReingresoActivo"
+                  [title]="tieneReingresoActivo ? 'Ya existe un reingreso activo para esta cédula' : 'Crear nueva solicitud de reingreso'">
+            <i class="bi bi-person-plus-fill me-2"></i>Reingreso
+          </button>
+          <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" *ngIf="!editMode" (click)="regresar()">
             <i class="bi bi-arrow-left me-2"></i>Volver
           </button>
-          <button class="btn btn-primary rounded-pill px-4 shadow-sm" *ngIf="!editMode" (click)="toggleEdit()" [disabled]="isAprobado">
+          <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" *ngIf="!editMode" (click)="toggleEdit()" [disabled]="isAprobado">
             <i class="bi bi-pencil-square me-2"></i>{{ isAprobado ? 'Bloqueado' : 'Editar' }}
           </button>
-          <button class="btn btn-danger rounded-pill px-4 shadow-sm" *ngIf="editMode" (click)="toggleEdit()">
+          <button class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" *ngIf="editMode" (click)="toggleEdit()">
             <i class="bi bi-x-circle me-2"></i>Cancelar Edición
           </button>
         </div>
@@ -169,7 +192,13 @@ import { UserService } from '../../../../services/user.service';
               </div>
             </div>
             <div class="photo-box-container ms-4">
-              <div class="photo-box">FOTO CARNET</div>
+              <div class="photo-box">
+                <!-- Priorizar foto_base64 (cambio sin guardar) sobre foto_url (ya guardada) -->
+                <img *ngIf="form.get('datosPersonales.foto_base64')?.value || form.get('datosPersonales.foto_url')?.value" 
+                     [src]="getSafeUrl(form.get('datosPersonales.foto_base64')?.value || form.get('datosPersonales.foto_url')?.value)" 
+                     alt="Foto Carné">
+                <span *ngIf="!form.get('datosPersonales.foto_base64')?.value && !form.get('datosPersonales.foto_url')?.value">FOTO CARNET</span>
+              </div>
             </div>
           </div>
 
@@ -202,14 +231,14 @@ import { UserService } from '../../../../services/user.service';
               <div class="print-field"><span class="label">Postulante:</span> {{ form.get('datosPersonales.nombres')?.value }} {{ form.get('datosPersonales.apellidoPaterno')?.value }} {{ form.get('datosPersonales.apellidoMaterno')?.value }}</div>
               <div class="print-field"><span class="label">Apodo:</span> {{ form.get('datosPersonales.apodo')?.value || 'N/A' }} | <span class="label">Género:</span> {{ form.get('datosPersonales.genero')?.value }}</div>
               <div class="print-field"><span class="label">Cédula:</span> {{ form.get('datosPersonales.cedula')?.value }}</div>
-              <div class="print-field"><span class="label">F. Nac:</span> {{ (form.get('datosPersonales.fechaNacimiento')?.value | date:'dd/MM/yyyy') || 'N/A' }} ({{ form.get('datosPersonales.edad')?.value }} años)</div>
+              <div class="print-field"><span class="label">F. Nac:</span> {{ (form.get('datosPersonales.fechaNacimiento')?.value | date:'dd/MM/yyyy') || 'N/A' }} ({{ getEdadCompleta() }})</div>
               <div class="print-field">
                 <span class="label">Origen:</span> 
                 {{ (form.get('datosPersonales.paisNacimiento')?.value?.toUpperCase() === 'OTROS' || form.get('datosPersonales.paisNacimiento')?.value === 'Otros') ? form.get('datosPersonales.paisNacimientoOtro')?.value : form.get('datosPersonales.paisNacimiento')?.value }}, 
                 {{ (form.get('datosPersonales.provinciaNacimiento')?.value?.toUpperCase() === 'OTROS' || form.get('datosPersonales.provinciaNacimiento')?.value === 'Otros') ? form.get('datosPersonales.provinciaNacimientoOtro')?.value : form.get('datosPersonales.provinciaNacimiento')?.value }},
                 {{ (form.get('datosPersonales.cantonNacimiento')?.value?.toUpperCase() === 'OTROS' || form.get('datosPersonales.cantonNacimiento')?.value === 'Otros') ? form.get('datosPersonales.cantonNacimientoOtro')?.value : form.get('datosPersonales.cantonNacimiento')?.value }}
               </div>
-              <div class="print-field"><span class="label">Medidas:</span> Sangre: {{ form.get('datosPersonales.tipoSangre')?.value }} | Est.: {{ form.get('datosPersonales.estatura')?.value }}m | Peso: {{ form.get('datosPersonales.peso')?.value }}lb</div>
+              <div class="print-field"><span class="label">Medidas:</span> Sangre: {{ form.get('datosPersonales.tipoSangre')?.value }} | Est.: {{ form.get('datosPersonales.estatura')?.value }}m | <strong>Peso:</strong> {{ form.get('datosPersonales.peso')?.value }}lb / {{ getPesoKG(form.get('datosPersonales.peso')?.value) }}kg</div>
               <div class="print-field"><span class="label">Religión:</span> {{ form.get('datosPersonales.religion')?.value || 'N/A' }}</div>
               <div class="print-field"><span class="label">Correo:</span> {{ form.get('datosPersonales.correo')?.value }}</div>
               <div class="print-field"><span class="label">Afiliado IESS por primera vez:</span> {{ form.get('datosPersonales.afiliadoIess')?.value ? 'SÍ' : 'NO' }}</div>
@@ -277,12 +306,31 @@ import { UserService } from '../../../../services/user.service';
               </div>
               <div class="print-field"><span class="label">Detalles:</span> Matrimonio: {{ form.get('estadoCivil.tipo_matrimonio')?.value || 'N/A' }} | Comp. Ant: {{ form.get('estadoCivil.compromisos_anteriores')?.value }}</div>
               <div class="print-field"><span class="label">Demandas:</span> {{ form.get('estadoCivil.demandas')?.value }}</div>
-              <div class="print-field border-top pt-1 mt-1"><span class="label">Instrucción:</span> {{ form.get('datosEducativos.nivel_maximo')?.value }}</div>
-              <div class="x-small"><strong>Bachiller:</strong> {{ form.get('datosEducativos.bachillerato.institucion')?.value || 'N/A' }} 
+              <div class="print-field border-top pt-1 mt-1" *ngIf="!hasEducationData() && form.get('datosEducativos.nivel_maximo')?.value === 'NINGUNO'">
+                <strong>SIN ESTUDIOS</strong>
+              </div>
+              
+              <div class="x-small" *ngIf="form.get('datosEducativos.inicial.institucion')?.value">
+                <strong>Inicial:</strong> {{ form.get('datosEducativos.inicial.institucion')?.value }} ({{ form.get('datosEducativos.inicial.anio')?.value }})
+              </div>
+              
+              <div class="x-small" *ngIf="form.get('datosEducativos.basica.institucion')?.value">
+                <strong>Básica:</strong> {{ form.get('datosEducativos.basica.institucion')?.value }} - {{ form.get('datosEducativos.basica.ultimo_grado')?.value }} ({{ form.get('datosEducativos.basica.anio')?.value }})
+              </div>
+
+              <div class="x-small" *ngIf="form.get('datosEducativos.bachillerato.institucion')?.value">
+                <strong>Bachiller:</strong> {{ form.get('datosEducativos.bachillerato.institucion')?.value }} 
                 <span *ngIf="form.get('datosEducativos.bachillerato.titulo')?.value"> - {{ form.get('datosEducativos.bachillerato.titulo')?.value }}</span>
                 {{ form.get('datosEducativos.bachillerato.anio')?.value ? '(' + form.get('datosEducativos.bachillerato.anio')?.value + ')' : '' }}
               </div>
-              <div class="x-small" *ngIf="form.get('datosEducativos.superior.institucion')?.value || form.get('datosEducativos.nivel_maximo')?.value === 'TERCER_NIVEL'"><strong>Superior:</strong> {{ form.get('datosEducativos.superior.institucion')?.value || 'N/A' }} - {{ form.get('datosEducativos.superior.carrera_programa')?.value || 'N/A' }} ({{ form.get('datosEducativos.superior.estado')?.value || 'N/A' }} - {{ form.get('datosEducativos.superior.anio')?.value || 'N/A' }})</div>
+
+              <div class="x-small" *ngIf="form.get('datosEducativos.superior.institucion')?.value">
+                <strong>Superior (Grado):</strong> {{ form.get('datosEducativos.superior.institucion')?.value }} - {{ form.get('datosEducativos.superior.carrera_programa')?.value }} ({{ form.get('datosEducativos.superior.estado')?.value }} - {{ form.get('datosEducativos.superior.anio')?.value }})
+              </div>
+
+              <div class="x-small" *ngIf="form.get('datosEducativos.superior_posgrado.institucion')?.value">
+                <strong>Superior (Posgrado):</strong> {{ form.get('datosEducativos.superior_posgrado.institucion')?.value }} - {{ form.get('datosEducativos.superior_posgrado.carrera_programa')?.value }} ({{ form.get('datosEducativos.superior_posgrado.estado')?.value }} - {{ form.get('datosEducativos.superior_posgrado.anio')?.value }})
+              </div>
 
               <div class="print-section-title mt-2">8. PADRES Y PAREJA</div>
               <div class="print-field border-bottom pb-1 mb-1">
@@ -306,6 +354,7 @@ import { UserService } from '../../../../services/user.service';
               <div class="print-field">
                 <span class="label">Pareja Actual:</span> {{ form.get('datosFamiliares.conyuge_actual.nombre')?.value || 'N/A' }}
                 <span class="x-small fw-bold" *ngIf="form.get('datosFamiliares.conyuge_actual.edad')?.value"> - {{ form.get('datosFamiliares.conyuge_actual.edad')?.value }} años</span>
+                <div class="x-small"><strong>Ocupación:</strong> {{ form.get('datosFamiliares.conyuge_actual.ocupacion')?.value || 'N/A' }}</div>
                 <div class="x-small italic" *ngIf="form.get('datosFamiliares.conyuge_actual.domicilio')?.value"><strong>Dom:</strong> {{ form.get('datosFamiliares.conyuge_actual.domicilio')?.value }}</div>
               </div>
             </div>
@@ -335,7 +384,7 @@ import { UserService } from '../../../../services/user.service';
                 <tbody>
                   <tr *ngFor="let h of form.get('datosFamiliares.hermanos')?.value">
                     <td>
-                      <div>HERMANO: {{ h.nombre }}<span *ngIf="h.estado === 'FINADO'" class="text-danger fw-bold small"> (FINADO ✝)</span></div>
+                      <div>HERMANO #{{ h.numero_hermano }} ({{ h.es_mayor_menor }}): {{ h.nombre }}<span *ngIf="h.estado === 'FINADO'" class="text-danger fw-bold small"> (FINADO ✝)</span></div>
                       <div class="x-small italic opacity-75" *ngIf="h.domicilio">Dom: {{ h.domicilio }}</div>
                     </td>
                     <td>{{ h.edad ? h.edad + ' años' : 'N/A' }}</td>
@@ -421,7 +470,7 @@ import { UserService } from '../../../../services/user.service';
                     <td style="width: 20%; padding: 0px 2px;">{{ f.parentesco }}</td>
                     <td style="width: 20%; padding: 0px 2px;">{{ f.empresa }}</td>
                     <td style="width: 15%; padding: 0px 2px;">{{ f.cargo }}</td>
-                    <td style="width: 15%; padding: 0px 2px;">{{ f.telefono }}</td>
+                    <td style="width: 15%; padding: 0px 2px;">{{ f.telefono || 'N/A' }}</td>
                   </tr>
                 </table>
               </div>
@@ -437,17 +486,18 @@ import { UserService } from '../../../../services/user.service';
 
               <div class="print-section-title mt-2">13. SALUD Y ANTECEDENTES</div>
               <div style="font-size: 8pt;">
-                <div><strong>Cirugías/Fract/Accid/Quem:</strong> 
+                <div><strong>Cirugías/Fract/Accid/Quem/Alergias:</strong> 
                   {{ form.get('saludPersonal.operaciones.detalle')?.value || 'N/A' }} / 
                   {{ form.get('saludPersonal.fracturas.detalle')?.value || 'N/A' }} / 
                   {{ form.get('saludPersonal.accidentes_laborales.detalle')?.value || 'N/A' }} /
-                  {{ form.get('saludPersonal.quemaduras.detalle')?.value || 'N/A' }}
+                  {{ form.get('saludPersonal.quemaduras.detalle')?.value || 'N/A' }} /
+                  {{ form.get('saludPersonal.alergias.detalle')?.value || 'N/A' }}
                 </div>
                 <div><strong>Otros Antecedentes:</strong> {{ form.get('saludPersonal.otros_antecedentes')?.value || 'Ninguno' }}</div>
                 <div><strong>Ocio:</strong> Deporte: {{ form.get('saludPersonal.deporte')?.value || 'N/A' }} | Actividad Social: {{ form.get('saludPersonal.actividad_social')?.value || 'N/A' }}</div>
               </div>
 
-              <div class="print-section-title mt-1">14. OBSERVACIONES (Últimas 5)</div>
+              <div class="print-section-title mt-1">14. OBSERVACIONES (Últimas 4)</div>
               <div *ngIf="form.get('observaciones')?.value?.length">
                 <div *ngFor="let obs of getObservacionesSlice()" class="border-bottom mb-1 pb-1" style="font-size: 8pt; line-height: 1.1;">
                   <div class="d-flex justify-content-between x-small" style="font-size: 7.5pt; color: #555;">
@@ -484,29 +534,29 @@ import { UserService } from '../../../../services/user.service';
             </div>
           </div>
 
-          <div class="print-signatures mt-auto pt-2 border-top">
-            <div class="row text-center px-2">
+          <div class="print-signatures" style="position: absolute; bottom: 1.2cm; left: 1.5cm; right: 1.5cm; padding-top: 0;">
+            <div class="row text-center px-1">
               <div class="col-3">
                 <div class="signature-line mx-auto mb-1"></div>
-                <div class="x-small fw-bold">ADMINISTRADOR</div>
+                <div class="fw-bold" style="font-size: 7pt;">ADMINISTRADOR</div>
               </div>
               <div class="col-3">
                 <div class="signature-line mx-auto mb-1"></div>
-                <div class="x-small fw-bold">MANDO MEDIO</div>
-                <div class="x-small">(Prueba)</div>
+                <div class="fw-bold" style="font-size: 7pt;">MANDO MEDIO</div>
+                <div class="x-small" style="font-size: 6pt;">(Prueba)</div>
               </div>
               <div class="col-3">
                 <div class="signature-line mx-auto mb-1"></div>
-                <div class="x-small fw-bold">RR.HH.</div>
+                <div class="fw-bold" style="font-size: 7pt;">RR.HH.</div>
               </div>
               <div class="col-3">
                 <div class="signature-line mx-auto mb-1"></div>
-                <div class="x-small fw-bold">GERENTE</div>
+                <div class="fw-bold" style="font-size: 7pt;">GERENTE</div>
               </div>
             </div>
           </div>
 
-          <div class="print-footer mt-3 pt-2 border-top d-flex justify-content-between x-small" style="font-size: 8pt;">
+          <div class="print-footer" style="position: absolute; bottom: 0.5cm; left: 1.5cm; right: 1.5cm; display: flex; justify-content: space-between; font-size: 7pt; color: #777;">
             <span>Talento Humano</span>
             <strong>Página 2 de 2 (Cara B)</strong>
             <span>{{ form.get('codigo_solicitud')?.value }}</span>
@@ -595,6 +645,16 @@ import { UserService } from '../../../../services/user.service';
     /* ESTILOS DE IMPRESIÓN MEJORADOS */
     @media screen {
       .d-none-screen { display: none !important; }
+      
+      /* Mantener estilos de la caja previstos para pantalla si fuese visible, aunque d-none la oculta por defecto */
+      .photo-box-container { margin-top: 10px; }
+      .photo-box {
+        width: 120px; height: 150px; border: 2px solid #333;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10pt; font-weight: bold; color: #555; text-align: center;
+        background: #f8f9fa; border-radius: 8px; overflow: hidden;
+      }
+      .photo-box img { width: 100%; height: 100%; object-fit: cover; }
     }
 
     @media print {
@@ -610,13 +670,23 @@ import { UserService } from '../../../../services/user.service';
       }
       .accordion-container, .header-glass, .btn, .alert, .nav-tabs, footer, header { display: none !important; }
       
+      .photo-box-container { margin-top: 10px; }
+      .photo-box {
+        width: 35mm; height: 45mm; border: 1px solid #000;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 8pt; font-weight: bold; color: #000; text-align: center;
+        background: white !important; overflow: hidden;
+      }
+      .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+      
       .print-page {
         min-height: 290mm;
         width: 210mm;
-        padding: 8mm 15mm; /* Margen más relajado */
+        padding: 8mm 15mm;
         display: flex;
         flex-direction: column;
         background: white !important;
+        position: relative;
       }
       
       .page-break { page-break-after: always; }
@@ -628,11 +698,11 @@ import { UserService } from '../../../../services/user.service';
         padding: 3px 10px;
         margin-bottom: 6px;
         border-left: 5px solid #0d6efd;
-        font-size: 10pt;
+        font-size: 9.5pt;
         text-transform: uppercase;
       }
       
-      .print-field { margin-bottom: 4px; font-size: 9.5pt; line-height: 1.4; }
+      .print-field { margin-bottom: 4px; font-size: 8.5pt; line-height: 1.4; }
       .print-field .label { font-weight: bold; color: #000; }
       
       .print-grid-3 {
@@ -653,13 +723,13 @@ import { UserService } from '../../../../services/user.service';
         border: 1px solid #ccc;
         padding: 8px;
         border-radius: 8px;
-        font-size: 10pt;
+        font-size: 9.5pt;
         background: #fdfdfd !important;
         margin-bottom: 8px;
         -webkit-print-color-adjust: exact;
       }
       
-      .print-table-mini { border-collapse: collapse; font-size: 9.5pt; width: 100%; }
+      .print-table-mini { border-collapse: collapse; font-size: 8.5pt; width: 100%; }
       .print-table-mini th, .print-table-mini td {
         border-bottom: 1px solid #ddd;
         padding: 4px 6px;
@@ -669,9 +739,9 @@ import { UserService } from '../../../../services/user.service';
       .print-table-mini th { background: #f8f9fa !important; font-weight: bold; -webkit-print-color-adjust: exact; }
       
       .signature-line {
-        width: 140px;
-        border-bottom: 2px solid #000;
-        margin-top: 25px;
+        width: 100px;
+        border-bottom: 1px solid #000;
+        margin-top: 15px;
       }
  
       .photo-box {
@@ -695,7 +765,7 @@ import { UserService } from '../../../../services/user.service';
         text-transform: uppercase;
       }
 
-      .x-small { font-size: 8.5pt; }
+      .x-small { font-size: 7.5pt; }
       .italic { font-style: italic; }
 
       @page {
@@ -712,7 +782,11 @@ export class VerSolicitudComponent implements OnInit {
   activeSections: Set<string> = new Set(['datosAdministrativos']);
   savingSection: string | null = null;
   isAprobado: boolean = false;
+  esElUltimoAprobado: boolean = false;
+  tieneReingresoActivo: boolean = false;
+  ultimoIdRelacionado: number | null = null;
   currentDate: Date = new Date();
+  originalCedula: string = '';
 
   get canPrint(): boolean {
     return true; // Habilitado para todos los estados sin restricciones
@@ -740,15 +814,16 @@ export class VerSolicitudComponent implements OnInit {
     if (!dpCtrl) return '';
     const dp = (dpCtrl as FormGroup).getRawValue();
     const full = `${dp.nombres || ''} ${dp.apellidoPaterno || ''} ${dp.apellidoMaterno || ''}`.trim();
-    return full.toUpperCase();
+    return full.toUpperCase() || 'SIN NOMBRE';
   }
 
+  private sanitizer = inject(DomSanitizer);
+  public userService = inject(UserService);
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private thService: TalentoHumanoService,
-    public userService: UserService
+    private thService: TalentoHumanoService
   ) { }
 
   ngOnInit() {
@@ -762,6 +837,73 @@ export class VerSolicitudComponent implements OnInit {
       this.cargarSolicitud(this.solicitudId);
     });
     this.setupEstadoCivilWatcher();
+    this.cargarGrupos();
+  }
+
+  private listaGruposDB: any[] = [];
+
+  private cargarGrupos() {
+    this.userService.getGrupo().subscribe({
+      next: (grupos) => {
+        this.listaGruposDB = grupos;
+        // Actualizar el grupo en el formulario una vez cargados los datos reales de la DB
+        const groupName = this.getGroupName();
+        this.form.get('datosAdministrativos.control_interno.responsable_grupo')?.setValue(groupName);
+        this.form.get('datosEntrevistador.entrevistador.grupo')?.setValue(groupName);
+      },
+      error: (err) => console.error('Error cargando grupos:', err)
+    });
+  }
+
+  getGroupName(): string {
+    const groupId = this.userService.getGroupId();
+    if (this.listaGruposDB.length > 0) {
+      const g = this.listaGruposDB.find(x => (x.id || x.ID) == groupId);
+      if (g) {
+        return g.nombre || g.NOMBRE || g.grupo || g.GRUPO || g.descripcion || g.DESCRIPCION || 'N/A';
+      }
+    }
+
+    // Mapa de respaldo
+    const groups: { [key: number]: string } = {
+      1: 'ADMINISTRACION',
+      2: 'SISTEMAS',
+      3: 'TALENTO HUMANO',
+      4: 'OPERACIONES'
+    };
+    return groups[groupId] || 'SIN GRUPO';
+  }
+
+
+
+  getEdadCompleta(): string {
+    const fechaNac = this.form.get('datosPersonales.fechaNacimiento')?.value;
+    if (!fechaNac) return 'N/A';
+
+    const today = new Date();
+    const birthDate = new Date(fechaNac);
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    let days = today.getDate() - birthDate.getDate();
+
+    if (days < 0) {
+      months--;
+      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      days += lastMonth.getDate();
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    return `${years >= 0 ? years : 0} años y ${months >= 0 ? months : 0} meses`;
+  }
+
+  getPesoKG(lb: any): string {
+    if (!lb) return '0.00';
+    const kg = parseFloat(lb) / 2.20462;
+    return kg.toFixed(2);
   }
 
   private setupExperienceWatcher() {
@@ -782,7 +924,8 @@ export class VerSolicitudComponent implements OnInit {
 
   private setupCedulaWatcher() {
     this.form.get('datosPersonales.cedula')?.valueChanges.subscribe(cedula => {
-      if (cedula && cedula.length === 10 && this.editMode) {
+      // Solo validar si la cédula cambia realmente respecto a la original del registro
+      if (cedula && cedula.length === 10 && this.editMode && cedula !== this.originalCedula) {
         this.validarDuplicadoCedula(cedula);
       }
     });
@@ -791,7 +934,7 @@ export class VerSolicitudComponent implements OnInit {
   private validarDuplicadoCedula(cedula: string) {
     Swal.fire({
       title: 'Validando Identificación...',
-      html: 'Consultando bases de datos locales y SRI. Por favor, espere.',
+      html: 'Consultando bases de datos locales. Por favor, espere.',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -820,87 +963,79 @@ export class VerSolicitudComponent implements OnInit {
 
         // 2. Validar Existencia Local
         if (res.exists) {
-          Swal.fire({
-            title: '¡Cédula en Uso!',
-            html: `Este número de cédula ya pertenece a otra solicitud:<br><br>
-                   <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
-                   <b>Código:</b> ${res.solicitud.codigo}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-eye"></i> Ir a esa Ficha',
-            cancelButtonText: 'Mantener actual',
-            confirmButtonColor: '#0d6efd',
-            cancelButtonColor: '#6c757d',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.solicitud.id]);
-            } else {
-              this.thService.getSolicitud(this.solicitudId).subscribe(s => {
-                if (s && s.datosPersonales) {
-                  this.form.get('datosPersonales.cedula')?.setValue(s.datosPersonales.cedula, { emitEvent: false });
-                }
-              });
+          if (res.puede_reingresar) {
+            Swal.fire({
+              title: 'Trabajador con Ficha Aprobada',
+              html: `Este número de cédula ya tiene una ficha <b>APROBADA</b>.<br><br>
+                     <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
+                     Para gestionar un reingreso, debe ir a la ficha aprobada y presionar el botón <b>"Gestionar Reingreso"</b>.`,
+              icon: 'info',
+              showCancelButton: true,
+              confirmButtonText: '<i class="bi bi-eye"></i> Ver Ficha Aprobada',
+              cancelButtonText: 'Cerrar',
+              confirmButtonColor: '#0dcaf0',
+              cancelButtonColor: '#6c757d',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.solicitud.id]);
+              } else {
+                this.thService.getSolicitud(this.solicitudId).subscribe(s => {
+                  if (s && s.datosPersonales) {
+                    this.form.get('datosPersonales.cedula')?.setValue(s.datosPersonales.cedula, { emitEvent: false });
+                  }
+                });
+              }
+            });
+          } else {
+            Swal.fire({
+              title: '¡Cédula en Uso!',
+              html: `Este número de cédula ya pertenece a otra solicitud <b>ACTIVA</b>:<br><br>
+                     <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
+                     <b>Código:</b> ${res.solicitud.codigo}`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: '<i class="bi bi-eye"></i> Ir a esa Ficha',
+              cancelButtonText: 'Mantener actual',
+              confirmButtonColor: '#0d6efd',
+              cancelButtonColor: '#6c757d',
+              reverseButtons: true
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/talento-humano/pages/verSolicitud', res.solicitud.id]);
+              } else {
+                this.thService.getSolicitud(this.solicitudId).subscribe(s => {
+                  if (s && s.datosPersonales) {
+                    this.form.get('datosPersonales.cedula')?.setValue(s.datosPersonales.cedula, { emitEvent: false });
+                  }
+                });
+              }
+            });
+          }
+          return;
+        }
+
+      },
+      error: (err) => {
+        Swal.close();
+        console.error('Error al validar cédula:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de Conexión',
+          text: 'No se pudo validar la cédula con el servidor.',
+          confirmButtonColor: '#d33'
+        });
+        // Restaurar valor original si es posible
+        if (this.solicitudId) {
+          this.thService.getSolicitud(this.solicitudId).subscribe(s => {
+            if (s && s.datosPersonales) {
+              this.form.get('datosPersonales.cedula')?.setValue(s.datosPersonales.cedula, { emitEvent: false });
             }
           });
-        } 
-        // 3. Autocompletar desde SRI si está disponible
-        else if (res.sri_data && res.sri_data.exists && res.sri_data.full_name) {
-          this.autocompleteFromSri(res.sri_data.full_name);
         }
       }
     });
   }
 
-  private autocompleteFromSri(fullName: string) {
-    const parts = fullName.split(' ').filter(p => p.length > 0);
-    let apePat = '';
-    let apeMat = '';
-    let noms = '';
-
-    if (parts.length >= 4) {
-      apePat = parts[0];
-      apeMat = parts[1];
-      noms = parts.slice(2).join(' ');
-    } else if (parts.length === 3) {
-      apePat = parts[0];
-      apeMat = parts[1];
-      noms = parts[2];
-    } else if (parts.length === 2) {
-      apePat = parts[0];
-      noms = parts[1];
-    } else {
-      noms = fullName;
-    }
-
-    Swal.fire({
-      title: 'Datos Encontrados (SRI)',
-      html: `Se encontró información asociada a esta cédula:<br><br><b>${fullName}</b><br><br>¿Desea autocompletar nombres y apellidos?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, Autocompletar',
-      cancelButtonText: 'No, Manual',
-      confirmButtonColor: '#0d6efd',
-      cancelButtonColor: '#6c757d',
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.form.get('datosPersonales')?.patchValue({
-          apellidoPaterno: apePat,
-          apellidoMaterno: apeMat,
-          nombres: noms
-        });
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Campos Actualizados',
-          timer: 1500,
-          showConfirmButton: false,
-          toast: true,
-          position: 'top-end'
-        });
-      }
-    });
-  }
 
   shouldShowSaveButton(sectionId: string): boolean {
     if (sectionId === 'referenciasLaborales') {
@@ -998,28 +1133,28 @@ export class VerSolicitudComponent implements OnInit {
         genero: ['', Validators.required],
         tieneDiscapacidad: [false],
         discapacidadDetalle: [{ value: '', disabled: true }, [
-            Validators.maxLength(150),
-            CustomValidators.noWhitespace
+          Validators.maxLength(150),
+          CustomValidators.noWhitespace
         ]],
         discapacidadPorcentaje: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]*$/)]],
         cantonNacimiento: ['', Validators.required],
         cantonNacimientoOtro: ['', [
-            Validators.maxLength(100),
-            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
-            CustomValidators.noWhitespace
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
+          CustomValidators.noWhitespace
         ]],
         cantonCodigo: [null],
         paisNacimiento: ['', Validators.required],
         paisNacimientoOtro: ['', [
-            Validators.maxLength(100),
-            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
-            CustomValidators.noWhitespace
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
+          CustomValidators.noWhitespace
         ]],
         provinciaNacimiento: ['', Validators.required],
         provinciaNacimientoOtro: ['', [
-            Validators.maxLength(100),
-            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
-            CustomValidators.noWhitespace
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
+          CustomValidators.noWhitespace
         ]],
         fechaNacimiento: ['', Validators.required],
         edad: [''],
@@ -1034,7 +1169,9 @@ export class VerSolicitudComponent implements OnInit {
         vacunaCovid1: [false],
         vacunaCovid2: [false],
         vacunaCovid3: [false],
-        afiliadoIess: [null, Validators.required]
+        afiliadoIess: [null, Validators.required],
+        foto_base64: [null],
+        foto_url: [null]
       }, { validators: CustomValidators.covidVaccineValidator }),
       documentacion: this.fb.group({
         cedula_cant: [0, [Validators.required, Validators.min(1)]],
@@ -1166,6 +1303,12 @@ export class VerSolicitudComponent implements OnInit {
           estado: [''],
           anio: [null, [Validators.pattern(/^\d{4}$/)]]
         }),
+        superior_posgrado: this.fb.group({
+          institucion: [''],
+          carrera_programa: [''],
+          estado: [''],
+          anio: [null, [Validators.pattern(/^\d{4}$/)]]
+        }),
         cursos: this.fb.array([])
       }, { validators: this.educationMinValidator }),
       experienciaLaboral: this.fb.group({
@@ -1182,6 +1325,7 @@ export class VerSolicitudComponent implements OnInit {
         quemaduras: this.fb.group({ aplica: [false], detalle: [''] }),
         accidentes_laborales: this.fb.group({ aplica: [false], detalle: [''] }),
         otros_antecedentes: [''],
+        alergias: this.fb.group({ aplica: [false], detalle: [''] }),
         deporte: [''],
         actividad_social: ['']
       }),
@@ -1211,6 +1355,8 @@ export class VerSolicitudComponent implements OnInit {
           this.populateArray('datosFamiliares.hermanos', data.datosFamiliares.hermanos, (h) => this.fb.group({
             nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
             genero: [h?.genero || 'MASCULINO', Validators.required],
+            es_mayor_menor: [h?.es_mayor_menor || '', Validators.required],
+            numero_hermano: [h?.numero_hermano || null, [Validators.required, Validators.min(1), Validators.max(50)]],
             estado: [h?.estado || 'VIVO', Validators.required],
             edad: [h?.edad || null],
             domicilio: [h?.domicilio || ''],
@@ -1270,7 +1416,7 @@ export class VerSolicitudComponent implements OnInit {
             empresa: ['', [Validators.required, CustomValidators.noWhitespace]],
             cargo: ['', [Validators.required, CustomValidators.noWhitespace]],
             parentesco: ['', [Validators.required, CustomValidators.noWhitespace]],
-            telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/)]]
+            telefono: ['', [Validators.pattern(/^[0-9]{7,10}$/)]]
           }));
         }
         if (data.observaciones) {
@@ -1280,6 +1426,10 @@ export class VerSolicitudComponent implements OnInit {
         }
 
         this.form.patchValue(data);
+        this.originalCedula = data.datosPersonales?.cedula || '';
+        this.esElUltimoAprobado = data.es_el_ultimo_aprobado || false;
+        this.tieneReingresoActivo = data.tiene_reingreso_activo || false;
+        this.ultimoIdRelacionado = data.ultimo_id_relacionado || null;
 
         // FIX: Poblar campo de confirmación para que el validador no marque error en modo lectura
         if (data.datosAdministrativos?.banking_info?.numero_cuenta) {
@@ -1319,7 +1469,7 @@ export class VerSolicitudComponent implements OnInit {
   getObservacionesSlice() {
     const obs = this.form.get('observaciones')?.value;
     if (!Array.isArray(obs)) return [];
-    
+
     // Clonar para no mutar el original
     const sorted = [...obs].sort((a, b) => {
       // Prioridad 1: Fecha (ISO string comparison)
@@ -1327,12 +1477,12 @@ export class VerSolicitudComponent implements OnInit {
       const dateB = b.fecha || '';
       if (dateA < dateB) return -1;
       if (dateA > dateB) return 1;
-      
+
       // Prioridad 2: ID (Numérico)
       return (a.id || 0) - (b.id || 0);
     });
 
-    return sorted.slice(-5);
+    return sorted.slice(-4);
   }
 
   toggleSection(sectionId: string) {
@@ -1345,6 +1495,98 @@ export class VerSolicitudComponent implements OnInit {
 
   isSectionOpen(sectionId: string): boolean {
     return this.activeSections.has(sectionId);
+  }
+
+  irAFichaMasReciente() {
+    if (this.ultimoIdRelacionado) {
+      this.router.navigate(['/solicitud-empleo/pages/verSolicitud', this.ultimoIdRelacionado])
+        .then(() => window.location.reload());
+    }
+  }
+
+  reingresar() {
+    Swal.fire({
+      title: '¿Confirmar Reingreso?',
+      text: 'Se creará una copia de esta ficha para iniciar un nuevo proceso de contratación. Podrás editar los datos en la nueva ficha.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0dcaf0',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, crear reingreso',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: 'Procesando...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const userData = {
+          responsable_id: Number(this.userService.getCodEmpleado()),
+          responsable_nombre: this.userService.getUsername(),
+          responsable_grupo: this.getGroupName()
+        };
+
+        this.thService.reingresarSolicitud(this.solicitudId, userData).subscribe({
+          next: (res) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Reingreso Creado',
+              text: 'Se ha generado una nueva ficha editable basada en la anterior.',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              // Redirigir a la nueva solicitud
+              this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.nuevo_id]);
+              // Pequeño delay para asegurar que la navegación ocurra antes del refresh si es necesario
+              setTimeout(() => {
+                if (this.solicitudId === res.nuevo_id) {
+                  window.location.reload();
+                }
+              }, 500);
+            });
+          },
+          error: (err) => {
+            if (err.status === 409 && err.error?.exists_active) {
+              Swal.fire({
+                icon: 'info',
+                title: 'Ficha Activa Detectada',
+                html: `Ya existe un proceso de reingreso en curso para este trabajador.<br><br>
+                         <b>Código:</b> ${err.error.active_code}<br><br>
+                         ¿Desea ir a la ficha existente?`,
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-eye"></i> Ver Ficha Activa',
+                cancelButtonText: 'Cerrar',
+                confirmButtonColor: '#0dcaf0',
+                cancelButtonColor: '#6c757d',
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  this.router.navigate(['/solicitud-empleo/pages/verSolicitud', err.error.active_id]);
+                }
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.error?.message || 'No se pudo procesar el reingreso.'
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  getSafeUrl(base64OrUrl: any): SafeUrl | string | null {
+    if (!base64OrUrl) return null;
+    const value = base64OrUrl.toString();
+    if (value.startsWith('data:image/')) {
+      return this.sanitizer.bypassSecurityTrustUrl(value);
+    }
+    return value;
   }
 
   guardarSeccion(sectionId: string) {
@@ -1397,6 +1639,9 @@ export class VerSolicitudComponent implements OnInit {
       next: () => {
         this.savingSection = null;
         this.activeSections.delete(sectionId); // Auto-collapse on success
+        this.cargarSolicitud(this.solicitudId); // Refresh data to get new foto_url, etc.
+        this.form.get('datosPersonales.foto_base64')?.setValue(null);
+        this.form.get('datosPersonales.foto_base64')?.markAsPristine();
         Swal.fire({
           icon: 'success',
           title: '¡Guardado!',
@@ -1421,18 +1666,18 @@ export class VerSolicitudComponent implements OnInit {
   imprimirFicha() {
     // Obtener el código de la solicitud o un nombre genérico
     const codigo = this.form.get('codigo_solicitud')?.value || `Solicitud_${this.solicitudId}`;
-    
+
     // Guardar el título original de la página
     const originalTitle = document.title;
-    
+
     // Cambiar temporalmente el título al código para la descarga PDF
     document.title = codigo;
-    
+
     // Activar impresión (con un pequeño delay para que el navegador registre el DOM title)
     setTimeout(() => {
       this.currentDate = new Date();
       window.print();
-      
+
       // Restaurar el título después de cerrar el diálogo de impresión
       document.title = originalTitle;
     }, 50);
@@ -1487,7 +1732,15 @@ export class VerSolicitudComponent implements OnInit {
   private getInvalidFields(group: FormGroup, prefix: string, results: string[]) {
     Object.keys(group.controls).forEach(key => {
       const control = group.get(key);
-      const label = this.fieldLabels[key] || key;
+      let label = this.fieldLabels[key] || key;
+
+      // Ajustar etiqueta 'estado' según contexto
+      if (key === 'estado') {
+        if (prefix.toLowerCase().includes('superior') || prefix.toLowerCase().includes('grado') || prefix.toLowerCase().includes('posgrado')) {
+          label = 'Estado de Estudios';
+        }
+      }
+
       if (control?.invalid) {
         if (control instanceof FormGroup) {
           this.getInvalidFields(control, label + ' > ', results);
@@ -1547,7 +1800,7 @@ export class VerSolicitudComponent implements OnInit {
     telefono_emergencia: 'Teléfono de Emergencia',
     nombre_contacto_emergencia: 'Nombre de Contacto de Emergencia',
     parentesco_contacto_emergencia: 'Parentesco de Contacto de Emergencia',
-    nivel_maximo: 'Nivel de Instrucción Máximo',
+    nivel_maximo: 'Nivel de Instrucción',
     institucion: 'Institución',
     anio: 'Año',
     titulo: 'Título',
@@ -1572,7 +1825,9 @@ export class VerSolicitudComponent implements OnInit {
     parentesco: 'Parentesco/Relación',
     referenciasLaborales: 'Referencias Laborales',
     referenciasPersonales: 'Referencias Personales',
-    familiaresEnEmpresa: 'Vínculos en la Empresa'
+    familiaresEnEmpresa: 'Vínculos en la Empresa',
+    superior: 'Educación Superior (Grado)',
+    superior_posgrado: 'Educación Superior (Posgrado)'
   };
 
   private setupEstadoCivilWatcher() {
@@ -1581,7 +1836,7 @@ export class VerSolicitudComponent implements OnInit {
       const isMandatory = ['CASADO', 'UNION LIBRE', 'UNIÓN LIBRE'].includes(estado?.toUpperCase());
 
       const fields = ['nombre', 'estado', 'edad', 'domicilio', 'ocupacion'];
-      
+
       fields.forEach(field => {
         const control = conyugeGroup.get(field);
         if (control) {
@@ -1594,6 +1849,38 @@ export class VerSolicitudComponent implements OnInit {
         }
       });
     });
+  }
+
+  getNivelEducativoLabel(nivel: string): string {
+    if (!nivel) return 'N/A';
+    const map: { [key: string]: string } = {
+      'NINGUNO': 'SIN INSTRUCCIÓN',
+      'INICIAL': 'EDUCACIÓN INICIAL',
+      'BASICA_INCOMPLETA': 'EGB INCOMPLETA',
+      'BASICA_COMPLETA': 'EGB COMPLETA',
+      'BACHILLERATO_INCOMPLETO': 'BACHILLERATO INCOMPLETO',
+      'BACHILLERATO_COMPLETO': 'BACHILLERATO COMPLETO',
+      'TECNICO_TECNOLOGO': 'TÉCNICO / TECNÓLOGO',
+      'TERCER_NIVEL': 'TERCER NIVEL',
+      'ESPECIALISTA': 'ESPECIALISTA',
+      'MAESTRIA': 'MAESTRÍA',
+      'DOCTORADO': 'DOCTORADO (PHD)'
+    };
+    return map[nivel] || nivel;
+  }
+
+  hasEducationData(): boolean {
+    const edu = this.form.get('datosEducativos')?.value;
+    if (!edu) return false;
+
+    return (
+      !!edu.inicial?.institucion ||
+      !!edu.basica?.institucion ||
+      !!edu.bachillerato?.institucion ||
+      !!edu.superior?.institucion ||
+      !!edu.superior_posgrado?.institucion ||
+      (edu.cursos && edu.cursos.length > 0)
+    );
   }
 
   regresar() {

@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 import { CustomValidators } from '../../utils/custom-validators';
 
@@ -54,7 +55,7 @@ import { CustomValidators } from '../../utils/custom-validators';
                 <button type="button" class="btn btn-link text-danger text-decoration-none fw-bold d-flex align-items-center p-0" 
                         (click)="eliminarRegistro('referenciasPersonales', i)" 
                         *ngIf="!isReadOnly">
-                  <i class="bi bi-trash3-fill me-2 fs-5"></i>
+                  <i class="bi bi-trash-fill me-2 fs-5"></i>
                   <span class="small">Eliminar Referencia</span>
                 </button>
               </div>
@@ -167,7 +168,7 @@ import { CustomValidators } from '../../utils/custom-validators';
                 <button type="button" class="btn btn-link text-danger text-decoration-none fw-bold d-flex align-items-center p-0" 
                         (click)="eliminarRegistro('familiaresEnEmpresa', i)" 
                         *ngIf="!isReadOnly">
-                  <i class="bi bi-trash3-fill me-2 fs-5"></i>
+                  <i class="bi bi-trash-fill me-2 fs-5"></i>
                   <span class="small">Eliminar Registro</span>
                 </button>
               </div>
@@ -222,12 +223,12 @@ import { CustomValidators } from '../../utils/custom-validators';
                 </div>
 
                 <div class="col-md-4">
-                  <label class="form-label fw-bold text-secondary small text-uppercase">Teléfono <span class="text-danger">*</span></label>
+                  <label class="form-label fw-bold text-secondary small text-uppercase">Teléfono</label>
                   <input type="tel" class="form-control" formControlName="telefono" 
                          [class.is-invalid]="vinculo.get('telefono')?.invalid && vinculo.get('telefono')?.touched"
                          placeholder="09XXXXXXXX" (keypress)="onlyNumbers($event)"
                          (input)="cleanPhoneNumber(i, 'familiaresEnEmpresa')" maxlength="10" [readonly]="isReadOnly">
-                  <div class="invalid-feedback">El teléfono es obligatorio.</div>
+                  <div class="invalid-feedback">El teléfono debe tener entre 7 y 10 dígitos.</div>
                 </div>
               </div>
 
@@ -300,11 +301,28 @@ export class ReferenciasPersonalesComponent implements OnInit {
           empresa: ['', [Validators.required, CustomValidators.noWhitespace]],
           cargo: ['', [Validators.required, CustomValidators.noWhitespace, Validators.pattern(this.LETTERS_PATTERN)]],
           parentesco: ['', [Validators.required, CustomValidators.noWhitespace, Validators.pattern(this.LETTERS_PATTERN)]],
-          telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/), Validators.maxLength(10)]]
+          telefono: ['', [Validators.pattern(/^[0-9]{7,10}$/), Validators.maxLength(10)]]
         }));
       }
       this.cdr.detectChanges();
+      const selector = arrayName === 'referenciasPersonales' ? '.referencia-card' : '.vinculo-card';
+      const msg = arrayName === 'referenciasPersonales' ? 'Referencia personal añadida abajo' : 'Vínculo interno añadido abajo';
+      this.scrollToLast(selector, msg);
     }
+  }
+
+  private scrollToLast(selector: string, message: string) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }, 100);
   }
 
   eliminarRegistro(arrayName: string, index: number) {

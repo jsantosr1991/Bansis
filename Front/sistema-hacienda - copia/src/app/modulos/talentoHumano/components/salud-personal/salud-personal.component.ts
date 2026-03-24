@@ -72,7 +72,7 @@ import { Subscription } from 'rxjs';
           <div class="col-12">
             <div class="p-3 border rounded-4 bg-white shadow-sm">
               <label class="form-label fw-bold text-secondary d-flex align-items-center">
-                <i class="bi bi-file-earmark-medical me-2 text-primary"></i>5. OTROS ANTECEDENTES RELEVANTES <small class="ms-2 fw-normal">(Opcional)</small>
+                <i class="bi bi-file-earmark-medical me-2 text-primary"></i>6. OTROS ANTECEDENTES RELEVANTES <small class="ms-2 fw-normal">(Opcional)</small>
               </label>
               <textarea class="form-control border-light-subtle" formControlName="otros_antecedentes" 
                         placeholder="Ej: Lesiones antiguas, enfermedades importantes, limitaciones físicas que debamos conocer..." 
@@ -89,7 +89,7 @@ import { Subscription } from 'rxjs';
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-bold text-secondary small">6. ¿PRACTICA ALGÚN DEPORTE? <small class="ms-2 fw-normal">(Opcional)</small></label>
+            <label class="form-label fw-bold text-secondary small">7. ¿PRACTICA ALGÚN DEPORTE? <small class="ms-2 fw-normal">(Opcional)</small></label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-trophy text-primary"></i></span>
               <input type="text" class="form-control" formControlName="deporte" placeholder="Ej: Fútbol, Ciclismo, Natación (o Ninguno)" [readonly]="isReadOnly">
@@ -97,7 +97,7 @@ import { Subscription } from 'rxjs';
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-bold text-secondary small">7. PARTICIPACIÓN CÍVICO-SOCIAL <small class="ms-2 fw-normal">(Opcional)</small></label>
+            <label class="form-label fw-bold text-secondary small">8. PARTICIPACIÓN CÍVICO-SOCIAL <small class="ms-2 fw-normal">(Opcional)</small></label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-people text-primary"></i></span>
               <textarea class="form-control" formControlName="actividad_social" 
@@ -156,6 +156,14 @@ export class SaludPersonalComponent implements OnInit, OnDestroy {
       icon: 'bi-bandaid',
       placeholder: 'Ej: Lesión lumbar por carga pesada en 2020',
       help: 'Especifique la lesión y consecuencias.'
+    },
+    {
+      control: 'alergias',
+      label: '5. ALERGIAS',
+      sublabel: 'Reacciones alérgicas a medicamentos, alimentos o ambiente',
+      icon: 'bi-patch-exclamation',
+      placeholder: 'Ej: Alergia a la penicilina, polen, mariscos',
+      help: 'Indique a qué tiene alergia y la gravedad.'
     }
   ];
 

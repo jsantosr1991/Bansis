@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-datos-familiares',
@@ -174,7 +175,7 @@ import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } fr
             </div>
             <div class="row g-3">
               <div class="col-md-6 animate-fade" *ngFor="let h of hermanos.controls; let i=index" [formGroup]="getGroupFromArray(hermanos, i)">
-                <div class="p-3 border rounded-3 bg-white shadow-sm position-relative pt-4">
+                <div class="p-3 border rounded-3 bg-white shadow-sm position-relative pt-4 familiar-card">
                   <button type="button" class="btn-close position-absolute top-0 end-0 m-2" (click)="removeFromArray(hermanos, i)" *ngIf="!isReadOnly"></button>
                   <div class="row g-2">
                     <div class="col-12">
@@ -186,19 +187,36 @@ import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } fr
                              [class.is-invalid]="getGroupFromArray(hermanos, i).get('nombre')?.invalid && getGroupFromArray(hermanos, i).get('nombre')?.touched">
                       <div class="invalid-feedback">El nombre es obligatorio (solo letras).</div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                       <select class="form-select form-select-sm" formControlName="genero" [attr.disabled]="isReadOnly ? true : null">
                         <option value="MASCULINO">Masc.</option>
                         <option value="FEMENINO">Fem.</option>
                       </select>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                       <select class="form-select form-select-sm" formControlName="estado" [attr.disabled]="isReadOnly ? true : null" (change)="updateFamiliarValidators('hermanos', i)">
                         <option value="VIVO">Vivo</option>
                         <option value="FINADO">Finado</option>
                       </select>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
+                      <select class="form-select form-select-sm" formControlName="es_mayor_menor" 
+                             [class.is-invalid]="getGroupFromArray(hermanos, i).get('es_mayor_menor')?.invalid && getGroupFromArray(hermanos, i).get('es_mayor_menor')?.touched"
+                             [attr.disabled]="isReadOnly ? true : null">
+                        <option value="">Orden</option>
+                        <option value="MAYOR">Mayor</option>
+                        <option value="MENOR">Menor</option>
+                      </select>
+                      <div class="invalid-feedback small">Seleccionar orden.</div>
+                    </div>
+                    <div class="col-3">
+                      <input type="number" class="form-control form-control-sm" formControlName="numero_hermano" 
+                             placeholder="# Hermano" [readonly]="isReadOnly" 
+                             (input)="preventSpaces(hermanos, i, 'numero_hermano')"
+                             [class.is-invalid]="getGroupFromArray(hermanos, i).get('numero_hermano')?.invalid && getGroupFromArray(hermanos, i).get('numero_hermano')?.touched">
+                      <div class="invalid-feedback small">1-50.</div>
+                    </div>
+                    <div class="col-6">
                       <input type="number" class="form-control form-control-sm" formControlName="edad" placeholder="Edad" [readonly]="isReadOnly" [class.is-invalid]="getGroupFromArray(hermanos, i).get('edad')?.invalid && getGroupFromArray(hermanos, i).get('edad')?.touched">
                       <div class="invalid-feedback">Edad no válida.</div>
                     </div>
@@ -242,7 +260,7 @@ import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } fr
             </div>
             <div class="row g-3">
               <div class="col-lg-6 animate-fade" *ngFor="let h of hijos.controls; let i=index" [formGroup]="getGroupFromArray(hijos, i)">
-                <div class="p-3 border rounded-3 bg-white shadow-sm position-relative">
+                <div class="p-3 border rounded-3 bg-white shadow-sm position-relative familiar-card">
                   <button type="button" class="btn-close position-absolute top-0 end-0 m-2" (click)="removeFromArray(hijos, i)" *ngIf="!isReadOnly"></button>
                   <div class="row g-2">
                     <div class="col-md-8">
@@ -305,7 +323,7 @@ import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } fr
             </div>
             <div class="row g-3">
               <div class="col-md-4 animate-fade" *ngFor="let c of conyuges_anteriores.controls; let i=index" [formGroup]="getGroupFromArray(conyuges_anteriores, i)">
-                <div class="p-3 border rounded-3 bg-light position-relative shadow-sm pt-4">
+                <div class="p-3 border rounded-3 bg-light position-relative shadow-sm pt-4 familiar-card">
                   <button type="button" class="btn-close position-absolute top-0 end-0 m-1" style="transform: scale(0.8)" (click)="removeFromArray(conyuges_anteriores, i)" *ngIf="!isReadOnly"></button>
                   <label class="form-label small mb-1 fw-semibold">Cónyuge #{{i+1}}</label>
                   <input type="text" class="form-control form-control-sm mb-2" formControlName="nombre" 
@@ -508,6 +526,18 @@ export class DatosFamiliaresComponent implements OnInit {
     group.updateValueAndValidity({ emitEvent: false, onlySelf: true });
   }
 
+  preventSpaces(array: FormArray, index: number, controlName: string) {
+    const control = array.at(index).get(controlName);
+    if (control && control.value) {
+      // Si es un número en el input, a veces llega como string.
+      // Eliminamos cualquier espacio.
+      const val = control.value.toString().replace(/\s/g, '');
+      if (val !== control.value.toString()) {
+        control.setValue(val === '' ? null : parseInt(val, 10), { emitEvent: false });
+      }
+    }
+  }
+
   // Agregadores
   addHermano() {
     const group = this.fb.group({
@@ -516,10 +546,13 @@ export class DatosFamiliaresComponent implements OnInit {
       edad: [null, [Validators.required, Validators.min(0), Validators.max(120)]],
       domicilio: ['', [Validators.required, Validators.pattern(this.ALPHANUMERIC_PATTERN)]],
       ocupacion: ['', [Validators.required, Validators.pattern(this.ONLY_LETTERS_PATTERN)]],
-      genero: ['MASCULINO', Validators.required]
+      genero: ['MASCULINO', Validators.required],
+      es_mayor_menor: ['', Validators.required],
+      numero_hermano: [null, [Validators.required, Validators.min(1), Validators.max(50), Validators.pattern(/^[0-9]+$/)]]
     });
     this.hermanos.push(group);
     this.updateFamiliarValidators('hermanos', this.hermanos.length - 1);
+    this.scrollToLast('.familiar-card', 'Hermano/a añadido/a abajo');
   }
 
   addHijo() {
@@ -530,6 +563,7 @@ export class DatosFamiliaresComponent implements OnInit {
       discapacidad: [false, Validators.required],
       descripcion_discapacidad: ['']
     }));
+    this.scrollToLast('.familiar-card', 'Hijo/a añadido/a abajo');
   }
 
   addConyugeAnterior() {
@@ -539,7 +573,22 @@ export class DatosFamiliaresComponent implements OnInit {
         edad: [null, [Validators.required, Validators.min(0), Validators.max(120)]],
         ocupacion: ['', [Validators.required, Validators.pattern(this.ONLY_LETTERS_PATTERN)]]
       }));
+      this.scrollToLast('.familiar-card', 'Registro de cónyuge anterior añadido abajo');
     }
+  }
+
+  private scrollToLast(selector: string, message: string) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }, 100);
   }
 
   removeFromArray(array: FormArray, index: number) {

@@ -349,7 +349,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
   private validarDuplicadoCedula(cedula: string) {
     Swal.fire({
       title: 'Validando Identificación...',
-      html: 'Consultando bases de datos locales y SRI. Por favor, espere.',
+      html: 'Consultando bases de datos locales. Por favor, espere.',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -373,80 +373,58 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
 
         // 2. Validar Existencia Local
         if (res.exists) {
-          Swal.fire({
-            title: '¡Cédula Ya Registrada!',
-            html: `Se encontró una solicitud existente para este número de cédula:<br><br>
-                   <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
-                   <b>Código:</b> ${res.solicitud.codigo}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-eye"></i> Ver Ficha Existente',
-            cancelButtonText: 'Corregir Cédula',
-            confirmButtonColor: '#0d6efd',
-            cancelButtonColor: '#6c757d',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.solicitud.id]);
-            } else {
-              this.form.get('datosPersonales.cedula')?.setValue('', { emitEvent: false });
-            }
-          });
-        } 
-        // 3. Autocompletar desde SRI si está disponible
-        else if (res.sri_data && res.sri_data.exists && res.sri_data.full_name) {
-          this.autocompleteFromSri(res.sri_data.full_name);
+          if (res.puede_reingresar) {
+            Swal.fire({
+              title: 'Trabajador con Ficha Aprobada',
+              html: `Este número de cédula ya tiene una ficha <b>APROBADA</b>.<br><br>
+                     <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
+                     Para gestionar un reingreso, debe ir a la ficha aprobada y presionar el botón <b>"Gestionar Reingreso"</b>.`,
+              icon: 'info',
+              showCancelButton: true,
+              confirmButtonText: '<i class="bi bi-eye"></i> Ver Ficha Aprobada',
+              cancelButtonText: 'Cerrar',
+              confirmButtonColor: '#0dcaf0',
+              cancelButtonColor: '#6c757d',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.solicitud.id]);
+              } else {
+                this.form.get('datosPersonales.cedula')?.setValue('', { emitEvent: false });
+              }
+            });
+          } else {
+            Swal.fire({
+              title: '¡Cédula Ya Registrada!',
+              html: `Se encontró una solicitud <b>ACTIVA</b> para este número de cédula:<br><br>
+                     <b>Aspirante:</b> ${res.solicitud.nombre_completo}<br>
+                     <b>Estado:</b> ${res.solicitud.estado}`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: '<i class="bi bi-eye"></i> Ver Ficha Existente',
+              cancelButtonText: 'Corregir Cédula',
+              confirmButtonColor: '#0d6efd',
+              cancelButtonColor: '#6c757d',
+              reverseButtons: true
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/solicitud-empleo/pages/verSolicitud', res.solicitud.id]);
+              } else {
+                this.form.get('datosPersonales.cedula')?.setValue('', { emitEvent: false });
+              }
+            });
+          }
+          return;
         }
-      }
-    });
-  }
-
-  private autocompleteFromSri(fullName: string) {
-    // SRI suele devolver: APELLIDO1 APELLIDO2 NOMBRE1 NOMBRE2
-    const parts = fullName.split(' ').filter(p => p.length > 0);
-    let apePat = '';
-    let apeMat = '';
-    let noms = '';
-
-    if (parts.length >= 4) {
-      apePat = parts[0];
-      apeMat = parts[1];
-      noms = parts.slice(2).join(' ');
-    } else if (parts.length === 3) {
-      apePat = parts[0];
-      apeMat = parts[1];
-      noms = parts[2];
-    } else if (parts.length === 2) {
-      apePat = parts[0];
-      noms = parts[1];
-    } else {
-      noms = fullName;
-    }
-
-    Swal.fire({
-      title: 'Datos Encontrados (SRI)',
-      html: `Se encontró información asociada a esta cédula:<br><br><b>${fullName}</b><br><br>¿Desea autocompletar nombres y apellidos?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, Autocompletar',
-      cancelButtonText: 'No, Manual',
-      confirmButtonColor: '#0d6efd',
-      cancelButtonColor: '#6c757d',
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.form.get('datosPersonales')?.patchValue({
-          apellidoPaterno: apePat,
-          apellidoMaterno: apeMat,
-          nombres: noms
-        });
-        
+        // Cédula válida y disponible — no se hace nada adicional
+      },
+      error: (err) => {
+        Swal.close();
+        console.error('Error al validar cédula:', err);
         Swal.fire({
-          icon: 'success',
-          title: 'Campos Actualizados',
-          timer: 1500,
-          showConfirmButton: false,
-          toast: true,
-          position: 'top-end'
+          icon: 'error',
+          title: 'Error de Conexión',
+          text: 'No se pudo conectar con el servidor para validar la cédula.',
+          confirmButtonColor: '#d33'
         });
       }
     });
@@ -560,7 +538,9 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         vacunaCovid1: [false],
         vacunaCovid2: [false],
         vacunaCovid3: [false],
-        afiliadoIess: ['', Validators.required]
+        afiliadoIess: ['', Validators.required],
+        foto_base64: [null],
+        foto_url: [null]
       }, { validators: CustomValidators.covidVaccineValidator }),
       documentacion: this.fb.group({
         cedula_cant: [0, [Validators.required, Validators.min(1)]],
@@ -708,6 +688,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         quemaduras: this.fb.group({ aplica: [false], detalle: [''] }),
         accidentes_laborales: this.fb.group({ aplica: [false], detalle: [''] }),
         otros_antecedentes: [''],
+        alergias: this.fb.group({ aplica: [false], detalle: [''] }),
         deporte: [''],
         actividad_social: ['']
       }),
@@ -1037,7 +1018,15 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
   private getInvalidFields(group: FormGroup, prefix: string, results: string[]) {
     Object.keys(group.controls).forEach(key => {
       const control = group.get(key);
-      const label = this.fieldLabels[key] || key;
+      let label = this.fieldLabels[key] || key;
+
+      // Ajustar etiqueta 'estado' según contexto
+      if (key === 'estado') {
+        if (prefix.toLowerCase().includes('superior') || prefix.toLowerCase().includes('grado') || prefix.toLowerCase().includes('posgrado')) {
+          label = 'Estado de Estudios';
+        }
+      }
+
       if (control?.invalid) {
         if (control instanceof FormGroup) {
           this.getInvalidFields(control, label + ' > ', results);
@@ -1112,6 +1101,14 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
     parentesco: 'Parentesco/Relación',
     referenciasLaborales: 'Referencias Laborales',
     referenciasPersonales: 'Referencias Personales',
-    familiaresEnEmpresa: 'Vínculos en la Empresa'
+    familiaresEnEmpresa: 'Vínculos en la Empresa',
+    nivel_maximo: 'Nivel de Instrucción',
+    institucion: 'Institución',
+    anio: 'Año',
+    titulo: 'Título',
+    ultimo_grado: 'Último Grado Aprobado',
+    carrera_programa: 'Carrera / Programa',
+    superior: 'Educación Superior (Grado)',
+    superior_posgrado: 'Educación Superior (Posgrado)'
   };
 }

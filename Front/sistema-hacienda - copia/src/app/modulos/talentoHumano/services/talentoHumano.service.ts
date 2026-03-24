@@ -150,4 +150,13 @@ export class TalentoHumanoService {
     eliminarSolicitud(id: number): Observable<any> {
         return this.http.delete(`${this.apiUrl}/talento-humano/solicitudes/${id}`);
     }
+
+    /**
+     * Crea un reingreso (clon) de una solicitud aprobada.
+     * @param id Identificador de la solicitud original.
+     * @returns Observable con el resultado de la clonación y el nuevo ID.
+     */
+    reingresarSolicitud(id: number, payload: any = {}): Observable<any> {
+        return this.http.post(`${this.apiUrl}/talento-humano/solicitudes/${id}/reingreso`, payload);
+    }
 }

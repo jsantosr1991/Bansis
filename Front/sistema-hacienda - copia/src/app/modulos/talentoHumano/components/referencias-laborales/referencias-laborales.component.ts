@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 import { CustomValidators } from '../../utils/custom-validators';
 
@@ -54,7 +55,7 @@ import { CustomValidators } from '../../utils/custom-validators';
                       (click)="eliminarReferencia(i)" 
                       *ngIf="!isReadOnly"
                       title="Eliminar esta referencia">
-                <i class="bi bi-trash3-fill me-2 fs-5"></i>
+                <i class="bi bi-trash-fill me-2 fs-5"></i>
                 <span class="small">Eliminar Referencia</span>
               </button>
             </div>
@@ -194,7 +195,23 @@ export class ReferenciasLaboralesComponent implements OnInit, OnDestroy {
         telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/), Validators.maxLength(10)]]
       });
       this.referencias.push(refGroup);
+      this.cdr.detectChanges();
+      this.scrollToLast('.referencia-card', 'Referencia laboral añadida abajo');
     }
+  }
+
+  private scrollToLast(selector: string, message: string) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }, 100);
   }
 
   eliminarReferencia(index: number) {

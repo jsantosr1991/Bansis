@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-observaciones',
@@ -197,9 +198,28 @@ export class ObservacionesComponent implements OnInit {
   }
 
   eliminarObservacion(index: number) {
-    if (confirm('¿Está seguro de eliminar esta observación? Esta acción no se puede deshacer.')) {
-      this.observaciones.removeAt(index);
-    }
+    Swal.fire({
+      title: '¿Eliminar observación?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        this.observaciones.removeAt(index);
+        Swal.fire({
+          icon: 'success',
+          title: 'Eliminado',
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
+      }
+    });
   }
 
   getTipoClass(tipo: string): string {

@@ -112,17 +112,17 @@ import Swal from 'sweetalert2';
                 <div class="d-flex align-items-center gap-2 ms-2" *ngIf="fechaFilterMode === 'single'">
                   <label class="small text-muted fw-semibold mb-0">Fecha:</label>
                   <input type="date" class="form-control form-control-sm border rounded-3 shadow-none" 
-                         style="width: 170px;" 
+                         style="width: 170px;" [max]="maxDate"
                          [(ngModel)]="fechaSingle" (change)="filterSolicitudes()">
                 </div>
                 <div class="d-flex align-items-center gap-2 ms-2" *ngIf="fechaFilterMode === 'range'">
                   <label class="small text-muted fw-semibold mb-0">Desde:</label>
                   <input type="date" class="form-control form-control-sm border rounded-3 shadow-none" 
-                         style="width: 170px;" 
+                         style="width: 170px;" [max]="maxDate"
                          [(ngModel)]="fechaDesde" (change)="filterSolicitudes()">
                   <label class="small text-muted fw-semibold mb-0">Hasta:</label>
                   <input type="date" class="form-control form-control-sm border rounded-3 shadow-none" 
-                         style="width: 170px;" 
+                         style="width: 170px;" [max]="maxDate"
                          [(ngModel)]="fechaHasta" (change)="filterSolicitudes()">
                 </div>
               </div>
@@ -522,6 +522,7 @@ export class ListaSolicitudesComponent implements OnInit {
   loading: boolean = false;
   procesandoEstado: boolean = false;
   currentDate: Date = new Date();
+  maxDate: string = new Date().toISOString().split('T')[0];
 
   // Pagination
   currentPage: number = 1;
