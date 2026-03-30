@@ -118,21 +118,22 @@
 	<background>
 		<band height="19" splitType="Stretch">
 			<staticText>
-				<reportElement x="590" y="0" width="90" height="19" uuid="bef0471a-2ae3-458a-8d0e-b84e029f864d"/>
+				<reportElement x="620" y="0" width="90" height="19" uuid="bef0471a-2ae3-458a-8d0e-b84e029f864d"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Fecha de impresión:]]></text>
 			</staticText>
 			<textField pattern="MMMMM dd, yyyy">
-				<reportElement x="680" y="0" width="80" height="18" uuid="614f1e02-81d6-4720-989a-b29fb32856f3"/>
+				<reportElement x="710" y="0" width="60" height="18" uuid="614f1e02-81d6-4720-989a-b29fb32856f3"/>
+				<box leftPadding="3"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField pattern="HH:mm">
-				<reportElement x="760" y="0" width="40" height="18" uuid="07169982-65ba-4d65-9958-89fc5513c5bd"/>
+				<reportElement x="770" y="0" width="28" height="18" uuid="07169982-65ba-4d65-9958-89fc5513c5bd"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
@@ -143,7 +144,7 @@
 	<title>
 		<band height="70" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="700" height="50" uuid="3fb50bf6-a531-4436-aada-d96d35510945"/>
+				<reportElement x="0" y="0" width="800" height="50" uuid="3fb50bf6-a531-4436-aada-d96d35510945"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="26" isBold="true"/>
 				</textElement>
@@ -222,7 +223,9 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{semana}]]></textFieldExpression>
 			</textField>
 			<staticText>
@@ -241,7 +244,7 @@
 				<reportElement x="280" y="10" width="200" height="1" uuid="1a7b0200-eec4-4860-8161-431cf89d8a56"/>
 			</line>
 			<staticText>
-				<reportElement x="340" y="11" width="100" height="18" uuid="9c9565dd-f7ad-4b84-aff4-5a34a1252ca8"/>
+				<reportElement x="330" y="10" width="100" height="18" uuid="9c9565dd-f7ad-4b84-aff4-5a34a1252ca8"/>
 				<textElement textAlignment="Center"/>
 				<text><![CDATA[Firma]]></text>
 			</staticText>
