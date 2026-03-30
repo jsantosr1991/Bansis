@@ -116,7 +116,29 @@
 		<fieldDescription><![CDATA[anio]]></fieldDescription>
 	</field>
 	<background>
-		<band splitType="Stretch"/>
+		<band height="19" splitType="Stretch">
+			<staticText>
+				<reportElement x="590" y="0" width="90" height="19" uuid="bef0471a-2ae3-458a-8d0e-b84e029f864d"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="680" y="0" width="80" height="18" uuid="614f1e02-81d6-4720-989a-b29fb32856f3"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm">
+				<reportElement x="760" y="0" width="40" height="18" uuid="07169982-65ba-4d65-9958-89fc5513c5bd"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
 	</background>
 	<title>
 		<band height="70" splitType="Stretch">
@@ -145,7 +167,7 @@
 				<text><![CDATA[SEMANA]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="0" y="50" width="700" height="19" uuid="d9caf906-3614-40b1-828a-70c0151e7830"/>
+				<reportElement x="0" y="50" width="700" height="20" uuid="d9caf906-3614-40b1-828a-70c0151e7830"/>
 				<box leftPadding="55" bottomPadding="0" rightPadding="0">
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</box>
@@ -170,9 +192,9 @@
 		</band>
 	</title>
 	<columnHeader>
-		<band height="40" splitType="Stretch">
+		<band height="31" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="280" height="40" uuid="a02bbe4f-128d-40f9-afcd-fd005b8eb2c3"/>
+				<reportElement x="0" y="0" width="280" height="30" uuid="a02bbe4f-128d-40f9-afcd-fd005b8eb2c3"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</box>
@@ -182,7 +204,7 @@
 				<text><![CDATA[VIEJA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="280" y="0" width="480" height="40" uuid="b98bf668-8c69-4de3-8641-8e5ba41186cd"/>
+				<reportElement x="280" y="0" width="480" height="30" uuid="b98bf668-8c69-4de3-8641-8e5ba41186cd"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</box>
@@ -192,7 +214,7 @@
 				<text><![CDATA[JOVEN]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="760" y="0" width="40" height="40" uuid="5f8bc180-9294-4fa8-aa98-ec7bac2ab5bb"/>
+				<reportElement x="760" y="0" width="40" height="30" uuid="5f8bc180-9294-4fa8-aa98-ec7bac2ab5bb"/>
 				<box>
 					<pen lineStyle="Solid"/>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -213,6 +235,18 @@
 			</staticText>
 		</band>
 	</columnHeader>
+	<pageFooter>
+		<band height="29">
+			<line>
+				<reportElement x="280" y="10" width="200" height="1" uuid="1a7b0200-eec4-4860-8161-431cf89d8a56"/>
+			</line>
+			<staticText>
+				<reportElement x="340" y="11" width="100" height="18" uuid="9c9565dd-f7ad-4b84-aff4-5a34a1252ca8"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Firma]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
 	<summary>
 		<band height="80" splitType="Stretch">
 			<crosstab>
