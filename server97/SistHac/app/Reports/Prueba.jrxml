@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Prueba" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a1976f43-e360-4d23-84e7-1b15ff5185ce">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
+	<queryString language="JSON">
+		<![CDATA[]]>
+	</queryString>
+	<field name="COD_TRABAJ" class="java.lang.Integer">
+		<property name="net.sf.jasperreports.json.field.expression" value="COD_TRABAJ"/>
+		<fieldDescription><![CDATA[COD_TRABAJ]]></fieldDescription>
+	</field>
+	<field name="NUM_CEDULA" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="NUM_CEDULA"/>
+		<fieldDescription><![CDATA[NUM_CEDULA]]></fieldDescription>
+	</field>
+	<field name="NOMBRE_1" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="NOMBRE_1"/>
+		<fieldDescription><![CDATA[NOMBRE_1]]></fieldDescription>
+	</field>
+	<field name="APELLIDO_1" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="APELLIDO_1"/>
+		<fieldDescription><![CDATA[APELLIDO_1]]></fieldDescription>
+	</field>
+	<field name="NOMBRE_CORTO" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="NOMBRE_CORTO"/>
+		<fieldDescription><![CDATA[NOMBRE_CORTO]]></fieldDescription>
+	</field>
+	<field name="EMPRESA" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="EMPRESA"/>
+		<fieldDescription><![CDATA[EMPRESA]]></fieldDescription>
+	</field>
+	<field name="COD_EMPRESA" class="java.lang.Integer">
+		<property name="net.sf.jasperreports.json.field.expression" value="COD_EMPRESA"/>
+		<fieldDescription><![CDATA[COD_EMPRESA]]></fieldDescription>
+	</field>
+	<field name="SOLO_CORTE" class="java.lang.Integer">
+		<property name="net.sf.jasperreports.json.field.expression" value="SOLO_CORTE"/>
+		<fieldDescription><![CDATA[SOLO_CORTE]]></fieldDescription>
+	</field>
+	<field name="es_lotero" class="java.lang.Integer">
+		<property name="net.sf.jasperreports.json.field.expression" value="es_lotero"/>
+		<fieldDescription><![CDATA[es_lotero]]></fieldDescription>
+	</field>
+	<field name="nomcargo" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="nomcargo"/>
+		<fieldDescription><![CDATA[nomcargo]]></fieldDescription>
+	</field>
+	<field name="codcargo" class="java.lang.Integer">
+		<property name="net.sf.jasperreports.json.field.expression" value="codcargo"/>
+		<fieldDescription><![CDATA[codcargo]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="132" y="24" width="290" height="30" uuid="09c7764d-b580-411f-b2ba-f65ed9903656"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[LISTA DE EMPLEADOS EMPRESA]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="111" height="30" uuid="e865d05b-2702-4d02-b240-573b1fdd40fd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c183a6e5-d585-4cc3-8a61-42cb346c33b4"/>
+				</reportElement>
+				<text><![CDATA[COD_TRABAJ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="111" y="0" width="111" height="30" uuid="02f2ad38-f369-41a8-afc8-1a287d82f528">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c1b849d-cbc7-42c0-8c45-ea15161da9f8"/>
+				</reportElement>
+				<text><![CDATA[NUM_CEDULA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="222" y="0" width="111" height="30" uuid="6e98ab60-dc6c-4027-82c3-0b329948b406">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e18ea22-5f0c-4114-8a74-cec09923db64"/>
+				</reportElement>
+				<text><![CDATA[NOMBRE_CORTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="333" y="0" width="111" height="30" uuid="eaffa9dc-3c37-4bd4-aaa6-6b15ec604a66">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="517df040-e9c0-4939-b1f1-5b68b881a9f9"/>
+				</reportElement>
+				<text><![CDATA[EMPRESA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="444" y="0" width="111" height="30" uuid="7425812c-e876-4308-941a-574a01a65526">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="37ba7eb8-31b9-468e-8bd3-88d0f0362ad7"/>
+				</reportElement>
+				<text><![CDATA[COD_EMPRESA]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="32" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="111" height="30" uuid="caee3190-ee97-4a73-9948-8fa5b7f7a84a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c183a6e5-d585-4cc3-8a61-42cb346c33b4"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{COD_TRABAJ}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="111" y="0" width="111" height="30" uuid="4830ed15-6dfa-43a4-ba9b-e4b3d41c5347">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3c1b849d-cbc7-42c0-8c45-ea15161da9f8"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{NUM_CEDULA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="222" y="0" width="111" height="30" uuid="abbf69b1-b003-4914-bf63-45ddd497283a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e18ea22-5f0c-4114-8a74-cec09923db64"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{NOMBRE_CORTO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="333" y="0" width="111" height="30" uuid="3da1fb3b-56e5-4fa5-b257-eb99a930b0f9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="517df040-e9c0-4939-b1f1-5b68b881a9f9"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{EMPRESA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="444" y="0" width="111" height="30" uuid="1429f461-b9ef-4eeb-9b3a-9ece876459dd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="37ba7eb8-31b9-468e-8bd3-88d0f0362ad7"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{COD_EMPRESA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

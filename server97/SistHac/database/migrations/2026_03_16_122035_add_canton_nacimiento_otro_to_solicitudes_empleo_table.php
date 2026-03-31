@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('solicitudes_empleo', function (Blueprint $table) {
+            $table->string('canton_nacimiento_otro')->nullable()->after('canton_codigo');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('solicitudes_empleo', function (Blueprint $table) {
+            $table->dropColumn('canton_nacimiento_otro');
+        });
+    }
+};
