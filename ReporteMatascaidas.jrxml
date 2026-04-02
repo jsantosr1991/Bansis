@@ -193,9 +193,9 @@
 		</band>
 	</title>
 	<columnHeader>
-		<band height="31" splitType="Stretch">
+		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement x="0" y="0" width="310" height="30" uuid="a02bbe4f-128d-40f9-afcd-fd005b8eb2c3"/>
+				<reportElement x="0" y="0" width="310" height="25" uuid="a02bbe4f-128d-40f9-afcd-fd005b8eb2c3"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</box>
@@ -205,7 +205,7 @@
 				<text><![CDATA[VIEJA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="310" y="0" width="450" height="30" uuid="b98bf668-8c69-4de3-8641-8e5ba41186cd"/>
+				<reportElement x="310" y="0" width="450" height="25" uuid="b98bf668-8c69-4de3-8641-8e5ba41186cd"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid"/>
 				</box>
@@ -215,7 +215,7 @@
 				<text><![CDATA[JOVEN]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="760" y="0" width="40" height="30" uuid="5f8bc180-9294-4fa8-aa98-ec7bac2ab5bb"/>
+				<reportElement x="760" y="0" width="40" height="25" uuid="5f8bc180-9294-4fa8-aa98-ec7bac2ab5bb"/>
 				<box>
 					<pen lineStyle="Solid"/>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -251,9 +251,9 @@
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="80" splitType="Stretch">
+		<band height="100" splitType="Stretch">
 			<crosstab>
-				<reportElement x="0" y="0" width="800" height="80" uuid="7504b5bb-aee1-4ed6-8243-e6e91df2dd0c">
+				<reportElement x="0" y="0" width="800" height="100" uuid="7504b5bb-aee1-4ed6-8243-e6e91df2dd0c">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
 					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
@@ -278,7 +278,7 @@
 						<cellContents backcolor="#FFFFFF" mode="Opaque" style="Crosstab_CH">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField>
-								<reportElement x="0" y="0" width="45" height="20" uuid="3b3a251e-2240-4ab7-a4a8-bf3fe9153e0b"/>
+								<reportElement x="0" y="0" width="45" height="19" uuid="3b3a251e-2240-4ab7-a4a8-bf3fe9153e0b"/>
 								<box leftPadding="3"/>
 								<textFieldExpression><![CDATA[$V{lote}]]></textFieldExpression>
 							</textField>
@@ -352,12 +352,12 @@
 				<measure name="colorMeasure" class="java.lang.Object">
 					<measureExpression><![CDATA[]]></measureExpression>
 				</measure>
-				<crosstabCell width="55" height="20">
+				<crosstabCell width="55" height="19">
 					<cellContents backcolor="#FFFFFF" mode="Opaque" style="Crosstab_CD">
-						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<textField>
-							<reportElement x="0" y="0" width="55" height="20" uuid="9c55fe27-cffe-497a-b601-167430cd595f"/>
+							<reportElement x="0" y="0" width="55" height="19" uuid="9c55fe27-cffe-497a-b601-167430cd595f"/>
 							<box leftPadding="3"/>
 							<textElement>
 								<font size="10"/>
@@ -366,10 +366,10 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="40" height="20" columnTotalGroup="codigo">
+				<crosstabCell width="40" height="19" columnTotalGroup="codigo">
 					<cellContents backcolor="#FFFFFF" mode="Opaque" style="Crosstab_CT">
 						<textField>
-							<reportElement x="0" y="0" width="40" height="20" forecolor="#030303" uuid="896ecef2-6ca2-4421-957c-f927614c4110"/>
+							<reportElement x="0" y="0" width="40" height="19" forecolor="#030303" uuid="896ecef2-6ca2-4421-957c-f927614c4110"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font isBold="true"/>
 							</textElement>
@@ -387,7 +387,7 @@
 				</crosstabCell>
 				<crosstabCell width="55" height="20" rowTotalGroup="lote">
 					<cellContents backcolor="#FFFFFF" mode="Opaque" style="Crosstab_CT">
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 						<textField>
 							<reportElement x="0" y="0" width="55" height="20" forecolor="#030303" uuid="48432008-6064-4ecb-bb1f-08c61dc0c14f"/>
 							<box leftPadding="3"/>
@@ -401,6 +401,7 @@
 				<crosstabCell width="40" height="20" rowTotalGroup="lote" columnTotalGroup="codigo">
 					<cellContents backcolor="#FFFFFF" mode="Opaque" style="Crosstab_CT">
 						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 						<textField>
 							<reportElement x="0" y="0" width="40" height="20" forecolor="#030303" uuid="6be45c11-f735-478a-b5ac-7c920d0aa676"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
