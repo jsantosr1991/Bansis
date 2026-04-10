@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/spinner/loader/loader.component.ts", "src/app/shared/spinner/loader/loader.component.html"],
+  "sourcesContent": ["import { CommonModule } from '@angular/common';\r\nimport { Component, Input } from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-loader',\r\n  standalone: true,\r\n  imports: [CommonModule],\r\n  templateUrl: './loader.component.html',\r\n  styleUrl: './loader.component.css'\r\n})\r\nexport class LoaderComponent {\r\n  @Input() loading: boolean = false;\r\n\r\n}\r\n", "<div *ngIf=\"loading\" class=\"loader-overlay\">\r\n      <div class=\"spinner-border text-primary\" role=\"status\">\r\n        <span class=\"visually-hidden\">Cargando...</span>\r\n      </div>\r\n    </div>"],
+  "mappings": ";;;;;;;;;;;;;;;;ACAA,IAAA,yBAAA,GAAA,OAAA,CAAA,EAA4C,GAAA,OAAA,CAAA,EACiB,GAAA,QAAA,CAAA;AACvB,IAAA,iBAAA,GAAA,aAAA;AAAW,IAAA,uBAAA,EAAO,EAC5C;;;ADON,IAAO,kBAAP,MAAO,iBAAe;EACjB,UAAmB;;qCADjB,kBAAe;EAAA;yEAAf,kBAAe,WAAA,CAAA,CAAA,YAAA,CAAA,GAAA,QAAA,EAAA,SAAA,UAAA,GAAA,YAAA,MAAA,UAAA,CAAA,6BAAA,GAAA,OAAA,GAAA,MAAA,GAAA,QAAA,CAAA,CAAA,SAAA,kBAAA,GAAA,MAAA,GAAA,CAAA,GAAA,gBAAA,GAAA,CAAA,QAAA,UAAA,GAAA,kBAAA,cAAA,GAAA,CAAA,GAAA,iBAAA,CAAA,GAAA,UAAA,SAAA,yBAAA,IAAA,KAAA;AAAA,QAAA,KAAA,GAAA;ACV5B,MAAA,qBAAA,GAAA,gCAAA,GAAA,GAAA,OAAA,CAAA;;;AAAM,MAAA,qBAAA,QAAA,IAAA,OAAA;;oBDMM,cAAY,IAAA,GAAA,QAAA,CAAA,4SAAA,EAAA,CAAA;;;6EAIX,iBAAe,EAAA,WAAA,mBAAA,UAAA,0DAAA,YAAA,GAAA,CAAA;AAAA,GAAA;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/environments/environment.ts"],
+  "sourcesContent": ["export const environment = { production: false, apiUrl: 'http://192.168.191.97:8081/api' };\n"],
+  "mappings": ";AAAO,IAAM,cAAc,EAAE,YAAY,OAAO,QAAQ,iCAAgC;",
+  "names": []
+}

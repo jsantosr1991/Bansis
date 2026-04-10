@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/not-found/not-found.component.css"],
+  "sourcesContent": [".error-page {\r\n  position: relative;\r\n  min-height: 100vh;\r\n  background-color: #ff0000; /* Fondo rojo */\r\n  color: white;\r\n  display: flex;\r\n  flex-direction: column;\r\n  justify-content: center;\r\n  align-items: center;\r\n  text-align: center;\r\n  padding: 2rem;\r\n  z-index: 0;\r\n}\r\n\r\n#particles-js {\r\n  position: fixed !important;\r\n  top: 0;\r\n  left: 0;\r\n  width: 100% !important;\r\n  height: 100% !important;\r\n  z-index: -1 !important;\r\n  background: transparent !important;\r\n}\r\n\r\n.countdown-bg {\r\n  display: none; /* Si no usas esta capa, la escondemos */\r\n}\r\n\r\n.error-screen {\r\n  position: relative;\r\n  z-index: 1;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,YAAU;AACV,cAAY;AACZ,oBAAkB;AAClB,SAAO;AACP,WAAS;AACT,kBAAgB;AAChB,mBAAiB;AACjB,eAAa;AACb,cAAY;AACZ,WAAS;AACT,WAAS;AACX;AAEA,CAAC;AACC,YAAU;AACV,OAAK;AACL,QAAM;AACN,SAAO;AACP,UAAQ;AACR,WAAS;AACT,cAAY;AACd;AAEA,CAAC;AACC,WAAS;AACX;AAEA,CAAC;AACC,YAAU;AACV,WAAS;AACX;",
+  "names": []
+}

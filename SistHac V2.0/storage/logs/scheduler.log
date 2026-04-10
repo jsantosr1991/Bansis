@@ -1,0 +1,7 @@
+
+Warning: PHP Startup: Unable to load dynamic library 'php_sqlsrv_83_nts' (tried: c:/wamp64/bin/php/php8.3.14/ext/php_sqlsrv_83_nts (No se puede encontrar el módulo especificado), c:/wamp64/bin/php/php8.3.14/ext/php_php_sqlsrv_83_nts.dll (No se puede encontrar el módulo especificado)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'php_pdo_sqlsrv_83_nts' (tried: c:/wamp64/bin/php/php8.3.14/ext/php_pdo_sqlsrv_83_nts (No se puede encontrar el módulo especificado), c:/wamp64/bin/php/php8.3.14/ext/php_php_pdo_sqlsrv_83_nts.dll (No se puede encontrar el módulo especificado)) in Unknown on line 0
+?? Iniciando sincronización de solicitudes...
+? Registros encontrados: 18
+? Sincronización completada correctamente. Registros procesados: 18

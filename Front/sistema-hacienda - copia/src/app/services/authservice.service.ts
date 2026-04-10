@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {BehaviorSubject, Observable, of, tap} from 'rxjs';
+import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { UserService } from './user.service';
@@ -28,32 +28,33 @@ interface LoginResponse {
 export class AuthserviceService {
   private gruposUsuario: number[] = [];
   private rolesUsuario: number[] = [];
-  private gruposMap:{[key:string]:number[]} = {
-    administradores:[1],
-    sistemas:[2],
-    mayordomo:[3],
-    jefes:[4],
-    fitosanitario:[5],
-    gerencia:[6],
-    certificaciones:[7],
-    empacadora:[8],
-    rrhh:[9],
-    bodega:[10],
-    todos:[1,2,3,4,5,6,7,8,9,10],
-    campo:[3,5,8],
-    oficina:[1,2,6],
+  private gruposMap: { [key: string]: number[] } = {
+    administradores: [1],
+    sistemas: [2],
+    mayordomo: [3],
+    jefes: [4],
+    fitosanitario: [5],
+    gerencia: [6],
+    certificaciones: [7],
+    empacadora: [8],
+    rrhh: [9],
+    bodega: [10],
+    todos: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    campo: [3, 5, 8],
+    oficina: [1, 2, 6],
 
   };
-  private rolesMap:{[key:string]:number[]} = {
-    superadmin:[1],
-    usergerencia:[2],
-    userjefefito:[3],
-    usermmfito:[4],
-    usercampo:[5],
-    userjefempacadora:[6],
-    userempacadora:[7],
-    user:[8],
-    todos:[1,2,3,4,5,6,7,8]
+  private rolesMap: { [key: string]: number[] } = {
+    superadmin: [1],
+    usergerencia: [2],
+    userjefefito: [3],
+    usermmfito: [4],
+    usercampo: [5],
+    userjefempacadora: [6],
+    userempacadora: [7],
+    user: [8],
+    userjefevarios: [9],
+    todos: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
   };
   private baseUrl = environment.apiUrl;
@@ -119,23 +120,23 @@ export class AuthserviceService {
   }
 
   //verifica si el usuario pertnece a un grupo por nombre
-  tieneGrupo(nombreGrupo:string): boolean {
+  tieneGrupo(nombreGrupo: string): boolean {
     const idsGrupos = this.gruposMap[nombreGrupo];
     //console.log(idsGrupos)
-    if(!idsGrupos) return false;
+    if (!idsGrupos) return false;
 
     return this.gruposUsuario.some(id => idsGrupos.includes(id));
   }
- /* tieneRol(nombreRol: string): boolean {
-    const idsRoles = this.rolesMap[nombreRol];
-   // console.log(idsRoles)
-    if (!idsRoles) return false;
-
-    const usuario = this.userService.getUser();
-    if (!usuario) return false; // 🧩 Evita null
-
-    return idsRoles.includes(usuario.rol_id);
-  }*/
+  /* tieneRol(nombreRol: string): boolean {
+     const idsRoles = this.rolesMap[nombreRol];
+    // console.log(idsRoles)
+     if (!idsRoles) return false;
+ 
+     const usuario = this.userService.getUser();
+     if (!usuario) return false; // 🧩 Evita null
+ 
+     return idsRoles.includes(usuario.rol_id);
+   }*/
 
   tieneRol(nombreRol: string): boolean {
     const idsRoles = this.rolesMap[nombreRol];
@@ -197,7 +198,7 @@ export class AuthserviceService {
   }
 
   getToken(): string | null {
-        return localStorage.getItem(this.tokenKey);
+    return localStorage.getItem(this.tokenKey);
   }
 
   clearSession(): void {
@@ -216,7 +217,7 @@ export class AuthserviceService {
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
-     //   console.log(decoded)
+        //   console.log(decoded)
         return decoded.username; // cambia esto si el campo es distinto, como `username`
       } catch (e) {
         console.error('Token inválido:', e);

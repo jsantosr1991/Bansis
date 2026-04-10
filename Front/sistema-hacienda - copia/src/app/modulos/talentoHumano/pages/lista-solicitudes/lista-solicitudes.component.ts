@@ -934,7 +934,7 @@ export class ListaSolicitudesComponent implements OnInit {
     Swal.fire({
       icon: 'warning',
       title: '¿Eliminar Solicitud?',
-      html: `Se eliminará permanentemente la solicitud de <strong>${solicitud.apellido_paterno} ${solicitud.apellido_materno}, ${solicitud.nombres}</strong>.<br><br>Esta acción no se puede deshacer.`,
+      html: `Se eliminará permanentemente la solicitud de <strong>${solicitud.apellido_paterno} ${solicitud.apellido_materno} ${solicitud.nombres}</strong><br><br>Esta acción no se puede deshacer.`,
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',

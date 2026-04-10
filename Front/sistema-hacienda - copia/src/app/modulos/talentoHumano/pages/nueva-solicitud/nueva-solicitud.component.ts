@@ -15,6 +15,7 @@ import { ReferenciasPersonalesComponent } from '../../components/referencias-per
 import { SaludPersonalComponent } from '../../components/salud-personal/salud-personal.component';
 import { ObservacionesComponent } from '../../components/observaciones/observaciones.component';
 import { EvaluacionInternaComponent } from '../../components/evaluacion-interna/evaluacion-interna.component';
+import { DocumentosVariosComponent } from '../../components/documentos-varios/documentos-varios.component';
 import { Router } from '@angular/router';
 // FIX: Usar el servicio oficial de la aplicación para mantener la sesión real del usuario
 import { UserService } from '../../../../services/user.service';
@@ -39,7 +40,8 @@ import { CustomValidators } from '../../utils/custom-validators';
     ReferenciasPersonalesComponent,
     SaludPersonalComponent,
     ObservacionesComponent,
-    EvaluacionInternaComponent
+    EvaluacionInternaComponent,
+    DocumentosVariosComponent
   ],
   template: `
     <div class="container-fluid fade-in p-4 py-5">
@@ -105,6 +107,7 @@ import { CustomValidators } from '../../utils/custom-validators';
                 <app-salud-personal *ngSwitchCase="'saludPersonal'" [form]="getGroup('saludPersonal')"></app-salud-personal>
                 <app-observaciones *ngSwitchCase="'observaciones'" [parentForm]="form" [currentUser]="userService.getUsername() || 'SISTEMA'"></app-observaciones>
                 <app-evaluacion-interna *ngSwitchCase="'datosEntrevistador'" [form]="getGroup('datosEntrevistador')"></app-evaluacion-interna>
+                <app-documentos-varios *ngSwitchCase="'documentosVarios'" [form]="form"></app-documentos-varios>
               </ng-container>
 
               <div class="d-flex justify-content-end mt-4 pt-3 border-top" *ngIf="section.id !== 'datosEntrevistador' && shouldShowSaveButton(section.id)">
@@ -232,7 +235,8 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
     { id: 'referenciasPersonales', title: '10. Referencias Personales', icon: 'bi-person-lines-fill' },
     { id: 'saludPersonal', title: '11. Salud Personal', icon: 'bi-heart' },
     { id: 'observaciones', title: '12. Observaciones', icon: 'bi-chat-left-text' },
-    { id: 'datosEntrevistador', title: '13. Evaluación Interna', icon: 'bi-check2-square' }
+    { id: 'datosEntrevistador', title: '13. Evaluación Interna', icon: 'bi-check2-square' },
+    { id: 'documentosVarios', title: '14. Documentos Varios', icon: 'bi-file-earmark-pdf' }
   ];
 
   constructor(
@@ -439,33 +443,24 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         fechaIngreso: ['', Validators.required],
         banking_info: this.fb.group({
           usa_banco_guayaquil: [null, Validators.required],
-          numero_cuenta: [{ value: '', disabled: true }, [Validators.required, Validators.pattern(/^\d{10,13}$/)]],
-          confirmacion_cuenta: [{ value: '', disabled: true }, Validators.required],
-          tipo_cuenta: [{ value: '', disabled: true }, Validators.required],
-          titular: [{ value: '', disabled: true }, [
-            Validators.required,
-            Validators.maxLength(120),
-            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/),
-            CustomValidators.noWhitespace
-          ]]
+          numero_cuenta: [{ value: '', disabled: true }],
+          confirmacion_cuenta: [{ value: '', disabled: true }],
+          tipo_cuenta: [{ value: '', disabled: true }],
+          titular: [{ value: '', disabled: true }]
         }, { validators: CustomValidators.mustMatch('numero_cuenta', 'confirmacion_cuenta') }),
         fechas_control: this.fb.group({
-          fecha_revision_guayaquil: [null, Validators.required],
+          fecha_revision_guayaquil: [null],
           reingreso_fecha: [null],
           fecha_salida: [null]
         }),
         condiciones: this.fb.group({
           tipo_contrato: ['', Validators.required],
           transporte: [null, Validators.required],
-          recorrido: [{ value: '', disabled: true }, Validators.required],
-          recorrido_otro: [{ value: '', disabled: true }, [
-            Validators.required,
-            Validators.maxLength(100),
-            Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ][a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ,.]*$/)
-          ]],
+          recorrido: [{ value: '', disabled: true }],
+          recorrido_otro: [{ value: '', disabled: true }],
           vehiculo: [null, Validators.required],
           licencia: [null, Validators.required],
-          licencia_tipo: [{ value: '', disabled: true }, Validators.required],
+          licencia_tipo: [{ value: '', disabled: true }],
           acumulacion_decimos: [null, Validators.required],
           semana_completa: [null, Validators.required],
           solo_proceso: [null, Validators.required],
@@ -507,19 +502,19 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         ]],
         discapacidadPorcentaje: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]*$/)]],
         paisNacimiento: ['', Validators.required],
-        paisNacimientoOtro: ['', [
+        paisNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
         ]],
         provinciaNacimiento: ['', Validators.required],
-        provinciaNacimientoOtro: ['', [
+        provinciaNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
         ]],
         cantonNacimiento: ['', Validators.required],
-        cantonNacimientoOtro: ['', [
+        cantonNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
@@ -559,7 +554,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
           CustomValidators.noWhitespace
         ]],
         ciudad: ['', Validators.required],
-        ciudadOtro: ['', [
+        ciudadOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
@@ -608,6 +603,8 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
             CustomValidators.noWhitespace
           ]],
           estado: ['VIVO', Validators.required],
+          fecha_nacimiento: [null],
+          no_conoce_fecha: [false],
           edad: [null],
           domicilio: ['', [Validators.required, CustomValidators.noWhitespace]],
           ocupacion: ['', [
@@ -623,6 +620,8 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
             CustomValidators.noWhitespace
           ]],
           estado: ['VIVO', Validators.required],
+          fecha_nacimiento: [null],
+          no_conoce_fecha: [false],
           edad: [null],
           domicilio: ['', [Validators.required, CustomValidators.noWhitespace]],
           ocupacion: ['', [
@@ -730,6 +729,9 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
   }
 
   shouldShowSaveButton(sectionId: string): boolean {
+    if (sectionId === 'datosEntrevistador' || sectionId === 'documentosVarios') {
+      return false;
+    }
     if (sectionId === 'referenciasLaborales') {
       const sinExp = this.form.get('experienciaLaboral.sin_experiencia')?.value;
       return sinExp === false;

@@ -12,3 +12,273 @@
 .sidebar-dropdown.active .sidebar-submenu {
   display: block;
 }
+
+/* 🔥 ESTADOS VISUALES */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 🔴 PENDIENTE */
+.estado-pendiente {
+  background-color: #fdecea !important;
+  color: #b02a37 !important;
+  border: 1px solid #f5c2c7;
+}
+
+/* 🟡 PARCIAL */
+.estado-parcial {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffe69c;
+}
+
+/* 🟢 COMPLETO */
+.estado-completo {
+  background-color: #e6f4ea !important;
+  color: #1e7e34 !important;
+  border: 1px solid #badbcc;
+}
+
+/* 🟢 INCOMPLETO */
+.estado-incompleto {
+  background-color: #e6f4ea !important;
+  color: #1d0fddd0 !important;
+  border: 1px solid #badbcc;
+}
+
+/* ⚫ CERRADO */
+.estado-cerrado {
+  background-color: #e37210a0 !important;
+  color: #ffffff !important;
+  border: 1px solid #e37210a0;
+}
+
+/* 🔥 NORMALIZAR TODOS LOS ESTADOS */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-width: 110px;
+  /* 👈 MISMO ANCHO */
+  height: 32px;
+  /* 👈 MISMA ALTURA */
+
+  padding: 0 12px;
+  /* 👈 NO vertical padding */
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 🔥 MODAL GENERAL */
+.modal-pro {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 🔥 TABLA */
+.tabla-pro thead {
+  background: #f8f9fa;
+  font-size: 13px;
+}
+
+.tabla-pro th {
+  border: none;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.tabla-pro td {
+  border-top: 1px solid #f1f1f1;
+  font-size: 14px;
+}
+
+/* 🔥 ESTADOS MINI */
+.estado-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* colores */
+.estado-pendiente {
+  background: #fdecea;
+  color: #b02a37;
+}
+
+.estado-parcial {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.estado-completo {
+  background: #e6f4ea;
+  color: #1e7e34;
+}
+
+.estado-incompleto {
+  background: #e6f4ea;
+  color: #1d0fddd0;
+}
+
+.estado-cerrado {
+  background: #2c2c2c;
+  color: #fff;
+}
+
+input.border-danger {
+  border: 1px solid #dc3545 !important;
+}
+
+/* 🔥 FILA EXPANDIBLE */
+.comentario-row {
+  background-color: #f8f9fa;
+}
+
+/* 🔥 CONTENEDOR */
+.comentario-container {
+  padding: 10px 15px;
+  border-left: 4px solid #ffc107;
+  background: #fffbea;
+  border-radius: 6px;
+}
+
+/* 🔥 TEXTAREA */
+.comentario-textarea {
+  resize: none;
+  font-size: 13px;
+}
+
+/* 🔥 EFECTO SUAVE */
+.comentario-row {
+  transition: all 0.3s ease;
+}
+
+.comentario-row {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* fila comentario */
+textarea.form-control-sm {
+  font-size: 13px;
+  resize: none;
+}
+
+/* separación ligera */
+tr+tr td {
+  border-top: none;
+}
+
+/* 🔥 CONTENEDOR GENERAL */
+.comentario-expandido {
+  background: #fff;
+  padding: 8px 12px !important;
+  border-top: none !important;
+}
+
+/* 🔥 CAJA ESTILO ERP */
+.comentario-box {
+  border-left: 4px solid #ffc107;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 🔥 HEADER */
+.comentario-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+/* 🔥 TEXTO */
+.comentario-content {
+  font-size: 14px;
+  color: #212529;
+  line-height: 1.4;
+  padding-left: 2px;
+  white-space: pre-line;
+}
+
+/* 🔥 ICONO */
+.comentario-header i {
+  color: #ffc107;
+  font-size: 14px;
+}
+
+/* 🔥 BOTÓN ICONO LIMPIO */
+.btn-icon-comentario {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #fff8e1;
+  color: #b78103;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+/* 🔥 BOTÓN NEUTRO */
+.btn-icon-comentario {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+
+  background: #f8f9fa;
+  color: #495057;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+/* 🔥 HOVER */
+.btn-icon-comentario:hover {
+  background: #e9ecef;
+  color: #212529;
+}
+
+/* 🔥 ACTIVO (cuando está abierto) */
+.btn-icon-comentario.active {
+  background: #dee2e6;
+  color: #212529;
+  border-color: #ced4da;
+}

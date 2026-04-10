@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormGroup, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -21,6 +21,7 @@ import Swal from 'sweetalert2';
               <h6 class="fw-bold mb-3 d-flex align-items-center"><i class="bi bi-gender-male me-2 text-primary"></i>Datos del Padre <span class="text-danger ms-1">*</span></h6>
               <div class="row g-3">
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Nombre Completo <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre completo" 
                          (input)="cleanLetters('padre.nombre')" (blur)="trimField('padre.nombre')"
                          [class.is-invalid]="isInvalidGroup('padre', 'nombre')" [readonly]="isReadOnly">
@@ -34,21 +35,45 @@ import Swal from 'sweetalert2';
                     <label class="btn btn-outline-secondary" for="padreFinado">Finado</label>
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="input-group">
-                    <input type="number" class="form-control" formControlName="edad" placeholder="Edad" [class.is-invalid]="isInvalidGroup('padre', 'edad')" [readonly]="isReadOnly">
-                    <span class="input-group-text">años</span>
-                    <div class="invalid-feedback" *ngIf="getGroup('padre').get('edad')?.errors?.['required']">La edad es obligatoria si está vivo.</div>
-                    <div class="invalid-feedback" *ngIf="getGroup('padre').get('edad')?.errors?.['min'] || getGroup('padre').get('edad')?.errors?.['max']">Edad no válida (0-120).</div>
+                <!-- Opción de No Conoce Fecha -->
+                <div class="col-12" *ngIf="getGroup('padre').get('estado')?.value">
+                  <div class="form-check form-switch small">
+                    <input class="form-check-input" type="checkbox" formControlName="no_conoce_fecha" id="padreNoFecha" (change)="updateFamiliarValidators('padre')" [attr.disabled]="isReadOnly ? true : null">
+                    <label class="form-check-label text-muted" for="padreNoFecha">No conozco la fecha exacta de nacimiento</label>
                   </div>
                 </div>
+                <!-- Campo de Fecha de Nacimiento -->
+                <div class="col-md-6" *ngIf="!getGroup('padre').get('no_conoce_fecha')?.value">
+                  <label class="form-label x-small mb-0 fw-bold">Fecha de Nacimiento</label>
+                  <input type="date" class="form-control" formControlName="fecha_nacimiento" 
+                         [readonly]="isReadOnly" (change)="onFechaNacimientoChange('padre')"
+                         [class.is-invalid]="isInvalidGroup('padre', 'fecha_nacimiento')"
+                         [max]="maxDate"
+                         title="Fecha de Nacimiento">
+                  <div class="invalid-feedback">La fecha es obligatoria.</div>
+                </div>
+                <!-- Campo de Edad (Editable si no conoce fecha) -->
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Edad</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white text-muted small">{{ getGroup('padre').get('no_conoce_fecha')?.value ? 'Ingreso manual:' : 'Edad calculada:' }}</span>
+                    <input type="number" class="form-control fw-bold" formControlName="edad" placeholder="0" 
+                           [class.bg-light]="!getGroup('padre').get('no_conoce_fecha')?.value"
+                           [class.is-invalid]="isInvalidGroup('padre', 'edad')">
+                    <span class="input-group-text">años</span>
+                  </div>
+                  <div class="invalid-feedback d-block" *ngIf="isInvalidGroup('padre', 'edad')">La edad es obligatoria (0-120 años).</div>
+                  <small class="text-muted italic" style="font-size: 0.7rem;" *ngIf="!getGroup('padre').get('no_conoce_fecha')?.value">* Se calcula automáticamente al ingresar la fecha.</small>
+                </div>
+                <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Domicilio <span class="text-danger" *ngIf="getGroup('padre').get('estado')?.value === 'VIVO'">*</span></label>
                   <input type="text" class="form-control" formControlName="domicilio" placeholder="Domicilio actual / Referencia" 
                          (blur)="trimField('padre.domicilio')"
                          [class.is-invalid]="isInvalidGroup('padre', 'domicilio')" [readonly]="isReadOnly">
                   <div class="invalid-feedback">El domicilio es obligatorio y no puede contener solo espacios.</div>
                 </div>
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Ocupación <span class="text-danger" *ngIf="getGroup('padre').get('estado')?.value === 'VIVO'">*</span></label>
                   <input type="text" class="form-control" formControlName="ocupacion" 
                          placeholder="Ocupación / Labor" 
                          (input)="cleanLetters('padre.ocupacion')"
@@ -68,6 +93,7 @@ import Swal from 'sweetalert2';
               <h6 class="fw-bold mb-3 d-flex align-items-center"><i class="bi bi-gender-female me-2 text-danger"></i>Datos de la Madre <span class="text-danger ms-1">*</span></h6>
               <div class="row g-3">
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Nombre Completo <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre completo" 
                          (input)="cleanLetters('madre.nombre')" (blur)="trimField('madre.nombre')"
                          [class.is-invalid]="isInvalidGroup('madre', 'nombre')" [readonly]="isReadOnly">
@@ -81,21 +107,45 @@ import Swal from 'sweetalert2';
                     <label class="btn btn-outline-secondary" for="madreFinado">Finado</label>
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="input-group">
-                    <input type="number" class="form-control" formControlName="edad" placeholder="Edad" [class.is-invalid]="isInvalidGroup('madre', 'edad')" [readonly]="isReadOnly">
-                    <span class="input-group-text">años</span>
-                    <div class="invalid-feedback" *ngIf="getGroup('madre').get('edad')?.errors?.['required']">La edad es obligatoria si está vivo.</div>
-                    <div class="invalid-feedback" *ngIf="getGroup('madre').get('edad')?.errors?.['min'] || getGroup('madre').get('edad')?.errors?.['max']">Edad no válida (0-120).</div>
+                <!-- Opción de No Conoce Fecha -->
+                <div class="col-12" *ngIf="getGroup('madre').get('estado')?.value">
+                  <div class="form-check form-switch small">
+                    <input class="form-check-input" type="checkbox" formControlName="no_conoce_fecha" id="madreNoFecha" (change)="updateFamiliarValidators('madre')" [attr.disabled]="isReadOnly ? true : null">
+                    <label class="form-check-label text-muted" for="madreNoFecha">No conozco la fecha exacta de nacimiento</label>
                   </div>
                 </div>
+                <!-- Campo de Fecha de Nacimiento -->
+                <div class="col-md-6" *ngIf="!getGroup('madre').get('no_conoce_fecha')?.value">
+                  <label class="form-label x-small mb-0 fw-bold">Fecha de Nacimiento</label>
+                  <input type="date" class="form-control" formControlName="fecha_nacimiento" 
+                         [readonly]="isReadOnly" (change)="onFechaNacimientoChange('madre')"
+                         [class.is-invalid]="isInvalidGroup('madre', 'fecha_nacimiento')"
+                         [max]="maxDate"
+                         title="Fecha de Nacimiento">
+                  <div class="invalid-feedback">La fecha es obligatoria.</div>
+                </div>
+                <!-- Campo de Edad (Editable si no conoce fecha) -->
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Edad</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white text-muted small">{{ getGroup('madre').get('no_conoce_fecha')?.value ? 'Ingreso manual:' : 'Edad calculada:' }}</span>
+                    <input type="number" class="form-control fw-bold" formControlName="edad" placeholder="0" 
+                           [class.bg-light]="!getGroup('madre').get('no_conoce_fecha')?.value"
+                           [class.is-invalid]="isInvalidGroup('madre', 'edad')">
+                    <span class="input-group-text">años</span>
+                  </div>
+                  <div class="invalid-feedback d-block" *ngIf="isInvalidGroup('madre', 'edad')">La edad es obligatoria (0-120 años).</div>
+                  <small class="text-muted italic" style="font-size: 0.7rem;" *ngIf="!getGroup('madre').get('no_conoce_fecha')?.value">* Se calcula automáticamente al ingresar la fecha.</small>
+                </div>
+                <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Domicilio <span class="text-danger" *ngIf="getGroup('madre').get('estado')?.value === 'VIVO'">*</span></label>
                   <input type="text" class="form-control" formControlName="domicilio" placeholder="Domicilio actual / Referencia" 
                          (blur)="trimField('madre.domicilio')"
                          [class.is-invalid]="isInvalidGroup('madre', 'domicilio')" [readonly]="isReadOnly">
                   <div class="invalid-feedback">El domicilio es obligatorio y no puede contener solo espacios.</div>
                 </div>
                 <div class="col-12">
+                  <label class="form-label x-small mb-0 fw-bold">Ocupación <span class="text-danger" *ngIf="getGroup('madre').get('estado')?.value === 'VIVO'">*</span></label>
                   <input type="text" class="form-control" formControlName="ocupacion" 
                          placeholder="Ocupación / Labor" 
                          (input)="cleanLetters('madre.ocupacion')"
@@ -217,6 +267,7 @@ import Swal from 'sweetalert2';
                       <div class="invalid-feedback small">1-50.</div>
                     </div>
                     <div class="col-6">
+                      <label class="form-label extreme-small mb-0">Edad <span class="text-danger" *ngIf="isVivoInArray(hermanos, i)">*</span></label>
                       <input type="number" class="form-control form-control-sm" formControlName="edad" placeholder="Edad" [readonly]="isReadOnly" [class.is-invalid]="getGroupFromArray(hermanos, i).get('edad')?.invalid && getGroupFromArray(hermanos, i).get('edad')?.touched">
                       <div class="invalid-feedback">Edad no válida.</div>
                     </div>
@@ -370,23 +421,45 @@ import Swal from 'sweetalert2';
     .extreme-small { font-size: 0.75rem; }
   `]
 })
-export class DatosFamiliaresComponent implements OnInit {
+export class DatosFamiliaresComponent implements OnInit, OnChanges {
   @Input() form!: FormGroup;
   @Input() mainForm!: FormGroup; // Necesario para detectar estado civil
   @Input() isReadOnly: boolean = false;
+  maxDate = new Date().toISOString().split('T')[0];
 
   constructor(private fb: FormBuilder) { }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isReadOnly'] && !changes['isReadOnly'].firstChange) {
+      this.refreshAllValidators();
+    }
+  }
+
   ngOnInit() {
     this.setupConyugeValidator();
+    this.setupParentsInitialState(); // Inferir estado inicial de no_conoce_fecha
+    this.setupParentsAgeCalcuator(); // Nuevo watcher para padres
     // Refresco inicial inmediato
     this.refreshAllValidators();
 
     // Escuchar cambios profundos para re-validar dinámicamente
-    // Usamos valueChanges con un pequeño debounce o simplemente directo
     this.form.valueChanges.subscribe(() => {
-      // Si bien es un poco más pesado, asegura que al cargar datos externos se actualicen los validadores
       this.refreshAllValidators();
+    });
+  }
+
+  private setupParentsInitialState() {
+    ['padre', 'madre'].forEach(parent => {
+      const group = this.getGroup(parent);
+      if (!group) return;
+
+      const fecha = group.get('fecha_nacimiento')?.value;
+      const edad = group.get('edad')?.value;
+
+      // Si tiene edad pero no fecha de nacimiento, marcar no_conoce_fecha como true
+      if (edad && !fecha) {
+        group.get('no_conoce_fecha')?.setValue(true, { emitEvent: false });
+      }
     });
   }
 
@@ -481,6 +554,55 @@ export class DatosFamiliaresComponent implements OnInit {
   private readonly ONLY_LETTERS_PATTERN = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/;
   private readonly ALPHANUMERIC_PATTERN = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ][a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ,.]*$/;
 
+  private setupParentsAgeCalcuator() {
+    ['padre', 'madre'].forEach(parent => {
+      const group = this.getGroup(parent);
+      if (!group) return;
+
+      group.get('fecha_nacimiento')?.valueChanges.subscribe(fecha => {
+        if (!group.get('no_conoce_fecha')?.value) {
+          if (fecha) {
+            const edad = this.calculateAge(fecha);
+            group.get('edad')?.setValue(edad, { emitEvent: false });
+          } else {
+            group.get('edad')?.setValue(null, { emitEvent: false });
+          }
+          group.get('edad')?.updateValueAndValidity({ emitEvent: false });
+        }
+      });
+    });
+  }
+
+  onFechaNacimientoChange(parent: string) {
+    const group = this.getGroup(parent);
+    const fecha = group.get('fecha_nacimiento')?.value;
+    if (fecha) {
+      const edad = this.calculateAge(fecha);
+      group.get('edad')?.setValue(edad, { emitEvent: false });
+    } else {
+      group.get('edad')?.setValue(null, { emitEvent: false });
+    }
+    group.get('edad')?.updateValueAndValidity();
+  }
+
+  calculateAge(birthDate: string): number | null {
+    if (!birthDate) return null;
+    
+    const [year, month, day] = birthDate.split('-').map(Number);
+    if (!year || !month || !day) return null;
+
+    const today = new Date();
+    const birth = new Date(year, month - 1, day);
+    
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : 0;
+  }
+
   updateFamiliarValidators(parent: string, index?: number) {
     let group: FormGroup;
     if (parent === 'hermanos') {
@@ -490,33 +612,71 @@ export class DatosFamiliaresComponent implements OnInit {
     }
 
     const estado = group.get('estado')?.value?.toString().toUpperCase();
-    const fields = ['edad', 'domicilio', 'ocupacion'];
+    const fields = ['edad', 'domicilio', 'ocupacion', 'fecha_nacimiento'];
+    
+    // Si es del arreglo de hermanos, incluimos campos de orden
+    if (parent === 'hermanos') {
+      fields.push('es_mayor_menor', 'numero_hermano');
+    }
 
-    if (estado === 'VIVO') {
-      // Re-instaurar validadores
+    if (estado === 'VIVO' || estado === 'FINADO') {
+      const isVivo = estado === 'VIVO';
+      const noFecha = group.get('no_conoce_fecha') ? group.get('no_conoce_fecha')?.value : true;
+
       fields.forEach(f => {
         const control = group.get(f);
         if (!control) return;
+
         if (f === 'edad') {
-          control.setValidators([Validators.required, Validators.min(0), Validators.max(120)]);
+          const isParentType = (parent === 'padre' || parent === 'madre');
+          const validators = [Validators.min(0), Validators.max(120)];
+          if (isVivo && !isParentType) {
+            validators.push(Validators.required);
+          }
+          control.setValidators(validators);
+          if (!this.isReadOnly) {
+            noFecha ? control.enable({emitEvent: false}) : control.disable({emitEvent: false});
+          } else {
+            control.disable({emitEvent: false});
+          }
+        } else if (f === 'fecha_nacimiento') {
+          control.setValidators(null);
+          if (!this.isReadOnly) {
+            !noFecha ? control.enable({emitEvent: false}) : control.disable({emitEvent: false});
+            if (noFecha) control.setValue(null, { emitEvent: false });
+          } else {
+            control.disable({emitEvent: false});
+          }
         } else if (f === 'ocupacion') {
-          control.setValidators([Validators.required, Validators.pattern(this.ONLY_LETTERS_PATTERN)]);
+          control.setValidators(isVivo ? [Validators.required, Validators.pattern(this.ONLY_LETTERS_PATTERN)] : null);
+          if (!this.isReadOnly) control.enable({emitEvent: false});
         } else if (f === 'domicilio') {
           const pattern = parent === 'hermanos' ? this.ALPHANUMERIC_PATTERN : null;
-          control.setValidators(pattern ? [Validators.required, Validators.pattern(pattern)] : [Validators.required]);
+          const validators = isVivo ? (pattern ? [Validators.required, Validators.pattern(pattern)] : [Validators.required]) : null;
+          control.setValidators(validators);
+          if (!this.isReadOnly) control.enable({emitEvent: false});
+        } else if (f === 'es_mayor_menor') {
+          control.setValidators(isVivo ? [Validators.required] : null);
+          if (!this.isReadOnly) control.enable({emitEvent: false});
+        } else if (f === 'numero_hermano') {
+          control.setValidators(isVivo ? [Validators.required, Validators.min(1), Validators.max(50), Validators.pattern(/^[0-9]+$/)] : null);
+          if (!this.isReadOnly) control.enable({emitEvent: false});
         }
       });
     } else {
-      // Si es FINADO o no hay estado, limpiar validadores de los campos adicionales
+      // Si no hay estado o es otro estado, limpiar y deshabilitar
       fields.forEach(f => {
         const control = group.get(f);
         if (!control) return;
         control.setValidators(null);
         control.setErrors(null);
-        control.clearValidators();
         if (!this.isReadOnly) {
-          if (f === 'edad' && control.value !== null) control.setValue(null, { emitEvent: false });
-          else if (f !== 'edad' && control.value !== '') control.setValue('', { emitEvent: false });
+          control.disable({emitEvent: false});
+          if (f === 'edad' || f === 'numero_hermano' || f === 'fecha_nacimiento') {
+            if (control.value !== null) control.setValue(null, { emitEvent: false });
+          } else if (control.value !== '') {
+            control.setValue('', { emitEvent: false });
+          }
         }
       });
     }
@@ -643,6 +803,11 @@ export class DatosFamiliaresComponent implements OnInit {
         control.setValue(trimmed, { emitEvent: false });
       }
     }
+  }
+
+  isVivoInArray(array: FormArray, index: number): boolean {
+    const group = array.at(index) as FormGroup;
+    return group.get('estado')?.value === 'VIVO';
   }
 
   // Helpers de Validación

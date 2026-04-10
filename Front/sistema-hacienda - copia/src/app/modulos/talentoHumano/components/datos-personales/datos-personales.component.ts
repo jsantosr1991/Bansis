@@ -3,6 +3,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule, Validators, FormControl, FormsModule } from '@angular/forms';
 import { TalentoHumanoService } from '../../services/talentoHumano.service';
+import { CustomValidators } from '../../utils/custom-validators';
 
 @Component({
   selector: 'app-datos-personales',
@@ -570,9 +571,11 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
     }
 
     if (pais === 'Otros') {
+      paisOtro?.setValidators([Validators.required, Validators.maxLength(100), CustomValidators.noWhitespace]);
       paisOtro?.enable();
       this.provinciasDisponibles = [];
     } else {
+      paisOtro?.clearValidators();
       paisOtro?.disable();
       if (resetFull) paisOtro?.setValue('');
       if (pais) {
@@ -581,6 +584,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
         this.provinciasDisponibles = [];
       }
     }
+    paisOtro?.updateValueAndValidity({ emitEvent: false });
   }
 
   onProvinciaChange(resetFull = true) {
@@ -593,9 +597,11 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
     }
 
     if (provincia === 'Otros') {
+      provinciaOtro?.setValidators([Validators.required, Validators.maxLength(100), CustomValidators.noWhitespace]);
       provinciaOtro?.enable();
       this.cantonesDisponibles = [];
     } else {
+      provinciaOtro?.clearValidators();
       provinciaOtro?.disable();
       if (resetFull) provinciaOtro?.setValue('');
       
@@ -606,18 +612,27 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
         this.cantonesDisponibles = [];
       }
     }
+    provinciaOtro?.updateValueAndValidity({ emitEvent: false });
   }
 
   onCantonChange(resetCodigo = true) {
     const canton = this.form.get('cantonNacimiento')?.value;
+    const cantonOtro = this.form.get('cantonNacimientoOtro');
+
     if (canton === 'Otros') {
+      cantonOtro?.setValidators([Validators.required, Validators.maxLength(100), CustomValidators.noWhitespace]);
+      cantonOtro?.enable();
       this.form.get('cantonCodigo')?.setValue(null);
     } else {
+      cantonOtro?.clearValidators();
+      cantonOtro?.disable();
+      cantonOtro?.setValue('');
       const selectedCant = this.cantonesDisponibles.find(c => c.nombre === canton);
       if (selectedCant && resetCodigo) {
         this.form.get('cantonCodigo')?.setValue(selectedCant.codigo);
       }
     }
+    cantonOtro?.updateValueAndValidity({ emitEvent: false });
   }
 
   private cargarProvincias(pais: string) {

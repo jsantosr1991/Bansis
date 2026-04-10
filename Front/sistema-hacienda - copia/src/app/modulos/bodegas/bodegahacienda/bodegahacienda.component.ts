@@ -1,16 +1,16 @@
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
-import {DatePipe, NgClass, NgForOf, NgIf, UpperCasePipe} from '@angular/common';
-import {BodegahaciendaService} from '../../../services/bodegahacienda.service';
-import {FormsModule} from '@angular/forms';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { DatePipe, NgClass, NgForOf, NgIf, UpperCasePipe } from '@angular/common';
+import { BodegahaciendaService } from '../../../services/bodegahacienda.service';
+import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ChangeDetectorRef } from '@angular/core';
-import {LoaderComponent} from '../../../shared/spinner/loader/loader.component';
-import {AuthserviceService} from '../../../services/authservice.service';
-import {UserService} from '../../../services/user.service';
+import { LoaderComponent } from '../../../shared/spinner/loader/loader.component';
+import { AuthserviceService } from '../../../services/authservice.service';
+import { UserService } from '../../../services/user.service';
 
 declare var bootstrap: any;
 
-declare var $:any;
+declare var $: any;
 @Component({
   selector: 'app-bodegahacienda',
   standalone: true,
@@ -18,6 +18,7 @@ declare var $:any;
     NgForOf,
     DatePipe,
     NgIf,
+    NgClass,
     FormsModule,
     LoaderComponent
   ],
@@ -31,21 +32,21 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
   idhaciendaSeleccionada: any = null;  // Guarda el valor seleccionado del select
   namehacienda: any = null;
   private dataTable: any = null;
-  dataOriginal: any[] =[];
+  dataOriginal: any[] = [];
   empresas: any[] = [];
   solicitud = {
     fecha: '',
     idhacienda: ''
   };
-  hacienda= [
-    {id: 1, name: 'AGRICOLA E INDUSTRIAL PRIMOBANANO S.A.'},
-    {id: 3, name: 'SOCIEDAD FIDUCIARIA E INMOBILIARIA C.A.'},
+  hacienda = [
+    { id: 1, name: 'AGRICOLA E INDUSTRIAL PRIMOBANANO S.A.' },
+    { id: 3, name: 'SOCIEDAD FIDUCIARIA E INMOBILIARIA C.A.' },
 
   ]
   constructor(
-    private solicitudService: BodegahaciendaService,   private cdr: ChangeDetectorRef,
+    private solicitudService: BodegahaciendaService, private cdr: ChangeDetectorRef,
     protected permisoService: AuthserviceService, private userService: UserService
-  ) {}
+  ) { }
 
   /* =========================
    * CICLO DE VIDA
@@ -74,7 +75,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
     this.cargarSolicitudes();
   }
 
-  cargarhacienda(){
+  cargarhacienda() {
     this.empresas = this.hacienda
   }
   ngOnDestroy(): void {
@@ -96,17 +97,17 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
 
     if (esMayordomo) {
       idhacienda = Number(this.idhaciendaSeleccionada);
-      if(idhacienda == 8) {
-          idhacienda = 3
+      if (idhacienda == 8) {
+        idhacienda = 3
       }
 
     } else {
       // Gerencia y otros usuarios usan la hacienda seleccionada en el select
       idhacienda = this.solicitud.idhacienda
         ? Number(this.solicitud.idhacienda) : null;
-      if(idhacienda ==1){
+      if (idhacienda == 1) {
         this.namehacienda = 'AGRICOLA E INDUSTRIAL PRIMOBANANO S.A.'
-      }else{
+      } else {
         this.namehacienda = 'SOCIEDAD FIDUCIARIA E INMOBILIARIA C.A.'
       }
 
@@ -135,6 +136,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
         // 4?? cargar datos
         this.solicitudes = this.agruparSolicitudes(dataProcesar);
 
+
         // 5?? esperar a que Angular pinte la tabla
         setTimeout(() => {
           if (this.solicitudes.length > 0) {
@@ -158,7 +160,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
       responsive: false,
       ordering: true,
       destroy: true,
-
+      order: [[1, 'desc']],
 
       columnDefs: [
         { targets: [5], orderable: false }
@@ -214,13 +216,13 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
         codProd: item.codProd,
         producto: item.producto,
         Solicitante: item.Solicitante?.trim(),
-        hacienda:item.hacienda?.trim(),
-       // cantidad: Number(item.CantidadDigitada),
+        hacienda: item.hacienda?.trim(),
+        // cantidad: Number(item.CantidadDigitada),
         // ?? DATOS REALES DESDE EL BACK
         cantidadSolicitada,
         TotalDespachado: totalDespachado,
 
-        itemsPendientes: 0 ,  // ?? CONTADOR DE ÍTEMS
+        itemsPendientes: 0,  // ?? CONTADOR DE ÍTEMS
         pendiente,
         // UI
         completo: true,
@@ -230,7 +232,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
       if (pendiente > 0) {
         grupo.itemsPendientes++;
       }
-    console.log(grupo);
+      console.log(grupo);
     });
 
     return Array.from(mapa.values());
@@ -241,21 +243,21 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
    * ========================= */
   verDetalle(s: any): void {
 
-    // 1?? Cargar datos
+    const esCerrado = s.estado_documento === 'CERRADO';
+
     this.solicitudSeleccionada = {
       ...s,
-      detalle: s.detalle.filter((d:any) => d.pendiente >= 0)
-        .map((d: any) => ({
+      esCerrado,
+      detalle: s.detalle.map((d: any) => ({
         ...d,
         completo: true,
-        cantidadDespachar: d.pendiente
+        cantidadDespachar: d.pendiente,
+        comentario: '' // 🔥 NUEVO
       }))
     };
 
-    // 2?? Forzar render de Angular
     this.cdr.detectChanges();
 
-    // 3?? Abrir modal Bootstrap
     const modalEl = document.getElementById('modalDetalle');
     const modal = new bootstrap.Modal(modalEl!, {
       backdrop: 'static',
@@ -265,17 +267,21 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
   }
 
   onCheckItem(d: any): void {
+
+    if (this.solicitudSeleccionada?.esCerrado) return;
+
     if (d.completo) {
       d.cantidadDespachar = d.pendiente;
+      d.comentario = ''; // 🔥 limpiar comentario
     } else {
       d.cantidadDespachar = 0;
+      // 🔥 aquí se habilita comentario
     }
   }
-
   /* =========================
    * DESPACHO
    * ========================= */
-  confirmarDespacho(): void {
+  /* confirmarDespacho(): void {
     const invalido = this.solicitudSeleccionada.detalle.some((d: any) =>
       d.cantidadDespachar < 0 || d.cantidadDespachar > d.pendiente
     );
@@ -303,7 +309,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
         // 1?? cerrar modal
         this.cerrarModal();
         // 2?? esperar cierre REAL
-        setTimeout(() =>{
+        setTimeout(() => {
           // 3?? recargar tabla
           this.cargarSolicitudes();
           // 4?? mensaje
@@ -328,6 +334,106 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
       }
     });
   }
+ */
+
+  confirmarDespacho(): void {
+
+    const detalle = this.solicitudSeleccionada.detalle;
+
+    const invalido = detalle.some((d: any) =>
+      d.cantidadDespachar < 0 || d.cantidadDespachar > d.pendiente
+    );
+
+    if (invalido) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Cantidad inválida'
+      });
+      return;
+    }
+
+    // 🔥 VALIDAR COMENTARIOS
+    const sinComentario = detalle.some((d: any) =>
+      !d.completo && (!d.comentario || d.comentario.trim() === '')
+    );
+
+    if (sinComentario) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Comentario requerido',
+        text: 'Debe ingresar un comentario en los ítems incompletos'
+      });
+      return;
+    }
+
+    const hayPendientes = detalle.some((d: any) =>
+      (d.pendiente - d.cantidadDespachar) > 0
+    );
+
+    if (hayPendientes) {
+      this.confirmarCierreParcial();
+    } else {
+      this.enviarDespacho(false);
+    }
+  }
+
+  confirmarCierreParcial(): void {
+    Swal.fire({
+      icon: 'question',
+      title: 'Despacho incompleto',
+      text: '¿Deseas cerrar el despacho o dejarlo pendiente?',
+      showCancelButton: true,
+      confirmButtonText: 'Cerrar despacho',
+      cancelButtonText: 'Dejar pendiente'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+        this.enviarDespacho(true);
+      } else {
+        this.enviarDespacho(false);
+      }
+
+    });
+  }
+
+  enviarDespacho(cerrar: boolean): void {
+
+    const payload = {
+      Documento: this.solicitudSeleccionada.Documento,
+      cerrar: cerrar,
+      detalle: this.solicitudSeleccionada.detalle.map((d: any) => ({
+        linea: d.linea,
+        CantidadDespachada: Number(d.cantidadDespachar || 0),
+        comentario: d.comentario || '' // 🔥 NUEVO
+      }))
+    };
+
+    this.solicitudService.despachar(payload).subscribe({
+      next: () => {
+        this.cerrarModal();
+
+        setTimeout(() => {
+          this.cargarSolicitudes();
+
+          Swal.fire({
+            icon: 'success',
+            title: cerrar ? 'Despacho cerrado' : 'Guardado como pendiente',
+            timer: 1200,
+            showConfirmButton: false
+          });
+        }, 300);
+      },
+
+      error: (err: any) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err?.error?.message || 'Error en despacho'
+        });
+      }
+    });
+  }
+
 
   cerrarModal(): void {
     const modalEl = document.getElementById('modalDetalle');

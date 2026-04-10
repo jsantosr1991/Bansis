@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/modulos/estadisticas/cinta-barrida/cinta-barrida.component.css"],
+  "sourcesContent": ["/* Evita que el modal padre bloque\u00E9 la interacci\u00F3n visual cuando hay un hijo abierto */\r\n.modal-stack-hidden {\r\n  display: none !important;  /* Oculta visualmente el padre */\r\n}\r\n"],
+  "mappings": ";AACA,CAAC;AACC,WAAS;AACX;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/auth/login/login.component.css"],
+  "sourcesContent": [".input-error {\r\n  border: 1px solid #dc3545; /* rojo */\r\n  background-color: #f8d7da; /* rosa claro */\r\n}\r\n\r\n.error-message {\r\n  color: #dc3545;\r\n  font-weight: 500;\r\n  margin-top: 10px;\r\n  background-color: #f8d7da;\r\n  border: 1px solid #dc3545;\r\n  padding: 8px;\r\n  border-radius: 4px;\r\n}\r\n\r\n/* Spinner de pantalla completa */\r\n.overlay-spinner {\r\n  position: fixed;\r\n  top: 0;\r\n  left: 0;\r\n  width: 100vw;\r\n  height: 100vh;\r\n  background-color: rgba(255, 255, 255, 0.6); /* Semitransparente */\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n  z-index: 1050; /* Aseg\u00FArate de que est\u00E9 sobre todo */\r\n}\r\ninput:-webkit-autofill {\r\n  -webkit-box-shadow: 0 0 0px 1000px white inset !important;\r\n  box-shadow: 0 0 0px 1000px white inset !important;\r\n  -webkit-text-fill-color: #000 !important; /* color del texto */\r\n  transition: background-color 5000s ease-in-out 0s;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,UAAQ,IAAI,MAAM;AAClB,oBAAkB;AACpB;AAEA,CAAC;AACC,SAAO;AACP,eAAa;AACb,cAAY;AACZ,oBAAkB;AAClB,UAAQ,IAAI,MAAM;AAClB,WAAS;AACT,iBAAe;AACjB;AAGA,CAAC;AACC,YAAU;AACV,OAAK;AACL,QAAM;AACN,SAAO;AACP,UAAQ;AACR,oBAAkB,KAAK,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE;AACtC,WAAS;AACT,mBAAiB;AACjB,eAAa;AACb,WAAS;AACX;AACA,KAAK;AACH,sBAAoB,EAAE,EAAE,IAAI,OAAO,MAAM;AACzC,cAAY,EAAE,EAAE,IAAI,OAAO,MAAM;AACjC,2BAAyB;AACzB,cAAY,iBAAiB,MAAM,YAAY;AACjD;",
+  "names": []
+}

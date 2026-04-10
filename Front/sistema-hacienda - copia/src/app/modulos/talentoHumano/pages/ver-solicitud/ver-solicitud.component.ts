@@ -19,6 +19,7 @@ import { ReferenciasPersonalesComponent } from '../../components/referencias-per
 import { SaludPersonalComponent } from '../../components/salud-personal/salud-personal.component';
 import { ObservacionesComponent } from '../../components/observaciones/observaciones.component';
 import { EvaluacionInternaComponent } from '../../components/evaluacion-interna/evaluacion-interna.component';
+import { DocumentosVariosComponent } from '../../components/documentos-varios/documentos-varios.component';
 // FIX: Usar el servicio oficial de la aplicación para mantener la sesión real del usuario
 import { UserService } from '../../../../services/user.service';
 
@@ -40,7 +41,8 @@ import { UserService } from '../../../../services/user.service';
     ReferenciasPersonalesComponent,
     SaludPersonalComponent,
     ObservacionesComponent,
-    EvaluacionInternaComponent
+    EvaluacionInternaComponent,
+    DocumentosVariosComponent
   ],
   template: `
     <div class="container-fluid fade-in p-4 py-5">
@@ -150,6 +152,7 @@ import { UserService } from '../../../../services/user.service';
                 <app-salud-personal *ngSwitchCase="'saludPersonal'" [form]="getGroup('saludPersonal')" [isReadOnly]="!editMode"></app-salud-personal>
                 <app-observaciones *ngSwitchCase="'observaciones'" [parentForm]="form" [isReadOnly]="!editMode" [currentUser]="userService.getUsername() || 'SISTEMA'"></app-observaciones>
                 <app-evaluacion-interna *ngSwitchCase="'datosEntrevistador'" [form]="getGroup('datosEntrevistador')" [isReadOnly]="!editMode"></app-evaluacion-interna>
+                <app-documentos-varios *ngSwitchCase="'documentosVarios'" [form]="form"></app-documentos-varios>
               </ng-container>
 
               <div *ngIf="editMode && section.id !== 'datosEntrevistador' && shouldShowSaveButton(section.id)" class="d-flex justify-content-end mt-4 pt-3 border-top">
@@ -185,9 +188,12 @@ import { UserService } from '../../../../services/user.service';
               <div class="text-center flex-grow-1">
                 <h2 class="mb-0 fw-bold" style="font-size: 16pt; letter-spacing: 1px;">FICHA DE SOLICITUD DE EMPLEO</h2>
                 <h4 class="text-primary fw-bold mb-1" style="font-size: 13pt;">{{ form.get('codigo_solicitud')?.value || 'ID: #' + solicitudId }}</h4>
-                <div class="mt-2">
+                <div class="mt-1">
                   <h3 class="mb-0 fw-bold text-dark" style="font-size: 15pt;">{{ nombreAspirante }}</h3>
                   <span class="text-muted fw-bold" style="font-size: 10pt;">C.I.: {{ form.get('datosPersonales.cedula')?.value }}</span>
+                </div>
+                <div class="mt-1 px-3" style="font-size: 7.5pt; line-height: 1.15; text-align: justify; color: #333;">
+                  <strong>Importante:</strong> Declaro que la información proporcionada es verdadera, la compañía puede investigar lo que se considere necesario. Y si la información ha sido falsa, esto implica una falta grave al reglamento interno y será causa suficiente para visto bueno. El aspirante en caso de ser contratado autoriza el débito por la alimentación y movilización no subsidiada por la compañía.
                 </div>
               </div>
             </div>
@@ -334,19 +340,25 @@ import { UserService } from '../../../../services/user.service';
 
               <div class="print-section-title mt-2">8. PADRES Y PAREJA</div>
               <div class="print-field border-bottom pb-1 mb-1">
-                <span class="label">Padre:</span> {{ form.get('datosFamiliares.padre.nombre')?.value }} 
+                <span class="label">Padre:</span> {{ form.get('datosFamiliares.padre.nombre')?.value }}
+                <span *ngIf="form.get('datosFamiliares.padre.estado')?.value === 'FINADO'" class="text-danger fw-bold x-small ms-1">(FINADO ✝)</span>
                 <span class="x-small ms-1">
-                  ({{ form.get('datosFamiliares.padre.estado')?.value }}{{ form.get('datosFamiliares.padre.estado')?.value === 'FINADO' ? ' ✝' : '' }})
-                  <strong *ngIf="form.get('datosFamiliares.padre.edad')?.value"> - {{ form.get('datosFamiliares.padre.edad')?.value }} años</strong>
+                  <span class="d-block">
+                    <strong>F. Nac:</strong> {{ (form.get('datosFamiliares.padre.fecha_nacimiento')?.value | date:'dd/MM/yyyy') || 'Manual/Sin fecha' }}
+                    <strong *ngIf="form.get('datosFamiliares.padre.edad')?.value"> - {{ form.get('datosFamiliares.padre.edad')?.value }} años</strong>
+                  </span>
                 </span>
                 <div class="x-small italic" *ngIf="form.get('datosFamiliares.padre.domicilio')?.value"><strong>Dom:</strong> {{ form.get('datosFamiliares.padre.domicilio')?.value }}</div>
                 <div class="x-small"><strong>Ocupación:</strong> {{ form.get('datosFamiliares.padre.ocupacion')?.value || 'N/A' }}</div>
               </div>
               <div class="print-field border-bottom pb-1 mb-1">
-                <span class="label">Madre:</span> {{ form.get('datosFamiliares.madre.nombre')?.value }} 
+                <span class="label">Madre:</span> {{ form.get('datosFamiliares.madre.nombre')?.value }}
+                <span *ngIf="form.get('datosFamiliares.madre.estado')?.value === 'FINADO'" class="text-danger fw-bold x-small ms-1">(FINADO ✝)</span>
                 <span class="x-small ms-1">
-                  ({{ form.get('datosFamiliares.madre.estado')?.value }}{{ form.get('datosFamiliares.madre.estado')?.value === 'FINADO' ? ' ✝' : '' }})
-                  <strong *ngIf="form.get('datosFamiliares.madre.edad')?.value"> - {{ form.get('datosFamiliares.madre.edad')?.value }} años</strong>
+                  <span class="d-block">
+                    <strong>F. Nac:</strong> {{ (form.get('datosFamiliares.madre.fecha_nacimiento')?.value | date:'dd/MM/yyyy') || 'Manual/Sin fecha' }}
+                    <strong *ngIf="form.get('datosFamiliares.madre.edad')?.value"> - {{ form.get('datosFamiliares.madre.edad')?.value }} años</strong>
+                  </span>
                 </span>
                 <div class="x-small italic" *ngIf="form.get('datosFamiliares.madre.domicilio')?.value"><strong>Dom:</strong> {{ form.get('datosFamiliares.madre.domicilio')?.value }}</div>
                 <div class="x-small"><strong>Ocupación:</strong> {{ form.get('datosFamiliares.madre.ocupacion')?.value || 'N/A' }}</div>
@@ -382,40 +394,40 @@ import { UserService } from '../../../../services/user.service';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let h of form.get('datosFamiliares.hermanos')?.value">
+                  <tr *ngFor="let h of getHermanosValue()">
                     <td>
                       <div>HERMANO #{{ h.numero_hermano }} ({{ h.es_mayor_menor }}): {{ h.nombre }}<span *ngIf="h.estado === 'FINADO'" class="text-danger fw-bold small"> (FINADO ✝)</span></div>
                       <div class="x-small italic opacity-75" *ngIf="h.domicilio">Dom: {{ h.domicilio }}</div>
                     </td>
-                    <td>{{ h.edad ? h.edad + ' años' : 'N/A' }}</td>
+                    <td>{{ (h.edad !== null && h.edad !== undefined && h.edad !== '') ? h.edad + ' años' : 'N/A' }}</td>
                     <td>{{ h.ocupacion || 'N/A' }}</td>
                   </tr>
-                  <tr *ngIf="!form.get('datosFamiliares.hermanos')?.value?.length">
+                  <tr *ngIf="!getHermanosValue().length">
                     <td colspan="3" class="text-center italic text-muted">Sin hermanos registrados</td>
                   </tr>
-                  <tr *ngFor="let h of form.get('datosFamiliares.hijos')?.value">
+                  <tr *ngFor="let h of getHijosValue()">
                     <td>
                       <div>HIJO: {{ h.nombre }}<span *ngIf="h.discapacidad" class="text-primary fw-bold small"> [DISC.]</span></div>
                       <div class="x-small italic opacity-75" *ngIf="h.domicilio">Dom: {{ h.domicilio }}</div>
                     </td>
-                    <td>{{ h.edad ? h.edad + ' años' : 'N/A' }}</td>
+                    <td>{{ (h.edad !== null && h.edad !== undefined && h.edad !== '') ? h.edad + ' años' : 'N/A' }}</td>
                     <td>
                       <div>{{ h.ocupacion || 'N/A' }}</div>
                       <div class="x-small text-primary fw-bold" *ngIf="h.discapacidad && h.descripcion_discapacidad">Obs: {{ h.descripcion_discapacidad }}</div>
                     </td>
                   </tr>
-                  <tr *ngIf="!form.get('datosFamiliares.hijos')?.value?.length">
+                  <tr *ngIf="!getHijosValue().length">
                     <td colspan="3" class="text-center italic text-muted">Sin hijos registrados</td>
                   </tr>
                 </tbody>
               </table>
 
-              <div class="mt-1" *ngIf="form.get('datosFamiliares.conyuges_anteriores')?.value?.length">
+              <div class="mt-1" *ngIf="getExConyugesValue().length">
                 <div class="fw-bold border-bottom mb-1" style="font-size: 8.5pt;">CÓNYUGES ANTERIORES</div>
                 <table class="print-table-mini w-100" style="font-size: 8pt;">
                   <tbody>
-                    <tr *ngFor="let c of form.get('datosFamiliares.conyuges_anteriores')?.value">
-                      <td>• {{ c.nombre }}</td><td>{{ c.edad }} años</td><td>{{ c.ocupacion }}</td>
+                    <tr *ngFor="let c of getExConyugesValue()">
+                      <td>• {{ c.nombre }}</td><td>{{ (c.edad !== null && c.edad !== undefined) ? c.edad + ' años' : 'N/A' }}</td><td>{{ c.ocupacion }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -423,10 +435,10 @@ import { UserService } from '../../../../services/user.service';
 
               <div class="print-section-title mt-1">10. CURSOS Y CAPACITACIÓN</div>
               <table class="print-table-mini w-100 mb-1" style="font-size: 8pt;">
-                <tr *ngFor="let c of form.get('datosEducativos.cursos')?.value">
+                <tr *ngFor="let c of getCursosValue()">
                   <td>{{ c.nombre | slice:0:30 }}</td><td>{{ c.institucion | slice:0:20 }}</td><td>{{ c.anio || 'N/A' }}</td>
                 </tr>
-                <tr *ngIf="!form.get('datosEducativos.cursos')?.value?.length">
+                <tr *ngIf="!getCursosValue().length">
                   <td colspan="3" class="text-center italic text-muted py-1">Sin cursos registrados</td>
                 </tr>
               </table>
@@ -438,34 +450,34 @@ import { UserService } from '../../../../services/user.service';
               
               <div class="fw-bold text-primary" style="font-size: 7pt; margin-bottom: 1px;">LABORALES</div>
               <table class="print-table-mini w-100" style="font-size: 7pt; margin-bottom: 2px;">
-                <tr *ngFor="let r of form.get('referenciasLaborales')?.value">
+                <tr *ngFor="let r of getRefLaboralesValue()">
                   <td style="width: 35%; padding: 0px 2px;">• {{ r.nombre }}</td>
                   <td style="width: 20%; padding: 0px 2px;">{{ r.cargo || 'N/A' }}</td>
                   <td style="width: 25%; padding: 0px 2px;">{{ r.empresa || 'N/A' }}</td>
                   <td style="width: 20%; padding: 0px 2px;">{{ r.telefono || 'N/A' }}</td>
                 </tr>
-                <tr *ngIf="!form.get('referenciasLaborales')?.value?.length">
+                <tr *ngIf="!getRefLaboralesValue().length">
                   <td colspan="4" class="text-center italic text-muted">Sin referencias laborales</td>
                 </tr>
               </table>
 
               <div class="fw-bold text-primary" style="font-size: 7pt; margin-bottom: 1px;">PERSONALES</div>
               <table class="print-table-mini w-100" style="font-size: 7pt; margin-bottom: 2px;">
-                <tr *ngFor="let r of form.get('referenciasPersonales')?.value">
+                <tr *ngFor="let r of getRefPersonalesValue()">
                   <td style="width: 35%; padding: 0px 2px;">• {{ r.nombre }}</td>
                   <td style="width: 20%; padding: 0px 2px;">{{ r.cargo || 'N/A' }}</td>
                   <td style="width: 25%; padding: 0px 2px;">{{ r.empresa || 'PERSONAL' }}</td>
                   <td style="width: 20%; padding: 0px 2px;">{{ r.telefono || 'N/A' }}</td>
                 </tr>
-                <tr *ngIf="!form.get('referenciasPersonales')?.value?.length">
+                <tr *ngIf="!getRefPersonalesValue().length">
                   <td colspan="4" class="text-center italic text-muted">Sin referencias personales</td>
                 </tr>
               </table>
 
-              <div *ngIf="form.get('familiaresEnEmpresa')?.value?.length">
+              <div *ngIf="getFamiliaresEmpresaValue().length">
                 <div class="fw-bold text-primary" style="font-size: 7pt; margin-bottom: 1px;">VÍNCULOS EN EMPRESA</div>
                 <table class="print-table-mini w-100" style="font-size: 7pt; margin-bottom: 2px;">
-                  <tr *ngFor="let f of form.get('familiaresEnEmpresa')?.value">
+                  <tr *ngFor="let f of getFamiliaresEmpresaValue()">
                     <td style="width: 30%; padding: 0px 2px;">• {{ f.nombre }}</td>
                     <td style="width: 20%; padding: 0px 2px;">{{ f.parentesco }}</td>
                     <td style="width: 20%; padding: 0px 2px;">{{ f.empresa }}</td>
@@ -477,7 +489,7 @@ import { UserService } from '../../../../services/user.service';
 
               <div class="print-section-title mt-2">12. EXPERIENCIA LABORAL</div>
               <div style="font-size: 8pt;">
-                <div *ngFor="let exp of form.get('experienciaLaboral.experiencias')?.value" class="print-exp-item border-bottom mb-1 pb-1">
+                <div *ngFor="let exp of getExperienciasValue()" class="print-exp-item border-bottom mb-1 pb-1">
                   <div class="fw-bold">{{ exp.empresa }} ({{ exp.area }})</div>
                   <div>Motivo: {{ exp.motivo_salida }} | Jefe: {{ exp.jefe_inmediato }} | Periodo: {{ exp.fecha_inicio | date:'dd/MM/yy' }} - {{ exp.actualmente ? 'Hoy' : (exp.fecha_fin | date:'dd/MM/yy') }}</div>
                 </div>
@@ -498,7 +510,7 @@ import { UserService } from '../../../../services/user.service';
               </div>
 
               <div class="print-section-title mt-1">14. OBSERVACIONES (Últimas 4)</div>
-              <div *ngIf="form.get('observaciones')?.value?.length">
+              <div *ngIf="getObservacionesValue().length">
                 <div *ngFor="let obs of getObservacionesSlice()" class="border-bottom mb-1 pb-1" style="font-size: 8pt; line-height: 1.1;">
                   <div class="d-flex justify-content-between x-small" style="font-size: 7.5pt; color: #555;">
                     <span class="fw-bold">{{ obs.fecha | date:'dd/MM/yy' }} | {{ obs.tipo }}</span>
@@ -507,7 +519,7 @@ import { UserService } from '../../../../services/user.service';
                   <div style="word-break: break-all; margin-top: 1px;">{{ obs.comentario }}</div>
                 </div>
               </div>
-              <div class="x-small italic text-muted" *ngIf="!form.get('observaciones')?.value?.length">Sin observaciones registradas.</div>
+              <div class="x-small italic text-muted" *ngIf="!getObservacionesValue().length">Sin observaciones registradas.</div>
 
               <!-- NUEVA SECCIÓN 13: AUDITORÍA -->
               <div class="print-section-title mt-1" style="font-size: 7.5pt; padding: 1px 6px; margin-bottom: 2px;">15. AUDITORÍA (CONTROL INTERNO)</div>
@@ -534,29 +546,32 @@ import { UserService } from '../../../../services/user.service';
             </div>
           </div>
 
-          <div class="print-signatures" style="position: absolute; bottom: 1.2cm; left: 1.5cm; right: 1.5cm; padding-top: 0;">
-            <div class="row text-center px-1">
-              <div class="col-3">
-                <div class="signature-line mx-auto mb-1"></div>
-                <div class="fw-bold" style="font-size: 7pt;">ADMINISTRADOR</div>
+          <div class="print-signatures" style="position: absolute; bottom: 1.5cm; left: 1cm; right: 1cm; padding-top: 0;">
+            <div class="row text-center g-0">
+              <div class="col" style="flex: 1 0 0%;">
+                <div class="signature-line mx-auto mb-1" style="width: 80%;"></div>
+                <div class="fw-bold" style="font-size: 6.5pt;">ASPIRANTE</div>
               </div>
-              <div class="col-3">
-                <div class="signature-line mx-auto mb-1"></div>
-                <div class="fw-bold" style="font-size: 7pt;">MANDO MEDIO</div>
-                <div class="x-small" style="font-size: 6pt;">(Prueba)</div>
+              <div class="col" style="flex: 1 0 0%;">
+                <div class="signature-line mx-auto mb-1" style="width: 80%;"></div>
+                <div class="fw-bold" style="font-size: 6.5pt;">MANDO MEDIO</div>
               </div>
-              <div class="col-3">
-                <div class="signature-line mx-auto mb-1"></div>
-                <div class="fw-bold" style="font-size: 7pt;">RR.HH.</div>
+              <div class="col" style="flex: 1 0 0%;">
+                <div class="signature-line mx-auto mb-1" style="width: 80%;"></div>
+                <div class="fw-bold" style="font-size: 6.5pt;">RR.HH.</div>
               </div>
-              <div class="col-3">
-                <div class="signature-line mx-auto mb-1"></div>
-                <div class="fw-bold" style="font-size: 7pt;">GERENTE</div>
+              <div class="col" style="flex: 1 0 0%;">
+                <div class="signature-line mx-auto mb-1" style="width: 80%;"></div>
+                <div class="fw-bold" style="font-size: 6.5pt;">ADMINISTRADOR</div>
+              </div>
+              <div class="col" style="flex: 1 0 0%;">
+                <div class="signature-line mx-auto mb-1" style="width: 80%;"></div>
+                <div class="fw-bold" style="font-size: 6.5pt;">GERENTE</div>
               </div>
             </div>
           </div>
 
-          <div class="print-footer" style="position: absolute; bottom: 0.5cm; left: 1.5cm; right: 1.5cm; display: flex; justify-content: space-between; font-size: 7pt; color: #777;">
+          <div class="print-footer" style="position: absolute; bottom: 0.5cm; left: 1.5cm; right: 1.5cm; display: flex; justify-content: space-between; font-size: 7pt; color: #bbb;">
             <span>Talento Humano</span>
             <strong>Página 2 de 2 (Cara B)</strong>
             <span>{{ form.get('codigo_solicitud')?.value }}</span>
@@ -805,7 +820,8 @@ export class VerSolicitudComponent implements OnInit {
     { id: 'referenciasPersonales', title: '10. Referencias Personales', icon: 'bi-person-lines-fill' },
     { id: 'saludPersonal', title: '11. Salud Personal', icon: 'bi-heart' },
     { id: 'observaciones', title: '12. Observaciones', icon: 'bi-chat-left-text' },
-    { id: 'datosEntrevistador', title: '13. Evaluación Interna', icon: 'bi-check2-square' }
+    { id: 'datosEntrevistador', title: '13. Evaluación Interna', icon: 'bi-check2-square' },
+    { id: 'documentosVarios', title: '14. Documentos Varios', icon: 'bi-file-earmark-pdf' }
   ];
 
   get nombreAspirante(): string {
@@ -1038,6 +1054,9 @@ export class VerSolicitudComponent implements OnInit {
 
 
   shouldShowSaveButton(sectionId: string): boolean {
+    if (sectionId === 'datosEntrevistador' || sectionId === 'documentosVarios') {
+      return false;
+    }
     if (sectionId === 'referenciasLaborales') {
       return this.form.get('experienciaLaboral.sin_experiencia')?.value === false;
     }
@@ -1070,33 +1089,24 @@ export class VerSolicitudComponent implements OnInit {
         fechaIngreso: ['', Validators.required],
         banking_info: this.fb.group({
           usa_banco_guayaquil: [null, Validators.required],
-          numero_cuenta: ['', [Validators.required, Validators.pattern(/^\d{10,13}$/)]],
-          confirmacion_cuenta: ['', Validators.required],
-          tipo_cuenta: ['', Validators.required],
-          titular: ['', [
-            Validators.required,
-            Validators.maxLength(120),
-            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/),
-            CustomValidators.noWhitespace
-          ]]
+          numero_cuenta: [{ value: '', disabled: true }],
+          confirmacion_cuenta: [{ value: '', disabled: true }],
+          tipo_cuenta: [{ value: '', disabled: true }],
+          titular: [{ value: '', disabled: true }]
         }, { validators: CustomValidators.mustMatch('numero_cuenta', 'confirmacion_cuenta') }),
         fechas_control: this.fb.group({
-          fecha_revision_guayaquil: [null, Validators.required],
+          fecha_revision_guayaquil: [null],
           reingreso_fecha: [null],
           fecha_salida: [null]
         }),
         condiciones: this.fb.group({
           tipo_contrato: ['', Validators.required],
           transporte: [null, Validators.required],
-          recorrido: ['', Validators.required],
-          recorrido_otro: ['', [
-            Validators.required,
-            Validators.maxLength(100),
-            Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ][a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ,.]*$/)
-          ]],
+          recorrido: [{ value: '', disabled: true }],
+          recorrido_otro: [{ value: '', disabled: true }],
           vehiculo: [null, Validators.required],
           licencia: [null, Validators.required],
-          licencia_tipo: ['', Validators.required],
+          licencia_tipo: [{ value: '', disabled: true }],
           acumulacion_decimos: [null, Validators.required],
           semana_completa: [null, Validators.required],
           solo_proceso: [null, Validators.required],
@@ -1138,20 +1148,20 @@ export class VerSolicitudComponent implements OnInit {
         ]],
         discapacidadPorcentaje: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]*$/)]],
         cantonNacimiento: ['', Validators.required],
-        cantonNacimientoOtro: ['', [
+        cantonNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
         ]],
         cantonCodigo: [null],
         paisNacimiento: ['', Validators.required],
-        paisNacimientoOtro: ['', [
+        paisNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
         ]],
         provinciaNacimiento: ['', Validators.required],
-        provinciaNacimientoOtro: ['', [
+        provinciaNacimientoOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
@@ -1184,13 +1194,13 @@ export class VerSolicitudComponent implements OnInit {
       datosReferenciales: this.fb.group({
         direccion: ['', [Validators.required, Validators.maxLength(200), CustomValidators.noWhitespace]],
         provincia: ['', Validators.required],
-        provinciaOtro: ['', [
+        provinciaOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
         ]],
         ciudad: ['', Validators.required],
-        ciudadOtro: ['', [
+        ciudadOtro: [{ value: '', disabled: true }, [
           Validators.maxLength(100),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/),
           CustomValidators.noWhitespace
@@ -1239,6 +1249,8 @@ export class VerSolicitudComponent implements OnInit {
             CustomValidators.noWhitespace
           ]],
           estado: ['VIVO', Validators.required],
+          fecha_nacimiento: [null],
+          no_conoce_fecha: [false],
           edad: [null],
           domicilio: ['', [Validators.required, CustomValidators.noWhitespace]],
           ocupacion: ['', [
@@ -1254,6 +1266,8 @@ export class VerSolicitudComponent implements OnInit {
             CustomValidators.noWhitespace
           ]],
           estado: ['VIVO', Validators.required],
+          fecha_nacimiento: [null],
+          no_conoce_fecha: [false],
           edad: [null],
           domicilio: ['', [Validators.required, CustomValidators.noWhitespace]],
           ocupacion: ['', [
@@ -1362,70 +1376,86 @@ export class VerSolicitudComponent implements OnInit {
             domicilio: [h?.domicilio || ''],
             ocupacion: [h?.ocupacion || '']
           }));
-          this.populateArray('datosFamiliares.hijos', data.datosFamiliares.hijos, () => this.fb.group({
-            nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            edad: [null, [Validators.required, Validators.min(0), Validators.max(120)]],
-            ocupacion: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            discapacidad: [false, Validators.required],
-            descripcion_discapacidad: ['']
+          this.populateArray('datosFamiliares.hijos', data.datosFamiliares.hijos, (h) => this.fb.group({
+            nombre: [h?.nombre || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            edad: [h?.edad || null, [Validators.required, Validators.min(0), Validators.max(120)]],
+            ocupacion: [h?.ocupacion || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            discapacidad: [h?.discapacidad || false, Validators.required],
+            descripcion_discapacidad: [h?.descripcion_discapacidad || '']
           }));
-          this.populateArray('datosFamiliares.conyuges_anteriores', data.datosFamiliares.conyuges_anteriores, () => this.fb.group({
-            nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            edad: [null, [Validators.required, Validators.min(0), Validators.max(120)]],
-            ocupacion: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]]
+          this.populateArray('datosFamiliares.conyuges_anteriores', data.datosFamiliares.conyuges_anteriores, (c) => this.fb.group({
+            nombre: [c?.nombre || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            edad: [c?.edad || null, [Validators.required, Validators.min(0), Validators.max(120)]],
+            ocupacion: [c?.ocupacion || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]]
           }));
         }
         if (data.datosEducativos?.cursos) {
-          this.populateArray('datosEducativos.cursos', data.datosEducativos.cursos, () => this.fb.group({
-            nombre: ['', [Validators.required, Validators.maxLength(150)]],
-            institucion: ['', [Validators.required, Validators.maxLength(150)]],
-            duracion: [null, [Validators.required, Validators.min(1)]],
-            anio: [null, [Validators.required, Validators.pattern(/^\d{4}$/)]]
+          this.populateArray('datosEducativos.cursos', data.datosEducativos.cursos, (c) => this.fb.group({
+            nombre: [c?.nombre || '', [Validators.required, Validators.maxLength(150)]],
+            institucion: [c?.institucion || '', [Validators.required, Validators.maxLength(150)]],
+            duracion: [c?.duracion || null, [Validators.required, Validators.min(1)]],
+            anio: [c?.anio || null, [Validators.required, Validators.pattern(/^\d{4}$/)]]
           }));
         }
         if (data.experienciaLaboral?.experiencias) {
-          this.populateArray('experienciaLaboral.experiencias', data.experienciaLaboral.experiencias, () => this.fb.group({
-            empresa: ['', [Validators.required, Validators.maxLength(100)]],
-            area: ['', [Validators.required]],
-            jefe_inmediato: ['', [Validators.maxLength(80)]],
-            fecha_inicio: [null, Validators.required],
-            fecha_fin: [null],
-            actualmente: [false],
-            motivo_salida: ['', [Validators.required, Validators.maxLength(200)]]
+          this.populateArray('experienciaLaboral.experiencias', data.experienciaLaboral.experiencias, (e) => this.fb.group({
+            empresa: [e?.empresa || '', [Validators.required, Validators.maxLength(100)]],
+            area: [e?.area || '', [Validators.required]],
+            jefe_inmediato: [e?.jefe_inmediato || '', [Validators.maxLength(80)]],
+            fecha_inicio: [e?.fecha_inicio || null, Validators.required],
+            fecha_fin: [e?.fecha_fin || null],
+            actualmente: [e?.actualmente || false],
+            motivo_salida: [e?.motivo_salida || '', [Validators.required, Validators.maxLength(200)]]
           }));
         }
         if (data.referenciasLaborales) {
-          this.populateArray('referenciasLaborales', data.referenciasLaborales, () => this.fb.group({
-            empresa: ['', [Validators.required, CustomValidators.noWhitespace]],
-            nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            cargo: ['', [Validators.required, CustomValidators.noWhitespace]],
-            telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/)]]
+          this.populateArray('referenciasLaborales', data.referenciasLaborales, (r) => this.fb.group({
+            empresa: [r?.empresa || '', [Validators.required, CustomValidators.noWhitespace]],
+            nombre: [r?.nombre || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            cargo: [r?.cargo || '', [Validators.required, CustomValidators.noWhitespace]],
+            telefono: [r?.telefono || '', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/)]]
           }));
         }
         if (data.referenciasPersonales) {
-          this.populateArray('referenciasPersonales', data.referenciasPersonales, () => this.fb.group({
-            nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            cargo: ['', [Validators.required, CustomValidators.noWhitespace]],
-            empresa: ['', [Validators.required, CustomValidators.noWhitespace]],
-            telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/)]]
+          this.populateArray('referenciasPersonales', data.referenciasPersonales, (r) => this.fb.group({
+            nombre: [r?.nombre || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            cargo: [r?.cargo || '', [Validators.required, CustomValidators.noWhitespace]],
+            empresa: [r?.empresa || '', [Validators.required, CustomValidators.noWhitespace]],
+            telefono: [r?.telefono || '', [Validators.required, Validators.pattern(/^[0-9]{7,10}$/)]]
           }));
         }
         if (data.familiaresEnEmpresa) {
-          this.populateArray('familiaresEnEmpresa', data.familiaresEnEmpresa, () => this.fb.group({
-            nombre: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
-            empresa: ['', [Validators.required, CustomValidators.noWhitespace]],
-            cargo: ['', [Validators.required, CustomValidators.noWhitespace]],
-            parentesco: ['', [Validators.required, CustomValidators.noWhitespace]],
-            telefono: ['', [Validators.pattern(/^[0-9]{7,10}$/)]]
+          this.populateArray('familiaresEnEmpresa', data.familiaresEnEmpresa, (f) => this.fb.group({
+            nombre: [f?.nombre || '', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/), CustomValidators.noWhitespace]],
+            empresa: [f?.empresa || '', [Validators.required, CustomValidators.noWhitespace]],
+            cargo: [f?.cargo || '', [Validators.required, CustomValidators.noWhitespace]],
+            parentesco: [f?.parentesco || '', [Validators.required, CustomValidators.noWhitespace]],
+            telefono: [f?.telefono || '', [Validators.pattern(/^[0-9]{7,10}$/)]]
           }));
         }
         if (data.observaciones) {
-          this.populateArray('observaciones', data.observaciones, () => this.fb.group({
-            id: [null], tipo: [''], comentario: [''], fecha: [null], usuario: ['']
+          this.populateArray('observaciones', data.observaciones, (o) => this.fb.group({
+            id: [o?.id || null], tipo: [o?.tipo || ''], comentario: [o?.comentario || ''], fecha: [o?.fecha || null], usuario: [o?.usuario || '']
           }));
         }
 
         this.form.patchValue(data);
+        
+        // Detectar automáticamente si no se conoce la fecha exacta basado en los datos cargados
+        const dfGroup = this.form.get('datosFamiliares') as FormGroup;
+        if (dfGroup) {
+          ['padre', 'madre'].forEach(p => {
+            const group = dfGroup.get(p) as FormGroup;
+            if (group && group.get('estado')?.value === 'VIVO') {
+              const fecha = group.get('fecha_nacimiento')?.value;
+              const edad = group.get('edad')?.value;
+              if (!fecha && edad) {
+                group.get('no_conoce_fecha')?.setValue(true, { emitEvent: false });
+              }
+            }
+          });
+        }
+
         this.originalCedula = data.datosPersonales?.cedula || '';
         this.esElUltimoAprobado = data.es_el_ultimo_aprobado || false;
         this.tieneReingresoActivo = data.tiene_reingreso_activo || false;
@@ -1829,6 +1859,52 @@ export class VerSolicitudComponent implements OnInit {
     superior: 'Educación Superior (Grado)',
     superior_posgrado: 'Educación Superior (Posgrado)'
   };
+
+  getHermanosValue(): any[] {
+    const arr = this.form.get('datosFamiliares.hermanos') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getHijosValue(): any[] {
+    const arr = this.form.get('datosFamiliares.hijos') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getExConyugesValue(): any[] {
+    const arr = this.form.get('datosFamiliares.conyuges_anteriores') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getCursosValue(): any[] {
+    const arr = this.form.get('datosEducativos.cursos') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getExperienciasValue(): any[] {
+    const arr = this.form.get('experienciaLaboral.experiencias') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getRefLaboralesValue(): any[] {
+    const arr = this.form.get('referenciasLaborales') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getRefPersonalesValue(): any[] {
+    const arr = this.form.get('referenciasPersonales') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getFamiliaresEmpresaValue(): any[] {
+    const arr = this.form.get('familiaresEnEmpresa') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
+  getObservacionesValue(): any[] {
+    const arr = this.form.get('observaciones') as FormArray;
+    return arr ? arr.getRawValue() : [];
+  }
+
 
   private setupEstadoCivilWatcher() {
     this.form.get('estadoCivil.estado_civil')?.valueChanges.subscribe(estado => {

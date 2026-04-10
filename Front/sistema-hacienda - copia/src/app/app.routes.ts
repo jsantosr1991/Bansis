@@ -81,6 +81,15 @@ export const routes: Routes = [
           title: 'Talento Humano',
           breadcrumb: 'Talento Humano'
         }
+      },
+      {
+        path: 'soporte-tecnico',
+        loadChildren: () => import('./modulos/soporte/soporte.routes').then(m => m.SOPORTE_ROUTES),
+        canActivate: [RoleGuard],
+        data: {
+          title: 'Soporte Técnico',
+          breadcrumb: 'Soporte Técnico'
+        }
       }
     ]
   },

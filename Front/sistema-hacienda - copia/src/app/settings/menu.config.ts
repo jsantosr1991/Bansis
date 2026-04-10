@@ -44,7 +44,7 @@ export const MENU_CONFIG = [
     title: 'Asistencia',
     icon: 'bi bi-ui-checks',
     roles: ['todos'],
-    grupos: ['campo', 'oficina', 'jefe'],
+    grupos: ['campo', 'oficina', 'jefes'],
     submenus: [
       { title: 'Asistencia General', route: '/asistencia', roles: ['superadmin'], grupos: ['administradores'] },
       { title: 'Asistencia Haciendas', route: '/asistencia/asistenciamandosmedios', roles: ['todos'], grupos: ['todos'] },
@@ -83,7 +83,30 @@ export const MENU_CONFIG = [
       }
     ]
   },
-
-
-
+  {
+    title: 'Soporte Técnico',
+    icon: 'bi bi-headset',
+    roles: ['todos'],
+    grupos: ['todos'],
+    submenus: [
+      {
+        title: 'Mis Solicitudes',
+        route: '/soporte-tecnico/lista',
+        roles: ['todos'],
+        grupos: ['todos']
+      },
+      {
+        title: 'Nueva Solicitud',
+        route: '/soporte-tecnico/nueva',
+        roles: ['todos'],
+        grupos: ['todos']
+      },
+      {
+        title: 'Gestión Sistemas',
+        route: '/soporte-tecnico/gestion',
+        roles: ['todos'],
+        grupos: ['sistemas', 'administradores']
+      }
+    ]
+  }
 ];

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TalentoHumanoService } from '../../services/talentoHumano.service';
 import { CustomValidators } from '../../utils/custom-validators';
 import { Observable } from 'rxjs';
@@ -124,7 +124,7 @@ import { Observable } from 'rxjs';
             </div>
 
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Fecha Revisión Guayaquil <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold">Fecha Revisión Guayaquil (Opcional)</label>
               <input type="date" class="form-control" formControlName="fecha_revision_guayaquil"
                      [class.is-invalid]="isInvalidSub('fechas_control', 'fecha_revision_guayaquil')">
             </div>
@@ -472,10 +472,24 @@ export class DatosAdministrativosComponent implements OnInit, OnChanges {
       const ctrl = this.form.get(`banking_info.${f}`);
       if (usaBanco === true) {
         ctrl?.enable();
+        if (f === 'numero_cuenta') {
+          ctrl?.setValidators([Validators.required, Validators.pattern(/^\d{10,13}$/)]);
+        } else if (f === 'titular') {
+          ctrl?.setValidators([
+            Validators.required,
+            Validators.maxLength(120),
+            Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/),
+            CustomValidators.noWhitespace
+          ]);
+        } else {
+          ctrl?.setValidators([Validators.required]);
+        }
       } else {
         ctrl?.disable();
+        ctrl?.clearValidators();
         ctrl?.setValue('');
       }
+      ctrl?.updateValueAndValidity({ emitEvent: false });
     });
   }
 
@@ -484,10 +498,17 @@ export class DatosAdministrativosComponent implements OnInit, OnChanges {
     const otroCtrl = this.form.get('condiciones.recorrido_otro');
     if (recorrido === 'Otros') {
       otroCtrl?.enable();
+      otroCtrl?.setValidators([
+        Validators.required,
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ][a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ,.]*$/)
+      ]);
     } else {
       otroCtrl?.disable();
+      otroCtrl?.clearValidators();
       otroCtrl?.setValue('');
     }
+    otroCtrl?.updateValueAndValidity({ emitEvent: false });
   }
 
   onTransporteChange() {
@@ -497,12 +518,18 @@ export class DatosAdministrativosComponent implements OnInit, OnChanges {
 
     if (usaTransp === true) {
       recc?.enable();
+      recc?.setValidators([Validators.required]);
     } else {
       recc?.disable();
+      recc?.clearValidators();
       recc?.setValue('');
+
       reccOtro?.disable();
+      reccOtro?.clearValidators();
       reccOtro?.setValue('');
     }
+    recc?.updateValueAndValidity({ emitEvent: false });
+    reccOtro?.updateValueAndValidity({ emitEvent: false });
   }
 
   onLicenciaChange() {
@@ -511,10 +538,13 @@ export class DatosAdministrativosComponent implements OnInit, OnChanges {
 
     if (tieneLic === true) {
       licTipo?.enable();
+      licTipo?.setValidators([Validators.required]);
     } else {
       licTipo?.disable();
+      licTipo?.clearValidators();
       licTipo?.setValue('');
     }
+    licTipo?.updateValueAndValidity({ emitEvent: false });
   }
 
   onlyNumbers(event: any) {
