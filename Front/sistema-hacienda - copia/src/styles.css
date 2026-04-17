@@ -282,3 +282,12 @@ tr+tr td {
   color: #212529;
   border-color: #ced4da;
 }
+.badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.badge.bg-warning {
+  color: #000 !important;
+}

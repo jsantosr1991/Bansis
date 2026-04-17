@@ -1,0 +1,335 @@
+<app-loader [loading]="loading"></app-loader>
+
+<div class="module-card">
+
+  <!-- HEADER -->
+  <div class="module-header">
+    <div>
+      <h4 class="module-title">
+        <i class="bi bi-box-seam me-2"></i>
+        Material Despachado
+      </h4>
+      <p class="module-subtitle">
+        Consulta y control de despachos por hacienda
+      </p>
+    </div>
+  </div>
+
+  <!-- 🔥 FILTROS ERP -->
+  <div class="filters-bar">
+
+    <div class="row g-2 align-items-end">
+
+      <!-- HACIENDA -->
+      <div class="col-md-3" *ngIf="permisoService.tieneGrupo('bodega'); else gerenciaFiltro">
+        <label>Hacienda</label>
+        <div class="input-pro readonly">
+          {{ namehacienda }}
+        </div>
+      </div>
+
+      <ng-template #gerenciaFiltro>
+        <div class="col-md-3">
+          <label>Hacienda</label>
+          <select class="form-select select-pro" [(ngModel)]="idhaciendaSeleccionada" (change)="onHaciendaChange()">
+
+            <option value="">Seleccione</option>
+            <option *ngFor="let h of haciendas" [value]="h.idhacienda">
+              {{ h.name }}
+            </option>
+
+          </select>
+        </div>
+      </ng-template>
+
+      <!-- 🔥 FILTRO TIPO (CHIPS PRO) -->
+      <div class="col-md-8">
+        <label class="mb-1">Filtro</label>
+
+        <div class="multi-select-inline">
+
+          <div class="chip" [class.active]="filtros.tipo === 'ultimo'"
+            (click)="filtros.tipo='ultimo'; aplicarFiltroRapido()">
+            Último
+          </div>
+
+          <div class="chip" [class.active]="filtros.tipo === 'hoy'" (click)="filtros.tipo='hoy'; aplicarFiltroRapido()">
+            Hoy
+          </div>
+
+          <div class="chip" [class.active]="filtros.tipo === 'semana'"
+            (click)="filtros.tipo='semana'; aplicarFiltroRapido()">
+            Semana
+          </div>
+
+          <div class="chip" [class.active]="filtros.tipo === 'mes'" (click)="filtros.tipo='mes'; aplicarFiltroRapido()">
+            Mes
+          </div>
+
+          <div class="chip" [class.active]="filtros.tipo === 'rango'" (click)="filtros.tipo='rango'">
+            Rango
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN -->
+      <div class="col-md-1 d-grid">
+        <button class="btn btn-primary btn-pro" (click)="cargarDespachados()">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 🔥 INFO DE FECHA -->
+    <div class="filtro-info" *ngIf="filtros.tipo !== 'rango'">
+
+      <span class="badge-fecha">
+        <i class="bi bi-calendar3"></i>
+
+        <ng-container [ngSwitch]="filtros.tipo">
+
+          <span *ngSwitchCase="'ultimo'">
+            Última fecha: {{ filtros.desde | date:'dd/MM/yyyy' }}
+          </span>
+
+          <span *ngSwitchCase="'hoy'">
+            Hoy: {{ filtros.desde | date:'dd/MM/yyyy' }}
+          </span>
+
+          <span *ngSwitchCase="'semana'">
+            Semana: {{ filtros.desde | date:'dd/MM' }} - {{ filtros.hasta | date:'dd/MM' }}
+          </span>
+
+          <span *ngSwitchCase="'mes'">
+            Mes: {{ filtros.desde | date:'dd/MM' }} - {{ filtros.hasta | date:'dd/MM' }}
+          </span>
+
+        </ng-container>
+
+      </span>
+
+    </div>
+
+    <!-- 🔥 FECHAS TIPO ERP -->
+    <div class="row mt-2" *ngIf="filtros.tipo === 'rango'">
+      <div class="col-md-12">
+
+        <label class="mb-1">Rango personalizado</label>
+
+        <div class="date-chips">
+
+          <div class="date-chip">
+            <span>Desde</span>
+            <input type="date" [(ngModel)]="filtros.desde" [max]="hoy" (change)="cargarDespachados()">
+          </div>
+
+          <div class="date-chip">
+            <span>Hasta</span>
+            <input type="date" [(ngModel)]="filtros.hasta" [max]="hoy" (change)="cargarDespachados()">
+          </div>
+
+          <div class="chip clear" (click)="filtros.desde=''; filtros.hasta=''; cargarDespachados()">
+            Limpiar
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 🔥 ESTADO -->
+    <div class="row mt-2">
+      <div class="col-md-12">
+
+        <label class="mb-1">Estado</label>
+
+        <div class="multi-select-inline">
+
+          <div class="chip" [class.active]="filtros.estado.includes('PENDIENTE')" (click)="toggleEstado('PENDIENTE')">
+            Pendiente
+          </div>
+
+          <div class="chip" [class.active]="filtros.estado.includes('PARCIAL')" (click)="toggleEstado('PARCIAL')">
+            Parcial
+          </div>
+
+          <div class="chip" [class.active]="filtros.estado.includes('COMPLETO')" (click)="toggleEstado('COMPLETO')">
+            Completo
+          </div>
+
+          <div class="chip" [class.active]="filtros.estado.includes('CERRADO')" (click)="toggleEstado('CERRADO')">
+            Cerrado
+          </div>
+
+          <div class="chip" [class.active]="filtros.estado.includes('INCOMPLETO')" (click)="toggleEstado('INCOMPLETO')">
+            Incompleto
+          </div>
+
+          <div class="chip clear" *ngIf="filtros.estado.length" (click)="limpiarEstados()">
+            Limpiar
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLA -->
+  <div class="module-card">
+    <div class="table-responsive">
+      <table id="tablaDespachos" class="table table-hover align-middle w-100 table-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Doc.</th>
+            <th>Fecha Emisión</th>
+            <th>Usuario</th>
+            <th>Hacienda</th>
+            <th>Total</th>
+            <th>Despachadas</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- =========================
+         MODAL DETALLE (SIN CAMBIOS)
+    ========================== -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header bg-primary text-white">
+        <div>
+          <h5 class="modal-title mb-0">
+            📦 Despacho N° {{ documentoActual }}
+          </h5>
+          <small>
+            Detalle completo del despacho realizado
+          </small>
+        </div>
+
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body" *ngIf="detalle?.length">
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <strong>Documento:</strong><br />
+            {{ documentoActual }}
+          </div>
+
+          <div class="col-md-4">
+            <strong>Total Productos:</strong><br />
+            {{ detalle.length }}
+          </div>
+
+          <div class="col-md-4">
+            <strong>Fecha:</strong><br />
+            {{ detalle[0]?.fecha_despacho | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+
+        <!-- TABLA DETALLE -->
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-sm align-middle">
+
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Solicitante</th>
+                <th>Usuario</th>
+                <th>Solicitada</th>
+                <th>Despachada</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Obs.</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <ng-container *ngFor="let item of detalle">
+
+                <tr>
+
+                  <td>{{ item.linea }}</td>
+
+                  <td>
+                    <div class="fw-semibold">{{ item.producto }}</div>
+                    <small class="text-muted">{{ item.codProd }}</small>
+                  </td>
+
+                  <td>{{ item.Solicitante }}</td>
+                  <td>{{ item.usuario }}</td>
+
+                  <td class="text-center">{{ item.cantidadSolicitada }}</td>
+                  <td class="text-center text-primary">{{ item.TotalDespachado }}</td>
+
+                  <td class="text-center">
+                    <span class="estado-badge" [ngClass]="{
+                                'pendiente': item.estado_linea === 'PENDIENTE',
+                                'parcial': item.estado_linea === 'PARCIAL',
+                                'completo': item.estado_linea === 'COMPLETO',
+                                'cerrado': item.estado_linea === 'CERRADO'
+                              }">
+                      {{ item.estado_linea }}
+                    </span>
+                  </td>
+
+                  <td class="text-center">
+                    {{ item.fecha_despacho | date:'dd/MM/yyyy' }}
+                  </td>
+
+                  <td class="text-center">
+                    <button *ngIf="item.comentario" class="btn-icon-comentario" (click)="toggleComentario(item.linea)">
+                      <i class="bi" [ngClass]="comentariosAbiertos[item.linea]
+                               ? 'bi-chat-left-text-fill'
+                               : 'bi-chat-left-text'"></i>
+                    </button>
+                  </td>
+
+                </tr>
+
+                <!-- EXPANDIBLE -->
+                <tr *ngIf="comentariosAbiertos[item.linea]">
+                  <td colspan="9" class="comentario-expandido">
+                    <div class="comentario-box">
+                      <b>💬 Observación:</b><br>
+                      {{ item.comentario | uppercase }}
+                    </div>
+                  </td>
+                </tr>
+
+              </ng-container>
+
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

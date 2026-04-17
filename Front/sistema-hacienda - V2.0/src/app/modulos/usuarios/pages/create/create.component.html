@@ -1,0 +1,127 @@
+<app-loader [loading]="loading"></app-loader>
+
+<div class="module-container">
+
+  <!-- 🔥 HEADER -->
+  <div class="module-card">
+    <div class="module-header">
+      <div>
+        <h4 class="module-title">
+          <i class="bi bi-person-plus me-2"></i>
+          Crear Usuario
+        </h4>
+        <small class="module-subtitle">Gestión de usuarios del sistema</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔍 BUSCADOR -->
+  <div class="module-card">
+    <div class="section-title">Buscar empleado</div>
+
+    <input type="text" class="form-control input-pro" placeholder="Buscar empleado por nombre o cédula..."
+      [(ngModel)]="searchTerm" (keyup.enter)="buscarUsuario()" />
+
+    <ul class="list-group mt-2 shadow-sm" *ngIf="usuariosEncontrados.length > 0">
+
+      <li class="list-group-item list-item-pro" *ngFor="let user of usuariosEncontrados"
+        (click)="seleccionarUsuario(user)">
+
+        <div class="fw-semibold">
+          {{ user.NOMBRE_1 }} {{ user.APELLIDO_1 }}
+        </div>
+        <small class="text-muted">
+          {{ user.NUM_CEDULA }}
+        </small>
+
+      </li>
+    </ul>
+  </div>
+
+  <!-- 📋 FORMULARIO -->
+  <div class="module-card">
+
+    <div class="section-title">Información del usuario</div>
+
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label>Nombre *</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.NOMBRE_1" readonly>
+      </div>
+
+      <div class="col-md-6">
+        <label>Apellido *</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.APELLIDO_1" readonly>
+      </div>
+
+      <div class="col-md-6">
+        <label>Cédula</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.NUM_CEDULA">
+      </div>
+
+      <div class="col-md-6">
+        <label>Empresa *</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.EMPRESA" readonly>
+      </div>
+
+      <div class="col-md-6">
+        <label>Email *</label>
+        <input type="email" class="form-control input-pro" [(ngModel)]="usuario.EMAIL"
+          placeholder="ejemplo@empresa.com">
+      </div>
+
+      <div class="col-md-6">
+        <label>Usuario</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usernameGenerado" readonly>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ⚙ CONFIGURACIÓN -->
+  <div class="module-card">
+
+    <div class="section-title">Configuración</div>
+
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label>Grupo *</label>
+        <select class="form-select input-pro" [(ngModel)]="usuario.idGrupo">
+          <option value="">-- Seleccione --</option>
+          <option *ngFor="let grupo of grupos" [value]="grupo.id">
+            {{ grupo.grupo }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label>Rol *</label>
+        <select class="form-select input-pro" [(ngModel)]="usuario.idRol">
+          <option value="">-- Seleccione --</option>
+          <option *ngFor="let rol of roles" [value]="rol.id">
+            {{ rol.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label>Password</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.password" readonly>
+      </div>
+
+    </div>
+
+    <!-- BOTÓN -->
+    <div class="text-end mt-4">
+      <button class="btn btn-primary btn-pro" (click)="guardarUsuario()">
+        <i class="bi bi-save me-1"></i>
+        Guardar Usuario
+      </button>
+    </div>
+
+  </div>
+
+</div>

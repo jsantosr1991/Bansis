@@ -1,0 +1,313 @@
+<app-loader [loading]="loading"></app-loader>
+<div class="module-card">
+  <!-- Contenedor general -->
+  <div class="">
+
+    <!-- Configuración para 'mayordomo' -->
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <div class="card shadow-sm border-info">
+          <div class="card-body">
+            <h5 class="card-title">Configuración de Asistencia</h5>
+
+            <div *ngIf="permisoService.tieneGrupo('mayordomo'); else gerencia">
+
+              <div class="row align-items-end">
+
+                <!-- Fecha -->
+                <div class="col-md-4">
+                  <label for="fecha" class="form-label">Fecha</label>
+                  <input id="fecha" type="date" class="form-control" [(ngModel)]="asistencia.fecha"
+                    (change)="cargarAsistencia()" [max]="maxFecha">
+                </div>
+
+                <!-- Hacienda -->
+                <div class="col-md-4">
+                  <label for="hacienda" class="form-label">Hacienda</label>
+                  <input id="hacienda" class="form-control" [value]="namehacienda" readonly>
+                </div>
+
+                <!-- Botones -->
+                <div class="col-md-4 d-flex gap-2 mt-3 mt-md-0" *ngIf="botonesHabilitados">
+                  <button class="btn btn-danger position-relative w-100" (click)="abrirModalTabla1()"
+                    [disabled]="!botonesHabilitados">
+
+                    <i class="bi bi-x-circle"></i> Faltas
+
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+                      {{ totales.faltas }}
+                    </span>
+                  </button>
+
+                  <button class="btn btn-warning position-relative w-100" (click)="abrirModalTabla2()">
+                    <i class="bi bi-exclamation-triangle"></i> Permisos
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+                      {{ totales2.permisos }}
+                    </span>
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuración para gerencia -->
+    <ng-template #gerencia>
+      <div class="row align-items-end"
+        *ngIf="permisoService.tieneGrupo('gerencia') || permisoService.tieneGrupo('administradores'); else administrador">
+        <div class="col-md-4">
+          <label for="fecha-administrador">Fecha</label>
+          <input id="fecha-administrador" type="date" class="form-control" [(ngModel)]="asistencia.fecha"
+            (change)="cargarAsistencia()" [max]="maxFecha">
+        </div>
+
+        <div class="col-md-4">
+          <label for="hacienda-administrador">Escoja Hacienda</label>
+          <select id="hacienda-administrador" class="form-select" [(ngModel)]="asistencia.idhacienda"
+            (change)="cargarAsistencia()">
+            <option *ngFor="let h of empresas" [value]="h.id">{{h.nombre}}</option>
+          </select>
+        </div>
+        <!-- Botones -->
+        <div class="col-md-4 d-flex gap-2 mt-3 mt-md-0" *ngIf="botonesHabilitados">
+          <button class="btn btn-danger position-relative w-100" (click)="abrirModalTabla1()"
+            [disabled]="!botonesHabilitados">
+
+            <i class="bi bi-x-circle"></i> Faltas
+
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+              {{ totales.faltas }}
+            </span>
+          </button>
+
+          <button class="btn btn-warning position-relative w-100" (click)="abrirModalTabla2()">
+            <i class="bi bi-exclamation-triangle"></i> Permisos
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+              {{ totales2.permisos }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #administrador>
+      <div class="row align-items-end">
+        <div class="col-md-4">
+          <label for="fecha-administrador">Fecha</label>
+          <input id="fecha-administrador" type="date" class="form-control" [(ngModel)]="asistencia.fecha"
+            (change)="cargarAsistencia()" [max]="maxFecha">
+        </div>
+
+        <div class="col-md-4">
+          <label for="hacienda-administrador">Escoja Hacienda</label>
+          <select id="hacienda-administrador" class="form-select" [(ngModel)]="asistencia.idhacienda"
+            (change)="cargarAsistencia()">
+            <option *ngFor="let h of hacienda" [value]="h.id">{{h.name}}</option>
+
+          </select>
+        </div>
+        <!-- Botones -->
+        <div class="col-md-4 d-flex gap-2 mt-3 mt-md-0" *ngIf="botonesHabilitados">
+          <button class="btn btn-danger position-relative w-100" (click)="abrirModalTabla1()"
+            [disabled]="!botonesHabilitados">
+
+            <i class="bi bi-x-circle"></i> Faltas
+
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+              {{ totales.faltas }}
+            </span>
+          </button>
+
+          <button class="btn btn-warning position-relative w-100" (click)="abrirModalTabla2()">
+            <i class="bi bi-exclamation-triangle"></i> Permisos
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark ">
+              {{ totales2.permisos }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+    <!-- Leyenda de colores (sticky) -->
+    <div id="leyenda-colores" class="legend-container">
+      <!--      <h6 class="fw-bold mb-2">Leyenda de colores</h6>-->
+      <div class="d-flex flex-wrap gap-4">
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box" style="background: blue;"></span>
+          <small>Lotero</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box" style="background: yellow; border: 1px solid #ccc;"></span>
+          <small>Solo Corte</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box" style="background: #ff0000;"></span>
+          <small>Sin marcación</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box" style="background: #bf00ff;"></span>
+          <small>Vacaciones</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box" style="background: green;"></span>
+          <small>Permiso / Justificado</small>
+        </div>
+        <div class="d-flex align-items-center gap-2" *ngIf="estadoCorte === 'A';else nocorte">
+          <span class="legend-box" style="background: limegreen;"></span>
+          <small><b>Día de Proceso</b></small>
+        </div>
+        <ng-template #nocorte>
+          <div class="d-flex align-items-center gap-2">
+            <span class="legend-box" style="background: darkred;"></span>
+            <small><b>No hay Proceso</b></small>
+          </div>
+        </ng-template>
+
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Tablas de Asistencia -->
+    <div class="table-container mb-4">
+      <h4 class="table-title mb-2">Asistencia ({{ asistencias.length }})</h4>
+      <table #tablaAsistencia class="table table-bordered table-striped table-hover w-100">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Cod</th>
+            <th>Cargo</th>
+            <th>Fecha</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- Tablas de Sin Marcación -->
+    <div class="table-container mb-4">
+      <h4 class="table-titlesinmarcar mb-2">Sin marcación ({{ sinMarcacion.length }})</h4>
+      <table #tablaSinMarcacion class="table table-bordered table-striped table-hover w-100 table-warning">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Cod</th>
+            <th>Cargo</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- Tablas de Faltas -->
+    <div class="table-container mb-4">
+      <h4 class="table-titlefalta mb-2">Faltas ({{ faltas.length }})</h4>
+      <table #tablaFaltas class="table table-bordered table-striped table-hover w-100 table-warning">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Cod</th>
+            <th>Cargo</th>
+            <th>Fecha</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- Tablas de Permisos -->
+    <div class="table-container mb-4">
+      <h4 class="table-titlepermiso mb-2">Permisos / Justificados ({{ permisos.length }})</h4>
+      <table #tablaPermisos class="table table-bordered table-striped table-hover w-100 table-warning">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Cod</th>
+            <th>Cargo</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- Tablas de Vacaciones -->
+    <div class="table-container mb-4">
+      <h4 class="table-titlevacaciones mb-2">Vacaciones ({{ vacaciones.length }})</h4>
+      <table #tablaVacaciones class="table table-bordered table-striped table-hover w-100 table-warning">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Cod</th>
+            <th>Cargo</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Tabla 1 -->
+<div class="modal fade" id="modalTabla1" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-uppercase text-danger">Cantidad de faltas en el mes de {{mes}}: {{totales.faltas}}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Aquí va tu tabla -->
+        <div class="table-responsive">
+          <table #tablaFaltasCantidad id="tablaFaltasCantidad" class="table table-bordered display" style="width:100%">
+          </table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tabla 2 -->
+<div class="modal fade" id="modalTabla2" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-uppercase text-warning">Cantidad de permisos en el mes de {{mes}}:
+          {{totales2.permisos}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table #tablaPermisoCantidad id="tablaPermisoCantidad" class="table table-bordered display"
+            style="width:100%"></table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

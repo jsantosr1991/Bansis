@@ -1,0 +1,115 @@
+/* --- ESTRUCTURA RESPONSIVA DEL SIDEBAR --- */
+
+/* Contenedor del Menú con Scroll (Dinámico) */
+.sidebar-menu {
+  flex-grow: 1;
+  /* Ocupa el espacio restante */
+  overflow-y: auto;
+  /* Habilita scroll vertical si el contenido excede el alto */
+  overflow-x: hidden;
+  padding-bottom: 4rem;
+  /* Padding generoso para evitar cortes abruptos */
+
+  /* EFECTO PREMIUM: Desvanecimiento gradual en los extremos del scroll */
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 40px,
+      black calc(100% - 60px),
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 40px,
+      black calc(100% - 60px),
+      transparent 100%);
+}
+
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-right: 1px solid #eef0f2;
+
+  /* ACABADO PREMIUM: Bordes redondeados y sombra suave */
+  border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Marca/Logo superior (Fijo) */
+.sidebar-brand {
+  flex-shrink: 0;
+  /* Evita que el logo se encoja */
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Personalización de la barra de desplazamiento (Scrollbar) - OCULTA PARA ESTÉTICA PREMIUM */
+.sidebar-menu::-webkit-scrollbar {
+  display: none;
+  /* Oculta la barra en Chrome, Safari y nuevas versiones de Edge */
+}
+
+.sidebar-menu {
+  -ms-overflow-style: none;
+  /* Oculta la barra en Internet Explorer y Edge antiguo */
+  scrollbar-width: none;
+  /* Oculta la barra en Firefox */
+}
+
+/* Comportamiento en móviles y tablets */
+@media (max-width: 768px) {
+  .sidebar-wrapper {
+    transform: translateX(-100%);
+    /* Oculto por defecto en pantallas pequeñas */
+  }
+
+  .sidebar-wrapper.visible {
+    transform: translateX(0);
+    /* Se muestra al activar el toggle */
+  }
+}
+
+/* Comportamiento en escritorio */
+@media (min-width: 769px) {
+  .sidebar-wrapper {
+    transform: translateX(0);
+    /* Siempre visible en pantallas grandes */
+  }
+}
+
+/* --- FIN DE ESTRUCTURA RESPONSIVA --- */
+
+.menu-icon-img {
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-bottom: 7px;
+  display: inline-block;
+  background-color: #13181e;
+  -webkit-mask-image: url('../../../assets/images/SistemaHac/Logo/talento-humano.svg');
+  mask-image: url('../../../assets/images/SistemaHac/Logo/talento-humano.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.sidebar-wrapper .sidebar-menu ul li a:hover .menu-icon-img {
+  animation: iconUpDown 1s linear infinite;
+}
+
+.sidebar-wrapper .sidebar-menu ul li.active-page-link a .menu-icon-img,
+.sidebar-wrapper .sidebar-menu ul li.active a .menu-icon-img {
+  background-color: #435EEF;
+}

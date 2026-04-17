@@ -1,0 +1,61 @@
+<!-- Spinner de pantalla completa -->
+<div *ngIf="isLoading" class="overlay-spinner">
+  <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+
+<div class="login-container" [class.opacity-50]="isLoading">
+  <!-- Login box start -->
+  <form (ngSubmit) ="onSubmit()"  >
+    <div class="login-box">
+      <div class="login-form">
+        <a href="index.html" class="login-logo">
+          <img src="assets/images/SistemaHac/Logo/bananas.svg" alt="Vico Admin" />
+        </a>
+        <div class="login-welcome">
+         <b> Bienvenido, <br />Por favor ingrese credenciales.</b>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Username</label>
+          <input type="text"
+                id="username" name="username" [(ngModel)]="username"
+                 class="form-control" [class.input-error]="invalidLogin"
+                 required />
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bolder">Password</label>
+            <!-- En la plantilla de tu componente -->
+
+            <a  routerLink="/forgotpassword" class="btn-link ml-auto">Forgot password?</a>
+          </div>
+          <input type="password" id="password" name="password" [(ngModel)]="password" class="form-control"   [class.input-error]="invalidLogin"
+                 required />
+        </div>
+        <!-- Mensaje de error -->
+        <div *ngIf="invalidLogin" class="alert alert-danger text-center py-2">
+          {{ errorMessage }}
+        </div>
+
+        <div class="login-form-actions">
+          <button type="submit" class="btn" [disabled]="isLoading">
+
+
+            <span class="icon"> <i class="bi bi-arrow-right-circle"></i> </span>
+            Login
+          </button>
+
+        </div>
+
+        <div class="login-form-footer">
+          <div class="additional-link">
+           Si no puedes ingresar contacte a Sistemas
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!-- Login box end -->
+</div>

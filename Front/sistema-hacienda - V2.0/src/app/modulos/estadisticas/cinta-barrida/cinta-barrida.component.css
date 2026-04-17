@@ -1,0 +1,4 @@
+/* Evita que el modal padre bloqueé la interacción visual cuando hay un hijo abierto */
+.modal-stack-hidden {
+  display: none !important;  /* Oculta visualmente el padre */
+}

@@ -1,0 +1,41 @@
+<nav class="sidebar-wrapper" [class.visible]="sidebarVisible">
+
+  <!-- LOGO -->
+  <div class="sidebar-brand">
+    <a routerLink="/dashboard" (click)="closeSidebar()">
+      <img src="assets/images/SistemaHac/Logo/letter-v.svg" alt="logo">
+    </a>
+  </div>
+
+  <!-- MENU -->
+  <div class="sidebar-menu">
+    <div class="sidebarMenuScroll">
+
+      <ul>
+        <li *ngFor="let item of filteredMenu" class="sidebar-dropdown" [class.active]="item.active">
+
+          <!-- ITEM PRINCIPAL -->
+          <a href="javascript:void(0)" (click)="toggleDropdown(item)">
+            <i [class]="item.icon"></i>
+            <span class="menu-text">{{ item.title }}</span>
+          </a>
+
+          <!-- SUBMENU -->
+          <div class="sidebar-submenu" *ngIf="item.submenus?.length">
+            <ul>
+              <li *ngFor="let submenu of item.submenus">
+                <a [routerLink]="submenu.route" routerLinkActive="current-page" (click)="closeSidebar()">
+
+                  {{ submenu.title }}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+        </li>
+      </ul>
+
+    </div>
+  </div>
+
+</nav>

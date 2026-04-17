@@ -35,129 +35,202 @@
 <!-- TABLA -->
 <div class="card shadow-sm mt-1">
   <div class="card-body">
+
     <div class="table-responsive" *ngIf="solicitudes.length > 0">
 
-      <table class="table table-striped table-hover align-middle w-100" id="tablaSolicitudes"
-        style="table-layout: auto;">
+      <table class="table table-hover align-middle w-100 table-sm" id="tablaSolicitudes">
+
+        <!-- HEADER -->
         <thead class="table-dark">
           <tr>
-
             <th>Documento</th>
             <th>Fecha</th>
             <th>Usuario</th>
-            <th>Ítems</th>
-            <th>Estado</th>
-            <th>Por despachar</th>
+            <th class="text-center">Ítems</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Pendientes</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
 
+        <!-- BODY -->
         <tbody>
-          <tr *ngFor="let s of solicitudes; let i = index">
 
-            <td class="col-documento">
+          <tr *ngFor="let s of solicitudes">
+
+            <!-- DOCUMENTO -->
+            <td class="fw-semibold">
               {{ s.Documento }}
             </td>
 
-            <td>{{ s.FechaEmision | date:'dd/MM/yyyy' }}</td>
+            <!-- FECHA -->
             <td>
-              <div class="usuario-nombre">{{ s.usuario }}</div>
-
+              {{ s.FechaEmision | date:'dd/MM/yyyy' }}
             </td>
+
+            <!-- USUARIO -->
             <td>
-              <span class="badge bg-success">
-                {{ s.detalle.length }} productos
+              <div class="fw-semibold text-uppercase">
+                {{ s.usuario }}
+              </div>
+              <small class="text-muted">Solicitante</small>
+            </td>
+
+            <!-- ÍTEMS -->
+            <td class="text-center">
+              <span class="badge bg-success fs-6 px-3">
+                {{ s.despachado }}
               </span>
             </td>
 
-            <td *ngIf="s.itemsPendientes === s.detalle.length;else pendiente">
-              <span class="badge bg-danger">
-                <b> Pendiente </b>
+            <!-- ESTADO (MEJORADO) -->
+            <td class="text-center">
+
+              <!-- ⛔ PENDIENTE TOTAL -->
+              <span *ngIf="s.itemsPendientes == s.despachado" class="badge bg-danger px-3 py-2">
+                ⛔ Pendiente
               </span>
+
+              <!-- ⚠ PARCIAL -->
+              <span *ngIf="s.itemsPendientes > 0 && s.itemsPendientes < s.despachado"
+                class="badge bg-warning text-dark px-3 py-2">
+                ⚠ Parcial
+              </span>
+
             </td>
-            <ng-template #pendiente>
-              <td class="justify-content-center">
-                <span class="badge bg-warning">
-                  <b> Incompleto </b>
-                </span>
 
-              </td>
-
-            </ng-template>
-            <td class="justify-content-center">
-              <span class="fw-bolder text-center" *ngIf="s.itemsPendientes > 0">
+            <!-- PENDIENTES -->
+            <td class="text-center">
+              <span *ngIf="s.itemsPendientes > 0" class="fw-bold text-danger">
                 {{ s.itemsPendientes }} ítems
               </span>
+
+              <span *ngIf="s.itemsPendientes === 0" class="text-success fw-semibold">
+                0 ítems
+              </span>
             </td>
 
-            <td class="text-center acciones">
-
-              <button class="btn btn-primary" (click)="verDetalle(s)">
+            <!-- ACCIONES -->
+            <td class="text-center">
+              <button class="btn btn-primary btn-sm shadow-sm" (click)="verDetalle(s)">
                 <i class="bi bi-eye"></i>
               </button>
-
             </td>
+
           </tr>
+
         </tbody>
 
       </table>
+
     </div>
+
   </div>
 </div>
 <!--modal detalle-->
-
 <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          Detalle de Solicitud: Nº {{ solicitudSeleccionada?.Documento}}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <!-- HEADER PRO -->
+      <div class="modal-header bg-primary text-white">
+        <div>
+          <h5 class="modal-title mb-0">
+            📦 Solicitud N° {{ solicitudSeleccionada?.Documento }}
+          </h5>
+          <small>
+            Usuario: {{ solicitudSeleccionada?.usuario }} |
+            Bodega: {{ solicitudSeleccionada?.hacienda }}
+          </small>
+        </div>
+
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
+      <!-- BODY -->
       <div class="modal-body" *ngIf="solicitudSeleccionada">
 
+        <!-- INFO -->
         <div class="row mb-3">
           <div class="col-md-6">
             <strong>Solicita:</strong><br />
-            {{ solicitudSeleccionada?.usuario}}
+            {{ solicitudSeleccionada?.usuario }}
           </div>
           <div class="col-md-6">
             <strong>Bodega:</strong><br />
-            {{solicitudSeleccionada?.hacienda}}
+            {{ solicitudSeleccionada?.hacienda }}
           </div>
         </div>
-        <!-- CHECK COMPLETO / PARCIAL -->
-        <div class="table-responsive">
-          <table class="table table-bordered table-sm align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Despachar a:</th>
-                <th>Cod. Prod</th>
-                <th>Producto</th>
-                <th class="text-end">Cantidad Solicitada</th>
-                <th class="text-end">Cantidad Pendiente</th>
-                <th class="text-center">Completo</th>
-                <th class="text-end">Cantidad a despachar</th>
 
+        <!-- TABLA -->
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-sm align-middle">
+
+            <!-- 🔥 HEADER TIPO EXCEL -->
+            <thead class="table-light">
+
+              <tr>
+                <th rowspan="2">Despachar a</th>
+                <th rowspan="2">Cod. Prod</th>
+                <th rowspan="2">Producto</th>
+
+                <!-- 🔥 CANTIDAD AHORA INCLUYE PENDIENTE -->
+                <th colspan="3" class="text-center bg-light fw-bold">
+                  📦 Cantidad
+                </th>
+
+                <th rowspan="2" class="text-center">✔</th>
+                <th rowspan="2" class="text-end">Despachar</th>
               </tr>
+
+              <tr>
+                <th class="text-end">Solicitada</th>
+                <th class="text-end">Despachada</th>
+                <th class="text-end">Pendiente</th>
+              </tr>
+
             </thead>
+
             <tbody>
+
               <ng-container *ngFor="let d of solicitudSeleccionada?.detalle">
 
-                <!-- 🔹 FILA ORIGINAL (NO SE TOCA DISEÑO) -->
+                <!-- FILA PRINCIPAL -->
                 <tr>
 
-                  <td>{{ d.Solicitante }}</td>
+                  <!-- DESPACHAR A -->
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                        style="width:28px;height:28px;font-size:11px;">
+                        {{ d.Solicitante?.charAt(0) }}
+                      </div>
+
+                      <div class="fw-semibold">
+                        {{ d.Solicitante }}
+                      </div>
+                    </div>
+                  </td>
+
                   <td>{{ d.codProd }}</td>
                   <td>{{ d.producto }}</td>
 
-                  <td class="text-end">{{ d.cantidadSolicitada }}</td>
+                  <!-- SOLICITADA -->
+                  <td class="text-end fw-semibold">
+                    {{ d.cantidadSolicitada }}
+                  </td>
 
+                  <!-- DESPACHADA -->
+                  <td class="text-end text-primary fw-semibold">
+                    {{ d.TotalDespachado }}
+                  </td>
+
+                  <!-- 🔥 PENDIENTE (DENTRO DE CANTIDAD) -->
                   <td class="text-end">
-                    {{ d.pendiente }}
+                    <span [class.text-danger]="d.pendiente > 0" [class.text-success]="d.pendiente === 0"
+                      class="fw-bold">
+                      {{ d.pendiente }}
+                    </span>
                   </td>
 
                   <!-- CHECK -->
@@ -168,48 +241,44 @@
 
                   <!-- INPUT -->
                   <td class="text-end">
-                    <input type="number" class="form-control form-control-sm text-end" min="0" step="0.01"
+                    <input type="number" class="form-control form-control-sm text-end shadow-sm" min="0" step="0.01"
                       [max]="d.pendiente" [(ngModel)]="d.cantidadDespachar"
                       [disabled]="d.completo || d.pendiente === 0 || solicitudSeleccionada?.esCerrado">
                   </td>
 
                 </tr>
 
-                <!-- 🔥 NUEVA FILA SOLO PARA COMENTARIO -->
+                <!-- COMENTARIO -->
                 <tr *ngIf="!d.completo">
+                  <td colspan="8" class="bg-light p-2">
+                    <small class="text-muted fw-semibold">
+                      Motivo / Comentario:
+                    </small>
 
-                  <td colspan="7" class="p-2 bg-light">
-
-                    <div class="px-2">
-
-                      <small class="text-muted fw-semibold">
-                        Motivo / Comentario:
-                      </small>
-
-                      <textarea class="form-control form-control-sm mt-1" rows="2" [(ngModel)]="d.comentario"
-                        placeholder="Explique por qué no se completa este ítem..."
-                        [disabled]="solicitudSeleccionada?.esCerrado">
-          </textarea>
-
-                    </div>
-
+                    <textarea class="form-control form-control-sm mt-1" rows="2" [(ngModel)]="d.comentario"
+                      placeholder="Explique por qué no se completa este ítem..."
+                      [disabled]="solicitudSeleccionada?.esCerrado">
+                    </textarea>
                   </td>
-
                 </tr>
 
               </ng-container>
+
             </tbody>
+
           </table>
         </div>
+
       </div>
 
+      <!-- FOOTER -->
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal" (click)="cerrarModal()">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Cerrar
         </button>
 
-        <button class="btn btn-success" (click)="confirmarDespacho()"
-          [class.modal-disabled]="solicitudSeleccionada?.esCerrado">
+        <button type="button" class="btn btn-success" (click)="confirmarDespacho()"
+          [disabled]="solicitudSeleccionada?.esCerrado">
           Confirmar despacho
         </button>
       </div>

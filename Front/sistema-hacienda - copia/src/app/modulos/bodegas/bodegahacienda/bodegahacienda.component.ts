@@ -184,98 +184,207 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
   /* =========================
    * AGRUPACIÓN
    * ========================= */
+  /*  agruparSolicitudes(data: any[]): any[] {
+     const mapa = new Map<string, any>();
+ 
+     data.forEach(item => {
+ 
+       const key = `${item.Documento.trim()}-${item.usuario.trim()}`;
+ 
+       if (!mapa.has(key)) {
+         mapa.set(key, {
+           Documento: item.Documento.trim(),
+           FechaEmision: item.FechaEmision,
+           usuario: item.usuario.trim(),
+           //  hacienda: item.hacienda.trim(),
+           estado: item.estado,
+           despachado: item.totalItems,
+ 
+           detalle: [],
+           itemsPendientes: item.itemsPendientes  // ?? OBLIGATORIO
+         });
+       }
+ 
+       const cantidadSolicitada = Number(item.CantidadDigitada) || 0;
+       const totalDespachado = Number(item.TotalDespachado) || 0;
+       const pendiente = Math.max(cantidadSolicitada - totalDespachado, 0);
+ 
+       const grupo = mapa.get(key);
+ 
+       grupo.detalle.push({
+         Documento: item.Documento.trim(),
+         linea: item.linea,
+         codProd: item.codProd,
+         producto: item.producto,
+         Solicitante: item.Solicitante?.trim(),
+         hacienda: item.hacienda?.trim(),
+         // cantidad: Number(item.CantidadDigitada),
+         // ?? DATOS REALES DESDE EL BACK
+         cantidadSolicitada,
+         TotalDespachado: totalDespachado,
+ 
+         itemsPendientes: 0,  // ?? CONTADOR DE ÍTEMS
+         pendiente,
+         // UI
+         completo: true,
+         cantidadDespachar: pendiente
+       });
+       // ? CONTAR ÍTEMS, NO CANTIDADES
+       if (pendiente > 0) {
+         grupo.itemsPendientes++;
+       }
+       console.log('grupo:', grupo);
+     });
+ 
+     return Array.from(mapa.values());
+   }
+  */
+  /* =========================
+   * MODAL
+   * ========================= */
+  /*  verDetalle(s: any): void {
+ 
+     const esCerrado = s.estado_documento === 'CERRADO';
+ 
+     this.solicitudSeleccionada = {
+       ...s,
+       esCerrado,
+       detalle: s.detalle.map((d: any) => ({
+         ...d,
+         completo: true,
+         cantidadDespachar: d.pendiente,
+         comentario: '' // 🔥 NUEVO
+       }))
+ 
+     };
+ 
+     console.log('detalle:', this.solicitudSeleccionada)
+     this.cdr.detectChanges();
+ 
+     const modalEl = document.getElementById('modalDetalle');
+     const modal = new bootstrap.Modal(modalEl!, {
+       backdrop: 'static',
+       keyboard: false
+     });
+     modal.show();
+   } */
   agruparSolicitudes(data: any[]): any[] {
     const mapa = new Map<string, any>();
 
     data.forEach(item => {
 
-      const key = `${item.Documento.trim()}-${item.usuario.trim()}`;
+      const key = `${item.Documento?.trim()}-${item.usuario?.trim()}`;
 
+      // 🔥 ASEGURAR VALORES BASE
+      const estado = Number(item.estado ?? 0);
+      const pendienteItem = Math.max(
+        (Number(item.CantidadDigitada) || 0) - (Number(item.TotalDespachado) || 0),
+        0
+      );
+
+      // 🔹 CREAR GRUPO SOLO UNA VEZ
       if (!mapa.has(key)) {
         mapa.set(key, {
-          Documento: item.Documento.trim(),
+          Documento: item.Documento?.trim(),
           FechaEmision: item.FechaEmision,
-          usuario: item.usuario.trim(),
-          hacienda: item.hacienda.trim(),
-          estado: item.estado,
-          despachado: item.despachado,
+          usuario: item.usuario?.trim(),
+
+          estado: estado, // 🔥 FIX IMPORTANTE
+          despachado: item.totalItems,
+
           detalle: [],
-          itemsPendientes: 0   // ?? OBLIGATORIO
+          itemsPendientes: item.itemsPendientes
         });
       }
 
-      const cantidadSolicitada = Number(item.CantidadDigitada) || 0;
-      const totalDespachado = Number(item.TotalDespachado) || 0;
-      const pendiente = Math.max(cantidadSolicitada - totalDespachado, 0);
-
       const grupo = mapa.get(key);
 
+      // 🔹 DETALLE
       grupo.detalle.push({
-        Documento: item.Documento.trim(),
+        Documento: item.Documento?.trim(),
         linea: item.linea,
         codProd: item.codProd,
         producto: item.producto,
-        Solicitante: item.Solicitante?.trim(),
-        hacienda: item.hacienda?.trim(),
-        // cantidad: Number(item.CantidadDigitada),
-        // ?? DATOS REALES DESDE EL BACK
-        cantidadSolicitada,
-        TotalDespachado: totalDespachado,
+        Solicitante: item.Solicitante,
+        hacienda: item.hacienda,
 
-        itemsPendientes: 0,  // ?? CONTADOR DE ÍTEMS
-        pendiente,
-        // UI
-        completo: true,
-        cantidadDespachar: pendiente
+        cantidadSolicitada: Number(item.CantidadDigitada) || 0,
+        TotalDespachado: Number(item.TotalDespachado) || 0,
+        pendiente: pendienteItem,
+
+        completo: true, // 🔥 todos seleccionados por defecto
+        cantidadDespachar: pendienteItem,
+        comentario: ''
       });
-      // ? CONTAR ÍTEMS, NO CANTIDADES
-      if (pendiente > 0) {
+      console.log('grupo', grupo)
+
+      // 🔹 CONTADOR DE PENDIENTES
+      if (pendienteItem > 0) {
         grupo.itemsPendientes++;
       }
-      console.log(grupo);
     });
 
     return Array.from(mapa.values());
   }
-
-  /* =========================
-   * MODAL
-   * ========================= */
   verDetalle(s: any): void {
 
-    const esCerrado = s.estado_documento === 'CERRADO';
+    const esCerrado = Number(s.estado ?? 0) === 3;
 
-    this.solicitudSeleccionada = {
-      ...s,
-      esCerrado,
-      detalle: s.detalle.map((d: any) => ({
-        ...d,
-        completo: true,
-        cantidadDespachar: d.pendiente,
-        comentario: '' // 🔥 NUEVO
-      }))
-    };
+    this.solicitudService.getDetalle(s.Documento, s.usuario)
+      .subscribe((detalle: any[]) => {
 
-    this.cdr.detectChanges();
+        const detalleProcesado = detalle.map((d) => {
 
-    const modalEl = document.getElementById('modalDetalle');
-    const modal = new bootstrap.Modal(modalEl!, {
-      backdrop: 'static',
-      keyboard: false
-    });
-    modal.show();
+          const cantidadSolicitada = Number(d.CantidadDigitada) || 0;
+          const totalDespachado = Number(d.TotalDespachado) || 0;
+
+          const pendiente = Math.max(cantidadSolicitada - totalDespachado, 0);
+
+          return {
+            Documento: d.Documento?.trim(),
+            linea: d.linea,
+            codProd: d.codProd,
+            producto: d.producto,
+            Solicitante: d.Solicitante,
+            hacienda: d.hacienda,
+
+            cantidadSolicitada,
+            TotalDespachado: totalDespachado,
+            pendiente,
+
+            completo: true, // 🔥 todos seleccionados
+            cantidadDespachar: pendiente,
+            comentario: ''
+          };
+        });
+
+        this.solicitudSeleccionada = {
+          ...s,
+          estado: Number(s.estado ?? 0), // 🔥 FIX CLAVE
+          esCerrado,
+          hacienda: detalle[0]?.hacienda || 'N/A',
+          detalle: detalleProcesado
+        };
+
+        const modalEl = document.getElementById('modalDetalle');
+        const modal = new bootstrap.Modal(modalEl!, {
+          backdrop: 'static',
+          keyboard: false
+        });
+
+        modal.show();
+      });
   }
 
   onCheckItem(d: any): void {
 
-    if (this.solicitudSeleccionada?.esCerrado) return;
+    if (this.solicitudSeleccionada?.estado === 3) return;
 
     if (d.completo) {
       d.cantidadDespachar = d.pendiente;
-      d.comentario = ''; // 🔥 limpiar comentario
+      d.comentario = '';
     } else {
       d.cantidadDespachar = 0;
-      // 🔥 aquí se habilita comentario
     }
   }
   /* =========================

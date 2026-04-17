@@ -1,0 +1,24 @@
+<div class="page-wrapper">
+
+  <!-- SIDEBAR -->
+  <app-sidebar [menuItems]="menuItems" [sidebarVisible]="isSidebarVisible" (close)="toggleSidebar(false)">
+  </app-sidebar>
+
+  <!-- OVERLAY -->
+  <div class="sidebar-overlay" *ngIf="isSidebarVisible" (click)="toggleSidebar(false)">
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-container">
+
+    <!-- HEADER -->
+    <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </div>
+
+</div>

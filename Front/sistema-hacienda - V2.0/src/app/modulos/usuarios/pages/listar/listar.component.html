@@ -1,0 +1,164 @@
+<app-loader [loading]="loading"></app-loader>
+<div class="module-card">
+  <div>
+    <!-- Encabezado con botón de refresco -->
+    <div class="module-header">
+      <div>
+        <h4 class="module-title">Usuarios</h4>
+        <small class="module-subtitle">Gestión de usuarios activos</small>
+      </div>
+      <div class="module-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario">
+          <i class="bi bi-person-plus"></i> Nuevo
+        </button>
+
+        <button class="btn btn-outline-secondary" (click)="refrescarUsuarios()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+
+    </div>
+
+
+    <div class="module-card">
+      <div class="table-responsive">
+        <table id="usuariosTable" class="table table-bordered table-hover w-100">
+          <thead class="table-light">
+            <tr>
+              <th>Nombres</th>
+              <th>Usuario</th>
+              <th>E-mail</th>
+              <th>Empresa</th>
+              <th>Rol</th>
+              <th>Grupo</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuarios">
+              <td class="text-uppercase">{{ u.NOMBRE_CORTO }}</td>
+              <td>{{ u.username }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{u.empe_nom}}</td>
+              <td>
+                <span class="badge bg-primary-subtle text-primary">
+                  {{ u.tipousuario }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-secondary-subtle text-dark">
+                  {{ u.grupo }}
+                </span>
+              </td>
+              <!-- Estado (Switch) -->
+              <td>
+                <div class="form-check form-switch">
+                  <input #chk class="form-check-input" type="checkbox" [checked]="u.status == 1"
+                    (change)="cambiarEstado(u, chk.checked)">
+
+                </div>
+              </td>
+              <td>
+                <!-- Acciones -->
+                <button class="btn btn-warning btn-sm" (click)="editarUsuario(u)">
+                  <i class="bi bi-pencil"></i> </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    <app-data-table [tableId]="'usuariosTable'" [options]="dataTableOptions" [refreshTrigger]="refreshToken">
+    </app-data-table>
+
+
+
+  </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form (ngSubmit)="guardarCambios()">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Datos de solo lectura -->
+          <div class="mb-3">
+            <label>Nombres</label>
+            <input [(ngModel)]="usuarioEdit.nombres" name="nombres" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label>Usuario</label>
+            <input [(ngModel)]="usuarioEdit.username" name="username" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label>Empresa</label>
+            <input [(ngModel)]="usuarioEdit.empresa" name="empresa" class="form-control" readonly />
+          </div>
+
+          <!-- Campos editables -->
+          <div class="mb-3">
+            <label>Email</label>
+            <input [(ngModel)]="usuarioEdit.email" name="email" type="email" class="form-control" required />
+          </div>
+
+          <div class="mb-3">
+            <label>Contraseña (opcional)</label>
+            <input [(ngModel)]="usuarioEdit.password" name="password" type="password" class="form-control"
+              placeholder="Dejar vacío para no cambiarla" />
+          </div>
+
+          <div class="mb-3">
+            <label>Rol</label>
+            <select class="form-select" [(ngModel)]="usuarioEdit.idRol" name="idRol" required>
+              <option value="">-- Seleccione un rol --</option>
+              <option *ngFor="let rol of roles" [value]="rol.id">
+                {{ rol.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label>Grupo</label>
+            <select class="form-select" [(ngModel)]="usuarioEdit.idGrupo" name="idGrupo" required>
+              <option value="">-- Seleccione un grupo --</option>
+              <option *ngFor="let grupo of grupos" [value]="grupo.id">
+                {{ grupo.grupo }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modalCrearUsuario" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <app-create (usuarioCreado)="onUsuarioCreado()"></app-create>
+      </div>
+
+    </div>
+  </div>
+</div>

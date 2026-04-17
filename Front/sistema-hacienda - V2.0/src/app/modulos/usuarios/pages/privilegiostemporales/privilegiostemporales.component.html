@@ -1,0 +1,160 @@
+<div class="module-container">
+
+  <!-- 🔥 HEADER -->
+  <div class="module-card">
+    <div class="module-header">
+      <div>
+        <h4 class="module-title">
+          <i class="bi bi-shield-lock me-2"></i>
+          Privilegios Temporales
+        </h4>
+        <small class="module-subtitle">
+          Asignación y control de roles temporales
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔥 FORMULARIO -->
+  <div class="module-card">
+
+    <div class="section-title">Asignar privilegio</div>
+
+    <form (ngSubmit)="otorgar()">
+
+      <div class="row g-3">
+
+        <div class="col-md-3">
+          <label>De</label>
+          <select class="form-select input-pro" [(ngModel)]="nuevoPrivilegio.otorgado_por" name="rol_delegado_id"
+            required>
+
+            <option value="">Selecciona Usuario</option>
+            <option *ngFor="let u of usuarios" [value]="u.id">
+              {{ u.NOMBRE_CORTO }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label>A</label>
+          <select class="form-select input-pro" [(ngModel)]="nuevoPrivilegio.usuario_id" name="usuario_id" required>
+
+            <option value="">Selecciona usuario</option>
+            <option *ngFor="let u of usuarios" [value]="u.id">
+              {{ u.NOMBRE_CORTO }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label>Rol</label>
+          <select class="form-select input-pro" [(ngModel)]="nuevoPrivilegio.rol_delegado_id" name="rol_delegado_id"
+            required>
+
+            <option value="">Selecciona rol</option>
+            <option *ngFor="let r of roles" [value]="r.id">
+              {{ r.nombre }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label>Inicio</label>
+          <input type="date" class="form-control input-pro" [(ngModel)]="nuevoPrivilegio.fecha_inicio"
+            name="fecha_inicio" [min]="minDate" required>
+        </div>
+
+        <div class="col-md-2">
+          <label>Fin</label>
+          <input type="date" class="form-control input-pro" [(ngModel)]="nuevoPrivilegio.fecha_fin" name="fecha_fin"
+            [min]="minDate" required>
+        </div>
+
+      </div>
+
+      <div class="text-end mt-4">
+        <button class="btn btn-primary btn-pro">
+          <i class="bi bi-check-circle me-1"></i>
+          Otorgar privilegio
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+  <!-- 🔥 TABLA -->
+  <div class="module-card">
+
+    <div class="section-title">Historial de privilegios</div>
+
+    <div class="table-responsive">
+
+      <table class="table table-hover align-middle table-sm">
+
+        <thead class="table-light text-center">
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Otorgado por</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let p of privilegios | paginate: {itemsPerPage:5, currentPage:page}"
+            [class.row-activo]="p.activo == 1" [class.row-inactivo]="p.activo == 0">
+
+            <td class="text-center fw-semibold">{{ p.idSerial }}</td>
+            <td>{{ p.usuario }}</td>
+            <td>{{ p.rol_delegado }}</td>
+            <td>{{ p.otorgado_por }}</td>
+
+            <td class="text-center">
+              {{ p.fecha_inicio | date:'dd-MM-yyyy' }}
+            </td>
+
+            <td class="text-center">
+              {{ p.fecha_fin | date:'dd-MM-yyyy' }}
+            </td>
+
+            <!-- 🔥 ESTADO PRO -->
+            <td class="text-center">
+              <span class="estado-badge" [ngClass]="p.activo ? 'completo' : 'pendiente'">
+
+                <i class="bi" [ngClass]="p.activo ? 'bi-check-circle' : 'bi-x-circle'"></i>
+
+                {{ p.activo ? 'Activo' : 'Inactivo' }}
+
+              </span>
+            </td>
+
+            <!-- ACCIÓN -->
+            <td class="text-center">
+              <button *ngIf="p.activo" class="btn btn-danger btn-sm btn-pro" (click)="desactivar(p.idSerial)">
+
+                <i class="bi bi-x-circle"></i>
+
+              </button>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

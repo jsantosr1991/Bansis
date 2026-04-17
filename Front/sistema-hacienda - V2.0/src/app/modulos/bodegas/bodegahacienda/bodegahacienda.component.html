@@ -1,0 +1,292 @@
+<app-loader [loading]="loading"></app-loader>
+<div class="module-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">
+      <i class="bi bi-box-seam me-2"></i>
+      Solicitudes Pendientes | {{namehacienda}}
+    </h4>
+
+
+  </div>
+
+  <!-- TÍTULO -->
+
+
+  <div *ngIf="permisoService.tieneGrupo('bodega'); else gerencia">
+    <div class="row align-items-end">
+
+
+    </div>
+
+  </div>
+  <ng-template #gerencia>
+    <div class="row align-items-end">
+      <!-- Hacienda -->
+      <div class="col-md-4">
+        <label for="hacienda-administrador">Escoja Hacienda</label>
+        <select id="hacienda-administrador" class="form-select" [(ngModel)]="solicitud.idhacienda"
+          (change)="cargarSolicitudes()">
+          <option *ngFor="let h of hacienda" [value]="h.id">{{h.name}}</option>
+
+        </select>
+      </div>
+
+    </div>
+
+  </ng-template>
+</div>
+
+<!-- TABLA -->
+<div class="card shadow-sm mt-1">
+  <div class="card-body">
+
+    <div class="table-responsive" *ngIf="solicitudes.length > 0">
+
+      <table class="table table-hover align-middle w-100 table-sm" id="tablaSolicitudes">
+
+        <!-- HEADER -->
+        <thead class="table-dark">
+          <tr>
+            <th>Documento</th>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th class="text-center">Ítems</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Pendientes</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+
+        <!-- BODY -->
+        <tbody>
+
+          <tr *ngFor="let s of solicitudes">
+
+            <!-- DOCUMENTO -->
+            <td class="fw-semibold">
+              {{ s.Documento }}
+            </td>
+
+            <!-- FECHA -->
+            <td>
+              {{ s.FechaEmision | date:'dd/MM/yyyy' }}
+            </td>
+
+            <!-- USUARIO -->
+            <td>
+              <div class="fw-semibold text-uppercase">
+                {{ s.usuario }}
+              </div>
+              <small class="text-muted">Solicitante</small>
+            </td>
+
+            <!-- ÍTEMS -->
+            <td class="text-center">
+              <span class="badge bg-success fs-6 px-3">
+                {{ s.despachado }}
+              </span>
+            </td>
+
+            <!-- ESTADO (MEJORADO) -->
+            <td class="text-center">
+
+              <!-- ⛔ PENDIENTE TOTAL -->
+              <span *ngIf="s.itemsPendientes == s.despachado" class="badge bg-danger px-3 py-2">
+                ⛔ Pendiente
+              </span>
+
+              <!-- ⚠ PARCIAL -->
+              <span *ngIf="s.itemsPendientes > 0 && s.itemsPendientes < s.despachado"
+                class="badge bg-warning text-dark px-3 py-2">
+                ⚠ Parcial
+              </span>
+
+            </td>
+
+            <!-- PENDIENTES -->
+            <td class="text-center">
+              <span *ngIf="s.itemsPendientes > 0" class="fw-bold text-danger">
+                {{ s.itemsPendientes }} ítems
+              </span>
+
+              <span *ngIf="s.itemsPendientes === 0" class="text-success fw-semibold">
+                0 ítems
+              </span>
+            </td>
+
+            <!-- ACCIONES -->
+            <td class="text-center">
+              <button class="btn btn-primary btn-sm shadow-sm" (click)="verDetalle(s)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+</div>
+<!--modal detalle-->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <!-- HEADER PRO -->
+      <div class="modal-header bg-primary text-white">
+        <div>
+          <h5 class="modal-title mb-0">
+            📦 Solicitud N° {{ solicitudSeleccionada?.Documento }}
+          </h5>
+          <small>
+            Usuario: {{ solicitudSeleccionada?.usuario }} |
+            Bodega: {{ solicitudSeleccionada?.hacienda }}
+          </small>
+        </div>
+
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body" *ngIf="solicitudSeleccionada">
+
+        <!-- INFO -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Solicita:</strong><br />
+            {{ solicitudSeleccionada?.usuario }}
+          </div>
+          <div class="col-md-6">
+            <strong>Bodega:</strong><br />
+            {{ solicitudSeleccionada?.hacienda }}
+          </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-sm align-middle">
+
+            <!-- 🔥 HEADER TIPO EXCEL -->
+            <thead class="table-light">
+
+              <tr>
+                <th rowspan="2">Despachar a</th>
+                <th rowspan="2">Cod. Prod</th>
+                <th rowspan="2">Producto</th>
+
+                <!-- 🔥 CANTIDAD AHORA INCLUYE PENDIENTE -->
+                <th colspan="3" class="text-center bg-light fw-bold">
+                  📦 Cantidad
+                </th>
+
+                <th rowspan="2" class="text-center">✔</th>
+                <th rowspan="2" class="text-end">Despachar</th>
+              </tr>
+
+              <tr>
+                <th class="text-end">Solicitada</th>
+                <th class="text-end">Despachada</th>
+                <th class="text-end">Pendiente</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <ng-container *ngFor="let d of solicitudSeleccionada?.detalle">
+
+                <!-- FILA PRINCIPAL -->
+                <tr>
+
+                  <!-- DESPACHAR A -->
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                        style="width:28px;height:28px;font-size:11px;">
+                        {{ d.Solicitante?.charAt(0) }}
+                      </div>
+
+                      <div class="fw-semibold">
+                        {{ d.Solicitante }}
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>{{ d.codProd }}</td>
+                  <td>{{ d.producto }}</td>
+
+                  <!-- SOLICITADA -->
+                  <td class="text-end fw-semibold">
+                    {{ d.cantidadSolicitada }}
+                  </td>
+
+                  <!-- DESPACHADA -->
+                  <td class="text-end text-primary fw-semibold">
+                    {{ d.TotalDespachado }}
+                  </td>
+
+                  <!-- 🔥 PENDIENTE (DENTRO DE CANTIDAD) -->
+                  <td class="text-end">
+                    <span [class.text-danger]="d.pendiente > 0" [class.text-success]="d.pendiente === 0"
+                      class="fw-bold">
+                      {{ d.pendiente }}
+                    </span>
+                  </td>
+
+                  <!-- CHECK -->
+                  <td class="text-center">
+                    <input type="checkbox" class="form-check-input" [(ngModel)]="d.completo" (change)="onCheckItem(d)"
+                      [disabled]="d.pendiente === 0 || solicitudSeleccionada?.esCerrado">
+                  </td>
+
+                  <!-- INPUT -->
+                  <td class="text-end">
+                    <input type="number" class="form-control form-control-sm text-end shadow-sm" min="0" step="0.01"
+                      [max]="d.pendiente" [(ngModel)]="d.cantidadDespachar"
+                      [disabled]="d.completo || d.pendiente === 0 || solicitudSeleccionada?.esCerrado">
+                  </td>
+
+                </tr>
+
+                <!-- COMENTARIO -->
+                <tr *ngIf="!d.completo">
+                  <td colspan="8" class="bg-light p-2">
+                    <small class="text-muted fw-semibold">
+                      Motivo / Comentario:
+                    </small>
+
+                    <textarea class="form-control form-control-sm mt-1" rows="2" [(ngModel)]="d.comentario"
+                      placeholder="Explique por qué no se completa este ítem..."
+                      [disabled]="solicitudSeleccionada?.esCerrado">
+                    </textarea>
+                  </td>
+                </tr>
+
+              </ng-container>
+
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+
+        <button type="button" class="btn btn-success" (click)="confirmarDespacho()"
+          [disabled]="solicitudSeleccionada?.esCerrado">
+          Confirmar despacho
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

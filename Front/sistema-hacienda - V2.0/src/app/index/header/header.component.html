@@ -1,0 +1,31 @@
+<div class="app-header">
+
+  <!-- LEFT -->
+  <div class="header-left">
+    <button class="menu-btn" (click)="toggleMenu()">☰</button>
+
+    <div class="breadcrumbs">
+      <a routerLink="/dashboard">Home</a>
+      <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+        <span> / </span>
+        <a *ngIf="!last" [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+        <span *ngIf="last">{{ breadcrumb.label }}</span>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="header-right">
+    <span class="welcome"><b>Bienvenido:</b> {{username}}</span>
+
+    <div class="user-box" (click)="toggleProfile()">
+      <img src="assets/images/SistemaHac/Logo/user.svg" />
+    </div>
+
+    <div class="dropdown-menu-custom" *ngIf="isProfileOpen">
+      <a href="#">Profile</a>
+      <a href="#">Settings</a>
+      <a (click)="logout()">Logout</a>
+    </div>
+
+  </div>
