@@ -1,0 +1,19 @@
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.bg-success {
+    background: #28a745;
+    color: #fff;
+}
+
+.bg-danger {
+    background: #dc3545;
+    color: #fff;
+}
+
+.bg-warning {
+    background: #ffc107;
+}

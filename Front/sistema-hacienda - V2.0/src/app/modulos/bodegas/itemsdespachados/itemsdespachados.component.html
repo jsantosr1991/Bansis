@@ -8,6 +8,7 @@
       <h4 class="module-title">
         <i class="bi bi-box-seam me-2"></i>
         Material Despachado
+        <span class="text-muted fs-6"> | {{ namehacienda }}</span>
       </h4>
       <p class="module-subtitle">
         Consulta y control de despachos por hacienda
@@ -20,29 +21,14 @@
 
     <div class="row g-2 align-items-end">
 
-      <!-- HACIENDA -->
-      <div class="col-md-3" *ngIf="permisoService.tieneGrupo('bodega'); else gerenciaFiltro">
-        <label>Hacienda</label>
-        <div class="input-pro readonly">
-          {{ namehacienda }}
-        </div>
+      <!-- ✅ HACIENDA (ARREGLADO) -->
+      <div class="col-md-3">
+        <app-filtro-hacienda [grupoOcultar]="CONFIG_FILTRO.grupoOcultar"
+          [gruposPermitidos]="CONFIG_FILTRO.gruposPermitidos" (cambioHacienda)="onHaciendaChange($event)">
+        </app-filtro-hacienda>
       </div>
 
-      <ng-template #gerenciaFiltro>
-        <div class="col-md-3">
-          <label>Hacienda</label>
-          <select class="form-select select-pro" [(ngModel)]="idhaciendaSeleccionada" (change)="onHaciendaChange()">
-
-            <option value="">Seleccione</option>
-            <option *ngFor="let h of haciendas" [value]="h.idhacienda">
-              {{ h.name }}
-            </option>
-
-          </select>
-        </div>
-      </ng-template>
-
-      <!-- 🔥 FILTRO TIPO (CHIPS PRO) -->
+      <!-- 🔥 FILTRO TIPO -->
       <div class="col-md-8">
         <label class="mb-1">Filtro</label>
 
@@ -73,7 +59,7 @@
         </div>
       </div>
 
-      <!-- BOTÓN -->
+      <!-- 🔥 BOTÓN -->
       <div class="col-md-1 d-grid">
         <button class="btn btn-primary btn-pro" (click)="cargarDespachados()">
           <i class="bi bi-search"></i>
@@ -81,103 +67,7 @@
       </div>
 
     </div>
-
-    <!-- 🔥 INFO DE FECHA -->
-    <div class="filtro-info" *ngIf="filtros.tipo !== 'rango'">
-
-      <span class="badge-fecha">
-        <i class="bi bi-calendar3"></i>
-
-        <ng-container [ngSwitch]="filtros.tipo">
-
-          <span *ngSwitchCase="'ultimo'">
-            Última fecha: {{ filtros.desde | date:'dd/MM/yyyy' }}
-          </span>
-
-          <span *ngSwitchCase="'hoy'">
-            Hoy: {{ filtros.desde | date:'dd/MM/yyyy' }}
-          </span>
-
-          <span *ngSwitchCase="'semana'">
-            Semana: {{ filtros.desde | date:'dd/MM' }} - {{ filtros.hasta | date:'dd/MM' }}
-          </span>
-
-          <span *ngSwitchCase="'mes'">
-            Mes: {{ filtros.desde | date:'dd/MM' }} - {{ filtros.hasta | date:'dd/MM' }}
-          </span>
-
-        </ng-container>
-
-      </span>
-
-    </div>
-
-    <!-- 🔥 FECHAS TIPO ERP -->
-    <div class="row mt-2" *ngIf="filtros.tipo === 'rango'">
-      <div class="col-md-12">
-
-        <label class="mb-1">Rango personalizado</label>
-
-        <div class="date-chips">
-
-          <div class="date-chip">
-            <span>Desde</span>
-            <input type="date" [(ngModel)]="filtros.desde" [max]="hoy" (change)="cargarDespachados()">
-          </div>
-
-          <div class="date-chip">
-            <span>Hasta</span>
-            <input type="date" [(ngModel)]="filtros.hasta" [max]="hoy" (change)="cargarDespachados()">
-          </div>
-
-          <div class="chip clear" (click)="filtros.desde=''; filtros.hasta=''; cargarDespachados()">
-            Limpiar
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-    <!-- 🔥 ESTADO -->
-    <div class="row mt-2">
-      <div class="col-md-12">
-
-        <label class="mb-1">Estado</label>
-
-        <div class="multi-select-inline">
-
-          <div class="chip" [class.active]="filtros.estado.includes('PENDIENTE')" (click)="toggleEstado('PENDIENTE')">
-            Pendiente
-          </div>
-
-          <div class="chip" [class.active]="filtros.estado.includes('PARCIAL')" (click)="toggleEstado('PARCIAL')">
-            Parcial
-          </div>
-
-          <div class="chip" [class.active]="filtros.estado.includes('COMPLETO')" (click)="toggleEstado('COMPLETO')">
-            Completo
-          </div>
-
-          <div class="chip" [class.active]="filtros.estado.includes('CERRADO')" (click)="toggleEstado('CERRADO')">
-            Cerrado
-          </div>
-
-          <div class="chip" [class.active]="filtros.estado.includes('INCOMPLETO')" (click)="toggleEstado('INCOMPLETO')">
-            Incompleto
-          </div>
-
-          <div class="chip clear" *ngIf="filtros.estado.length" (click)="limpiarEstados()">
-            Limpiar
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
   </div>
-
   <!-- TABLA -->
   <div class="module-card">
     <div class="table-responsive">

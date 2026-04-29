@@ -1,0 +1,25 @@
+<div class="w-100">
+
+    <!-- 🔹 CUANDO PUEDE CAMBIAR -->
+    <div *ngIf="!ocultarFiltro">
+        <label>Escoja Hacienda</label>
+
+        <select class="form-select w-100" [(ngModel)]="idhaciendaSeleccionada" (ngModelChange)="onChange()">
+
+            <option *ngFor="let h of haciendas" [ngValue]="h.id">
+                {{ h.name }}
+            </option>
+
+        </select>
+    </div>
+
+    <!-- 🔹 CUANDO NO PUEDE CAMBIAR -->
+    <div *ngIf="ocultarFiltro">
+        <label>Hacienda</label>
+
+        <div class="form-control bg-light fw-semibold w-100">
+            {{ namehacienda }}
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,50 @@
+<div class="module-card">
+
+    <!-- HEADER -->
+    <div class="module-header d-flex justify-content-between">
+        <div>
+            <h4 class="module-title">Inventario</h4>
+            <p class="module-subtitle">Control de insumos</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm" (click)="openProducto()">+ Producto</button>
+            <button class="btn btn-success btn-sm" (click)="openMovimiento('INGRESO')">+ Ingreso</button>
+            <button class="btn btn-danger btn-sm" (click)="openMovimiento('SALIDA')">- Salida</button>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filters-bar">
+        <div class="row g-2">
+
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Buscar..." [(ngModel)]="filtro.texto"
+                    (ngModelChange)="filtrar()">
+            </div>
+
+            <div class="col-md-3">
+                <select class="form-control" [(ngModel)]="filtro.stock" (change)="filtrar()">
+                    <option value="">Todos</option>
+                    <option value="bajo">Stock bajo</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <app-tabla [data]="productosFiltrados" (verKardex)="openKardex($event)">
+    </app-tabla>
+
+</div>
+
+<!-- MODALES -->
+<app-producto-form *ngIf="showProducto" (close)="showProducto=false" (saved)="cargar()">
+</app-producto-form>
+
+<app-movimiento-form *ngIf="showMovimiento" [tipo]="tipoMovimiento" (close)="showMovimiento=false" (saved)="cargar()">
+</app-movimiento-form>
+
+<app-kardex *ngIf="showKardex" [producto]="productoSeleccionado" (close)="showKardex=false">
+</app-kardex>

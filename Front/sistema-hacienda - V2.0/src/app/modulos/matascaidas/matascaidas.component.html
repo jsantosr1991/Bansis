@@ -51,52 +51,6 @@
 
     <!-- TABLA -->
 
-    <!-- <div class="grid-container">
-      <div class="matas-table-wrapper table-scroll">
-        <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
-          <table>
-            <thead>
-            &lt;!&ndash; 🔹 Primera fila: códigos &ndash;&gt;
-            <tr>
-              <th class="lote-header sticky-col text-center">
-
-              </th>
-              <th *ngFor="let column of columns" class="header-cell text-center text-black">
-                {{ column.codigo }}
-              </th>
-            </tr>
-
-            &lt;!&ndash; 🔹 Segunda fila: colores &ndash;&gt;
-            <tr>
-              <th class="lote-header sticky-col text-center"><label class="text-black">Lote </label> </th>
-              <th *ngFor="let column of columns"
-                  [style.backgroundColor]="getBackgroundColor(column.color)"
-                  [style.color]="(column.color === 'BLANCO' || column.color === 'AMARILLO') ? 'black' : 'white'"
-                  class="header-cell">
-                {{ column.color }}
-              </th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let row of rows">
-              <td class="sticky-col">{{ row }}</td>
-              <td *ngFor="let column of columns">
-                <input
-                  [formControlName]="row + column.codigo"
-                  (change)="onInputChange(row, column.codigo)"
-                  type="text"
-                  class="cell-input"
-                />
-              </td>
-            </tr>
-            </tbody>
-          </table>
-
-          <button type="submit" class="btn btn-primary mt-3">Guardar</button>
-        </form>
-      </div>
-
-    </div>-->
     <div class="grid-container">
       <div class="matas-table-wrapper table-scroll">
         <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">

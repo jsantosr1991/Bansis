@@ -1,0 +1,81 @@
+<app-modal title="Kardex de Producto" (close)="close.emit()">
+
+    <!-- HEADER -->
+    <div class="mb-3">
+
+        <h5 class="mb-0">
+            {{ producto?.nombre }}
+        </h5>
+
+        <small class="text-muted">
+            Código: {{ producto?.codigo }}
+        </small>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+
+        <table class="table table-sm table-hover">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Cantidad</th>
+                    <th class="text-end">Stock Ant.</th>
+                    <th class="text-end">Stock Nuevo</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr *ngFor="let k of data">
+
+                    <td>{{ formatearFecha(k.fecha) }}</td>
+
+                    <td>
+                        <span [ngClass]="{
+              'badge bg-success': k.tipo === 'INGRESO',
+              'badge bg-danger': k.tipo === 'SALIDA',
+              'badge bg-warning text-dark': k.tipo === 'AJUSTE'
+            }">
+                            {{ k.tipo }}
+                        </span>
+                    </td>
+
+                    <td class="text-end">
+                        {{ k.cantidad }}
+                    </td>
+
+                    <td class="text-end text-muted">
+                        {{ k.stock_anterior }}
+                    </td>
+
+                    <td class="text-end fw-bold">
+                        {{ k.stock_nuevo }}
+                    </td>
+
+                </tr>
+
+                <!-- VACÍO -->
+                <tr *ngIf="!data.length">
+                    <td colspan="5" class="text-center text-muted">
+                        Sin movimientos
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-secondary" (click)="close.emit()">
+            Cerrar
+        </button>
+    </div>
+
+</app-modal>

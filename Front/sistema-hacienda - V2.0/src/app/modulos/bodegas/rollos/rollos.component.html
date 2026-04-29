@@ -1,0 +1,428 @@
+<app-loader [loading]="loading"></app-loader>
+
+<div class="module-card">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between mb-2">
+        <h4 class="fw-bold">
+            <i class="bi" [ngClass]="modo==='auto' ? 'bi-magic' : 'bi-sliders'"></i>
+            Rollos | {{ namehacienda || 'Seleccione Hacienda' }}
+        </h4>
+    </div>
+    <div class="alert alert-info py-2 mt-2" *ngIf="semana && periodo">
+        📅 Estás trabajando en:
+        <b>Semana {{ semana }}</b> |
+        <b>Periodo {{ periodo }}</b> |
+        <b>Año {{ anio }}</b>
+    </div>
+
+
+    <!-- ESTADO + TIPO -->
+    <div *ngIf="estadoSemana" class="mb-2 d-flex gap-2">
+
+        <span class="badge" [ngClass]="estadoSemana === 'cerrada' ? 'bg-danger' : 'bg-success'">
+            {{ estadoSemana | uppercase }}
+        </span>
+
+        <span class="badge" [ngClass]="esPromedio ? 'bg-warning text-dark' : 'bg-primary'">
+            {{ esPromedio ? 'PROMEDIO' : 'REAL' }}
+        </span>
+
+    </div>
+    <div *ngIf="!esPromedio && estadoSemana === 'abierta'" class="alert alert-info py-2 mt-2">
+        📊 Datos reales detectados.
+        La distribución ya no puede ser regenerada automáticamente.
+    </div>
+
+
+    <!-- 🔥 MENSAJE PROMEDIO -->
+    <div *ngIf="esPromedio" class="alert alert-warning py-2 mt-2">
+        ⚠️ Esta semana no tiene producción registrada.
+        Se está mostrando un <b>promedio basado en semanas anteriores</b>.
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filters-bar">
+
+        <!-- 🔷 GRID ERP -->
+        <div class="row g-3 align-items-end">
+
+            <!-- HACIENDA -->
+            <div class="col-md-4">
+                <label class="form-label">Hacienda</label>
+                <app-filtro-hacienda [grupoOcultar]="CONFIG_FILTRO.grupoOcultar"
+                    [gruposPermitidos]="CONFIG_FILTRO.gruposPermitidos" (cambioHacienda)="onHaciendaChange($event)">
+                </app-filtro-hacienda>
+            </div>
+
+            <!-- SEMANA -->
+
+
+            <div class="col-md-2">
+                <label class="form-label">Semana</label>
+
+                <div class="input-group">
+
+                    <!-- ⬅️ ANTERIOR -->
+                    <button class="btn btn-outline-secondary" (click)="cambiarSemana(-7)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <!-- INPUT (LO DEJAS IGUAL) -->
+                    <input type="number" class="form-control text-center" [(ngModel)]="semana"
+                        (ngModelChange)="onFiltroChange()">
+
+                    <!-- ➡️ SIGUIENTE -->
+                    <button class="btn btn-outline-secondary" (click)="cambiarSemana(7)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- PERIODO -->
+            <div class="col-md-2">
+                <label class="form-label">Periodo</label>
+                <div class="input-icon">
+
+                    <input type="number" class="form-control input-pro" [(ngModel)]="periodo"
+                        (ngModelChange)="onFiltroChange()">
+                </div>
+            </div>
+
+            <!-- ACCIONES -->
+            <div class="col-md-4">
+                <div class="acciones-bar">
+
+                    <button class="btn btn-primary" (click)="buscar()" [disabled]="!idhaciendaSeleccionada">
+                        <i class="bi bi-search"></i>
+                        Consultar
+                    </button>
+
+                    <button *ngIf="puedeGenerarSemana" class="btn btn-success" (click)="generarSemana()"
+                        [disabled]="estadoSemana === 'cerrada' || (!esPromedio && data.length > 0)">
+                        <i class="bi bi-calculator"></i>
+                        Generar
+                    </button>
+
+                    <button *ngIf="mostrarRecalcular" class="btn btn-warning" (click)="recalcularSiEsNecesario()">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Recalcular
+                    </button>
+
+                    <button class="btn btn-danger" (click)="cerrarSemana()" [disabled]="estadoSemana === 'cerrada'">
+                        <i class="bi bi-lock"></i>
+                        Cerrar
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 🔵 TABLA PRINCIPAL (YA POR SECCIÓN) -->
+    <table class="table table-sm table-hover align-middle table-erp">
+
+        <thead class="table-light">
+            <tr>
+                <th style="width: 10%">Sección</th>
+                <th style="width: 25%">Persona</th>
+
+                <th class="text-end" style="width: 10%">Fundas</th>
+
+                <th class="text-end" style="width: 12%">Estimado</th>
+                <th class="text-end text-danger" style="width: 10%">Arrastre</th>
+                <th class="text-end text-info" style="width: 12%">Debe Entregar</th>
+                <th class="text-end" style="width: 12%">Entregado</th>
+                <th class="text-end" style="width: 9%">Dif.</th>
+
+                <th style="width: 10%">Acción</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <ng-container *ngFor="let grupo of dataAgrupada">
+
+                <!-- 🔵 FILA PERSONA -->
+                <tr class="table-primary cursor-pointer" (click)="grupo.expanded = !grupo.expanded">
+
+                    <td></td>
+
+                    <td>
+
+                        <i class="bi" [ngClass]="grupo.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+
+                        <span *ngIf="grupo.nombre; else sinAsignacionGrupo">
+                            {{ grupo.nombre }}
+                        </span>
+
+                        <ng-template #sinAsignacionGrupo>
+                            <span class="badge bg-danger">SIN ASIGNACIÓN</span>
+                        </ng-template>
+
+                        <!-- 🔥 ESTADO -->
+                        <span class="badge ms-2" [ngClass]="{
+                        'bg-success': grupo.totalDiferencia === 0,
+                        'bg-warning text-dark': grupo.totalDiferencia > 0,
+                        'bg-danger': grupo.totalDiferencia < 0
+                    }">
+
+                            {{
+                            grupo.totalDiferencia === 0 ? 'COMPLETO' :
+                            grupo.totalDiferencia > 0 ? 'SOBRANTE' :
+                            'PENDIENTE'
+                            }}
+
+                        </span>
+
+                        <span class="badge bg-light text-dark ms-2">
+                            {{ grupo.lotes.length }} lotes
+                        </span>
+
+                        <!-- 🔥 PROGRESO -->
+                        <div class="mt-1">
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-info" [style.width.%]="grupo.avanceReal"></div>
+                            </div>
+
+                            <small class="text-muted">
+                                {{ grupo.totalEntregado | number:'1.2-2' }} /
+                                {{ grupo.debeEntregar | number:'1.2-2' }}
+                            </small>
+                        </div>
+
+                    </td>
+
+                    <!-- FUNDAS -->
+                    <td class="text-end">
+                        {{ grupo.totalFundas | number:'1.0-0' }}
+                    </td>
+
+                    <!-- ESTIMADO -->
+                    <td class="text-end text-primary fw-bold">
+                        {{ grupo.totalEstimado | number:'1.2-2' }}
+                    </td>
+
+                    <!-- ARRASTRE -->
+                    <td class="text-end text-danger fw-bold">
+                        {{ grupo.arrastre | number:'1.2-2' }}
+                    </td>
+
+                    <!-- DEBE ENTREGAR -->
+                    <td class="text-end text-info fw-bold">
+                        {{ grupo.debeEntregar | number:'1.2-2' }}
+                    </td>
+
+                    <!-- ENTREGADO -->
+                    <td class="text-end">
+                        {{ grupo.totalEntregado | number:'1.2-2' }}
+                    </td>
+
+                    <!-- DIFERENCIA -->
+                    <td class="text-end" [ngClass]="{
+                    'text-danger': grupo.totalDiferencia < 0,
+                    'text-success': grupo.totalDiferencia === 0,
+                    'text-primary': grupo.totalDiferencia > 0
+                }">
+                        {{ grupo.totalDiferencia | number:'1.2-2' }}
+                    </td>
+
+                    <!-- 🔥 ACCIONES -->
+                    <td>
+                        <div class="d-flex gap-1 justify-content-center">
+
+                            <!-- 🔵 SI ES PERSONA NORMAL -->
+                            <ng-container *ngIf="grupo.idlotero; else sinAsignacionUI">
+
+                                <!-- 🆕 BOTÓN HISTORIAL -->
+                                <button class="btn btn-outline-dark btn-sm" title="Ver historial"
+                                    (click)="verHistorial(grupo); $event.stopPropagation()">
+                                    <i class="bi bi-clock-history"></i>
+                                </button>
+
+                                <!-- INPUT -->
+                                <input type="number" class="form-control form-control-sm text-end" style="width: 90px;"
+                                    [(ngModel)]="grupo.nuevoDespacho" [disabled]="estadoSemana === 'cerrada'"
+                                    placeholder="+">
+
+                                <!-- BOTÓN DESPACHAR -->
+                                <button class="btn btn-success btn-sm"
+                                    [disabled]="!grupo.nuevoDespacho || estadoSemana === 'cerrada'"
+                                    (click)="despacharPersona(grupo); $event.stopPropagation()">
+                                    <i class="bi bi-check"></i>
+                                </button>
+
+                            </ng-container>
+
+                            <!-- 🔴 SOLO SIN ASIGNACIÓN -->
+                            <ng-template #sinAsignacionUI>
+
+                                <button class="btn btn-dark btn-sm fw-bold px-3"
+                                    (click)="abrirAsignacionMultiple(); $event.stopPropagation()">
+
+                                    <i class="bi bi-person-plus me-1"></i>
+                                    Asignar seleccionados
+
+                                </button>
+
+                            </ng-template>
+
+                        </div>
+                    </td>
+
+                </tr>
+
+                <!-- 🔽 LOTES -->
+                <tr *ngFor="let item of grupo.lotes" [hidden]="!grupo.expanded" [class.opacity-50]="item.idlotero">
+
+                    <!-- 🔥 CHECKBOX -->
+                    <td class="text-center">
+                        <input type="checkbox" (change)="toggleLote(item, $event)">
+                    </td>
+
+                    <td class="ps-4">
+                        {{ item.seccion }}
+                    </td>
+
+                    <td></td>
+
+                    <td class="text-end">{{ item.fundas }}</td>
+                    <td class="text-end">{{ item.rollos_entregados }}</td>
+
+                    <td></td>
+                    <td></td>
+
+                    <td class="text-end text-muted">-</td>
+                    <td class="text-end text-muted">-</td>
+
+                    <td></td>
+
+                </tr>
+
+            </ng-container>
+
+        </tbody>
+
+        <tfoot>
+            <tr class="fw-bold table-light">
+                <td colspan="2">Total</td>
+
+                <td class="text-end">{{ totalFundas | number:'1.0-0' }}</td>
+                <td class="text-end">{{ totalRollos | number:'1.2-2' }}</td>
+
+                <td></td>
+                <td></td>
+
+                <td class="text-end">{{ totalEntregado | number:'1.2-2' }}</td>
+                <td class="text-end">{{ totalDiferencia | number:'1.2-2' }}</td>
+
+                <td></td>
+            </tr>
+        </tfoot>
+
+    </table>
+</div>
+<!-- 🔥 MODAL MOTIVO SOBREDESPACHO -->
+<div class="modal fade" id="modalMotivo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Sobre despacho detectado
+                </h5>
+                <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    Se está despachando más de lo estimado.
+                </p>
+
+                <label class="form-label">Motivo (opcional)</label>
+
+                <select class="form-select mb-2" [(ngModel)]="motivoSeleccionado">
+                    <option value="">Seleccione...</option>
+                    <option value="AJUSTE OPERATIVO">Ajuste operativo</option>
+                    <option value="ERROR ESTIMACIÓN">Error de estimación</option>
+                    <option value="FALTA DE INSUMO">Falta de insumo</option>
+                    <option value="OTRO">Otro</option>
+                </select>
+
+                <textarea class="form-control" rows="2" placeholder="Detalle adicional..." [(ngModel)]="motivoTexto"
+                    style="text-transform: uppercase;">
+        </textarea>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" (click)="cerrarModal()">
+                    Cancelar
+                </button>
+
+                <button class="btn btn-success btn-sm" (click)="confirmarDespacho()">
+                    Continuar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 MODAL ASIGNAR PERSONA -->
+<div class="modal fade" id="modalAsignarPersona" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Asignar Persona
+                </h5>
+                <button type="button" class="btn-close" (click)="cerrarModalAsignacion()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <p *ngIf="loteSeleccionado">
+                    Sección: <b>{{ loteSeleccionado.seccion }}</b>
+                </p>
+
+                <label class="form-label">Seleccione persona</label>
+
+                <ng-select [items]="personasDisponibles" bindLabel="nombre" bindValue="idlotero"
+                    [(ngModel)]="personaSeleccionada" placeholder="Buscar persona..." [searchFn]="buscarPersona"
+                    [clearable]="true" [virtualScroll]="true">
+
+                    <!-- OPCIONES -->
+                    <ng-template ng-option-tmp let-item="item">
+                        <b>{{ item.idlotero }}</b> - {{ item.nombre }}
+                    </ng-template>
+
+                    <!-- SELECCIONADO -->
+                    <ng-template ng-label-tmp let-item="item">
+                        <b>{{ item.idlotero }}</b> - {{ item.nombre }}
+                    </ng-template>
+
+                </ng-select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" (click)="cerrarModalAsignacion()">
+                    Cancelar
+                </button>
+
+                <button class="btn btn-primary btn-sm" (click)="guardarAsignacion()">
+                    Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+<app-modal title="Producto" (close)="close.emit()">
+
+    <div class="erp-modal">
+
+        <!-- BODY -->
+        <div class="erp-body">
+
+            <div class="grid">
+
+                <div class="field">
+                    <label>Nombre</label>
+                    <input class="form-control" [(ngModel)]="form.nombre">
+                </div>
+
+                <div class="field">
+                    <label>Código</label>
+                    <input class="form-control" [(ngModel)]="form.codigo">
+                </div>
+
+                <div class="field">
+                    <label>Categoría</label>
+                    <select class="form-control" [(ngModel)]="form.categoria_id">
+                        <option [value]="null">Seleccione</option>
+                        <option *ngFor="let c of categorias" [value]="c.id">
+                            {{ c.nombre }}
+                        </option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Descripcion</label>
+                    <input class="form-control" [(ngModel)]="form.descripcion">
+                </div>
+
+                <div class="field">
+                    <label>Unidad</label>
+                    <input class="form-control" [(ngModel)]="form.unidad">
+                </div>
+
+                <div class="field">
+                    <label>Stock mínimo</label>
+                    <input type="number" class="form-control" [(ngModel)]="form.stock_minimo">
+                </div>
+
+                <!-- OPCIONAL -->
+                <div class="field">
+                    <label>Stock inicial</label>
+                    <input type="number" class="form-control" [(ngModel)]="form.stock_inicial">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="erp-footer">
+            <button class="btn btn-light" (click)="close.emit()">Cancelar</button>
+            <button class="btn btn-primary" (click)="guardar()">
+                Guardar Producto
+            </button>
+        </div>
+
+    </div>
+
+</app-modal>

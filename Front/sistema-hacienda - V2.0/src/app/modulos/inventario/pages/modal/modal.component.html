@@ -1,0 +1,18 @@
+<div class="modal-wrapper">
+
+    <div class="modal-backdrop" (click)="close.emit()"></div>
+
+    <div class="modal-container">
+
+        <div class="modal-header">
+            <h5>{{ title }}</h5>
+            <button class="btn btn-sm btn-close" (click)="close.emit()"></button>
+        </div>
+
+        <div class="modal-body">
+            <ng-content></ng-content>
+        </div>
+
+    </div>
+
+</div>

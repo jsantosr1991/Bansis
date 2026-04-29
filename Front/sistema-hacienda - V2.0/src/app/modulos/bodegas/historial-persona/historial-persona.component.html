@@ -1,0 +1,141 @@
+<div class="container-fluid">
+
+    <!-- 🔵 HEADER -->
+    <div class="module-header d-flex justify-content-between align-items-center">
+
+        <div>
+            <h4 class="module-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Historial de Persona
+            </h4>
+            <p class="module-subtitle">
+                Seguimiento de entregas y comportamiento histórico
+            </p>
+
+            <div *ngIf="nombre" class="fw-bold text-primary">
+                {{ nombre }} ({{ idlotero }})
+            </div>
+        </div>
+
+        <button class="btn btn-outline-secondary" (click)="volver()">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver
+        </button>
+
+    </div>
+
+    <!-- 🔄 LOADING -->
+    <div *ngIf="loading" class="text-center p-4">
+        <div class="spinner-border"></div>
+    </div>
+
+    <!-- 🔵 CONTENIDO -->
+    <div *ngIf="!loading">
+
+        <!-- 🟢 KPI -->
+        <div class="row mb-3 text-center">
+
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <div class="text-muted">Total Entregado</div>
+                    <h5>{{ resumen.total_entregado | number:'1.2-2' }}</h5>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <div class="text-muted">Total Estimado</div>
+                    <h5>{{ resumen.total_estimado | number:'1.2-2' }}</h5>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <div class="text-muted">Cumplimiento</div>
+                    <h5 [ngClass]="{
+            'text-success': resumen.cumplimiento >= 100,
+            'text-warning': resumen.cumplimiento >= 80 && resumen.cumplimiento < 100,
+            'text-danger': resumen.cumplimiento < 80
+          }">
+                        {{ resumen.cumplimiento | number:'1.0-0' }} %
+                    </h5>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 🔵 HISTÓRICO -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold">
+                Histórico semanal
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Semana</th>
+                            <th class="text-end">Estimado</th>
+                            <th class="text-end">Entregado</th>
+                            <th class="text-end">Arrastre</th>
+                            <th class="text-end">Diferencia</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let h of historial">
+                            <td>{{ h.semana }} / {{ h.anio }}</td>
+                            <td class="text-end">{{ h.rollos_estimados }}</td>
+                            <td class="text-end">{{ h.rollos_entregados }}</td>
+                            <td class="text-end text-danger">{{ h.arrastre_anterior }}</td>
+                            <td class="text-end" [ngClass]="h.diferencia >= 0 ? 'text-success' : 'text-danger'">
+                                {{ h.diferencia }}
+                            </td>
+                            <td>
+                                <span class="badge" [ngClass]="h.tipo === 'sobrante' ? 'bg-success' : 'bg-danger'">
+                                    {{ h.tipo }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- 🔴 MOVIMIENTOS -->
+        <div class="card">
+            <div class="card-header fw-bold">
+                Movimientos registrados
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Semana</th>
+                            <th class="text-end">Rollos</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let m of movimientos">
+                            <td>{{ m.fecha | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ m.semana }} / {{ m.anio }}</td>
+                            <td class="text-end">{{ m.rollos }}</td>
+                            <td>{{ m.motivo || '-' }}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>

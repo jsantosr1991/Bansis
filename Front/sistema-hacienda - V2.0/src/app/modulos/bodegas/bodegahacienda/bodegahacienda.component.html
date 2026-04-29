@@ -11,30 +11,16 @@
 
   <!-- TÍTULO -->
 
-
-  <div *ngIf="permisoService.tieneGrupo('bodega'); else gerencia">
-    <div class="row align-items-end">
-
-
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <app-filtro-hacienda [grupoOcultar]="CONFIG_FILTRO.grupoOcultar"
+        [gruposPermitidos]="CONFIG_FILTRO.gruposPermitidos" (cambioHacienda)="onHaciendaChange($event)">
+      </app-filtro-hacienda>
     </div>
-
   </div>
-  <ng-template #gerencia>
-    <div class="row align-items-end">
-      <!-- Hacienda -->
-      <div class="col-md-4">
-        <label for="hacienda-administrador">Escoja Hacienda</label>
-        <select id="hacienda-administrador" class="form-select" [(ngModel)]="solicitud.idhacienda"
-          (change)="cargarSolicitudes()">
-          <option *ngFor="let h of hacienda" [value]="h.id">{{h.name}}</option>
 
-        </select>
-      </div>
-
-    </div>
-
-  </ng-template>
 </div>
+
 
 <!-- TABLA -->
 <div class="card shadow-sm mt-1">

@@ -1,0 +1,71 @@
+/* WRAPPER (NO CAMBIAR MUCHO) */
+.modal-wrapper {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    /* 🔥 suficiente para estar encima de todo */
+}
+
+/* BACKDROP */
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+
+    /* 🔥 ESTE ES EL EFECTO DE TU IMAGEN */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    z-index: 1;
+}
+
+/* MODAL (AQUI ESTA LA CLAVE) */
+.modal-container {
+    position: relative;
+
+    width: 600px;
+    max-width: 95%;
+
+    margin: 0 auto;
+    /* 🔥 quitamos el 80px */
+
+    top: 50%;
+    transform: translateY(-50%);
+    /* 🔥 centrado vertical REAL */
+
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+
+    z-index: 2;
+
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+/* BODY SCROLL */
+.modal-body {
+    overflow-y: auto;
+}
+
+/* 📱 MOBILE (AQUI ESTA EL RESPONSIVE REAL) */
+
+
+@media (max-width: 576px) {
+    .modal-container {
+        top: 10px;
+        transform: none;
+        margin: 0 auto;
+        max-height: 95vh;
+    }
+}

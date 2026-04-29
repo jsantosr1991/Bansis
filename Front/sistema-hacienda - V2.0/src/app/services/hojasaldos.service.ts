@@ -40,6 +40,7 @@ export class HojasaldosService {
   obtenerLotesMayordomo(idhacienda: any): Observable<LotesMayordomosI[]> {
 
     const params = { idhacienda };
+    console.log("idhacienda", params)
 
     return this.http.post<LotesMayordomosI[]>(this.baseUrl + '/getlotesmayordomos', params);
   }
@@ -57,11 +58,11 @@ export class HojasaldosService {
     return this.http.post(`${this.baseUrl}/guardarmatascaidas`, payload);
   }
 
-  imprimirPorId(id: number) {
-    return this.http.post(`${this.baseUrl}/reporte-matascaidas`, { idcab: id });
+  imprimirPorId(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/imprimirmatascaidas/${id}`);
   }
   verPorId(id: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/imprimirmatascaidas/${id}`);
+    return this.http.post<any>(`${this.baseUrl}/informematascaidas`, { idcab: id });
   }
 
 

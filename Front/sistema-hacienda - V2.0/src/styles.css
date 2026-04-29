@@ -1022,3 +1022,327 @@ select.form-select {
   background: #fee2e2;
   color: #dc2626;
 }
+
+/* 🔷 TOGGLE MODO */
+.modo-toggle {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 5px;
+}
+
+.modo-option {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.modo-option i {
+  margin-right: 6px;
+}
+
+/* ACTIVO */
+.modo-option.active {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* HOVER */
+.modo-option:hover {
+  background: #e5e7eb;
+}
+
+/* 🔷 ACCIONES */
+
+/* 🔷 ACCIONES MÁS ORDENADAS */
+.acciones-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+/* BOTONES MÁS COMPACTOS */
+.acciones-bar .btn {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.persona-cell {
+  display: flex;
+  align-items: center;
+}
+
+.persona-name {
+  font-weight: 500;
+}
+
+.table tfoot td {
+  border-top: 2px solid #dee2e6;
+}
+
+.persona-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge.bg-danger-subtle {
+  background-color: #fde2e2;
+  border: 1px solid #f5c2c7;
+}
+
+/* 🔥 GRUPO SEMANA BALANCEADO */
+.semana-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* 🔥 INPUT SEMANA (YA NO TAN CHIQUITO) */
+.input-semana {
+  width: 55px;
+  min-width: 55px;
+  max-width: 65px;
+
+  font-weight: 600;
+  background: #f9fafb;
+
+  border-left: 0;
+  border-right: 0;
+}
+
+/* 🔥 INPUT PERIODO (MENOS GIGANTE) */
+.input-periodo {
+  max-width: 90px;
+  font-weight: 600;
+  background: #f9fafb;
+}
+
+/* 🔥 BOTONES MÁS PRO */
+.btn-step {
+  width: 32px;
+  height: 38px;
+
+  border: 1px solid #d1d5db;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  flex-shrink: 0;
+
+  transition: all 0.15s ease;
+}
+
+/* HOVER MÁS SUAVE */
+.btn-step:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+/* CLICK */
+.btn-step:active {
+  transform: scale(0.95);
+}
+
+/* 🔥 ALINEACIÓN PERFECTA CON BOTONES */
+.acciones-bar {
+  display: flex;
+  align-items: flex-end;
+  /* 👈 CLAVE */
+  gap: 8px;
+}
+
+/* 🔥 BOTONES MÁS COMPACTOS */
+.acciones-bar .btn {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 🔥 ACCIONES RESPONSIVE */
+@media (max-width: 768px) {
+  .acciones-bar {
+    justify-content: space-between;
+  }
+
+  .acciones-bar .btn {
+    flex: 1;
+  }
+}
+
+/* 🔥 ULTRA MOBILE */
+@media (max-width: 480px) {
+  .input-semana {
+    width: 50px;
+  }
+
+  .btn-step {
+    width: 30px;
+    height: 36px;
+  }
+
+  .ng-select {
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .ng-select .ng-select-container {
+    min-height: 38px;
+    border: 1px solid #ced4da;
+  }
+
+  .ng-select.ng-select-focused .ng-select-container {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+  }
+
+  .ng-dropdown-panel {
+    border-radius: 6px;
+  }
+}
+
+/* matas caidas */
+.reporte-header {
+  text-align: center;
+  margin-bottom: 10px;
+  font-family: Arial;
+}
+
+.titulo {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.info-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.reporte-final {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.reporte-final th,
+.reporte-final td {
+  border: 1px solid black;
+  text-align: center;
+  padding: 2px;
+}
+
+.grupo {
+  font-weight: bold;
+  background: #d9d9d9;
+}
+
+.vieja {
+  border-right: 2px solid black;
+}
+
+.joven {
+  border-left: 2px solid black;
+}
+
+.col-lote {
+  width: 70px;
+}
+
+.col-total {
+  width: 60px;
+}
+
+.lote {
+  font-weight: bold;
+}
+
+.total {
+  font-weight: bold;
+  background: #f2f2f2;
+}
+
+.color-cell {
+  font-size: 9px;
+}
+
+.codigo-cell {
+  font-size: 9px;
+}
+
+.reporte-final td {
+  height: 20px;
+}
+
+/* PRINT */
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  #reporteModal,
+  #reporteModal * {
+    visibility: visible;
+  }
+
+  #reporteModal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+}
+
+.totales-row {
+  background: #d9d9d9;
+  font-weight: bold;
+  border-top: 2px solid black;
+}
+
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  #reporteModal,
+  #reporteModal * {
+    visibility: visible;
+  }
+
+  #reporteModal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* 🔥 OCULTAR BOTONES Y HEADER */
+  .modal-header,
+  .modal-footer,
+  .btn,
+  app-loader {
+    display: none !important;
+  }
+
+}
+
+.info-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}

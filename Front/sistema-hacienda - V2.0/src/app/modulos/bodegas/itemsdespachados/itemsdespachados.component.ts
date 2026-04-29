@@ -5,6 +5,7 @@ import { DatePipe, NgForOf, NgIf, NgClass, NgSwitch, NgSwitchCase, UpperCasePipe
 import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../../../shared/spinner/loader/loader.component';
 import { UserService } from '../../../services/user.service';
+import { FiltroHaciendaComponent } from '../../../shared/filtro-hacienda/filtro-hacienda.component';
 
 declare var $: any;
 
@@ -20,13 +21,19 @@ declare var $: any;
     NgIf,
     NgSwitch,
     NgSwitchCase,
-    UpperCasePipe
+    UpperCasePipe,
+    FiltroHaciendaComponent
   ],
   templateUrl: './itemsdespachados.component.html',
   styleUrl: './itemsdespachados.component.css'
 })
 export class ItemsdespachadosComponent implements OnInit {
 
+  //SE CONFIGURA LOS GRUPOS PARA EL FILTRO ESCOGER HACIENDA
+  CONFIG_FILTRO = {
+    grupoOcultar: 'bodega',
+    gruposPermitidos: ['gerencia', 'administradores']
+  };
   detalle: any[] = [];
   loading = false;
 
@@ -344,21 +351,7 @@ export class ItemsdespachadosComponent implements OnInit {
      EVENTOS (SE RESPETAN)
   ========================= */
 
-  onHaciendaChange(): void {
 
-    const hacienda = this.haciendas.find(
-      h => h.idhacienda == this.idhaciendaSeleccionada
-    );
-
-    if (!hacienda?.fecha) return;
-
-    this.fechaSeleccionada = hacienda.fecha;
-
-    this.filtros.desde = hacienda.fecha;
-    this.filtros.hasta = '';
-
-    this.cargarDespachados();
-  }
 
   onFechaChange(): void {
     this.filtros.tipo = 'rango';
@@ -387,5 +380,16 @@ export class ItemsdespachadosComponent implements OnInit {
   limpiarEstados() {
     this.filtros.estado = [];
     this.renderTable(this.dataOriginal);
+  }
+
+  /* =========================
+  * FILTRO HACIENDA
+  * ========================= */
+  onHaciendaChange(hacienda: any): void {
+
+    this.idhaciendaSeleccionada = hacienda.id;
+    this.namehacienda = hacienda.name;
+
+    this.cargarDespachados();
   }
 }

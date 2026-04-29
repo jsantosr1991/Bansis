@@ -1,0 +1,95 @@
+<app-modal title="Movimiento de Inventario" (close)="close.emit()">
+
+    <div class="row g-3">
+
+        <!-- 🔍 PRODUCTO -->
+        <div class="col-md-12 position-relative producto-search">
+
+            <label>Producto</label>
+
+            <input class="form-control" [class.is-valid]="form.producto_id"
+                [class.is-invalid]="!form.producto_id && touchedProducto" placeholder="Buscar producto..."
+                [(ngModel)]="searchProducto" (input)="filtrarProductos()" (focus)="showDropdown=true">
+
+            <!-- DROPDOWN -->
+            <div class="dropdown-search" *ngIf="showDropdown">
+
+                <div *ngIf="productoFiltrado.length; else sinResultados">
+
+                    <div class="item" *ngFor="let p of productoFiltrado" (click)="seleccionarProducto(p)">
+
+                        <strong>{{ p.nombre }}</strong>
+                        <small class="text-muted">({{ p.codigo }})</small>
+
+                    </div>
+
+                </div>
+
+                <ng-template #sinResultados>
+                    <div class="p-2 text-muted">No se encontraron productos</div>
+                </ng-template>
+
+            </div>
+
+            <!-- STOCK -->
+            <div *ngIf="form.producto_id" class="mt-1">
+                <small [ngClass]="{
+          'text-danger': stockActual <= 5,
+          'text-success': stockActual > 5
+        }">
+                    Stock actual: <strong>{{ stockActual }}</strong>
+                </small>
+            </div>
+
+        </div>
+
+        <!-- BODEGA -->
+        <div class="col-md-6">
+            <label>Bodega</label>
+            <select class="form-control" [(ngModel)]="form.bodega_id">
+                <option [ngValue]="null">Seleccione</option>
+                <option *ngFor="let b of bodegas" [value]="b.id">
+                    {{ b.nombre }}
+                </option>
+            </select>
+        </div>
+
+        <!-- CANTIDAD -->
+        <div class="col-md-6">
+            <label>Cantidad</label>
+            <input type="number" class="form-control" [(ngModel)]="form.cantidad">
+        </div>
+
+        <!-- MOTIVO -->
+        <div class="col-md-6">
+            <label>Motivo</label>
+            <select class="form-control" [(ngModel)]="form.motivo">
+                <option [ngValue]="null">Seleccione</option>
+                <option *ngFor="let m of motivosFiltrados" [value]="m">
+                    {{ m }}
+                </option>
+            </select>
+        </div>
+
+        <!-- DOCUMENTO -->
+        <div class="col-md-6">
+            <label>Documento</label>
+            <input class="form-control" [(ngModel)]="form.documento">
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="d-flex justify-content-end mt-4 gap-2">
+
+        <button class="btn btn-secondary" (click)="close.emit()">
+            Cancelar
+        </button>
+
+        <button class="btn btn-success" (click)="guardar()" [disabled]="loading || !puedeGuardar()">
+            Guardar
+        </button>
+
+    </div>
+
+</app-modal>

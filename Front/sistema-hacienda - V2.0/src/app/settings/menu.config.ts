@@ -1,14 +1,7 @@
 
 
 export const MENU_CONFIG = [
-  /*{
-    title: 'Dashboard',
-    icon: 'bi bi-speedometer2',
-    route: '/dashboard',
-    roles: ['todos'],
-    grupos: ['todos'],
-    submenus: []
-  },*/
+
   {
     title: 'Gestión de Usuarios',
     icon: 'bi bi-people',
@@ -58,6 +51,7 @@ export const MENU_CONFIG = [
     submenus: [
       { title: 'Ver Solicitudes', route: '/bodegas/bodegahacienda', roles: ['todos'], grupos: ['todos'] },
       { title: 'Ver Despachos', route: '/bodegas/itemdespachado', roles: ['todos'], grupos: ['oficina', 'bodega'] },
+      { title: 'Rollos', route: '/bodegas/rollos', roles: ['todos'], grupos: ['oficina', 'bodega'] },
 
     ]
   },
@@ -107,6 +101,21 @@ export const MENU_CONFIG = [
         roles: ['todos'],
         grupos: ['sistemas', 'administradores']
       }
+    ]
+  },
+  {
+    title: 'Inventario',
+    icon: 'bi bi-box-seam',
+    roles: ['superadmin'],
+    grupos: ['sistemas', 'administradores'],
+    submenus: [
+      {
+        title: 'Vista General',
+        route: '/inventario',
+        roles: ['todos'],
+        grupos: ['todos']
+      }
+
     ]
   }
 ];

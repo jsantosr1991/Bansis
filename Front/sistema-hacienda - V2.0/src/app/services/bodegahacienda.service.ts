@@ -43,4 +43,60 @@ export class BodegahaciendaService {
     );
   }
 
+  getEstado(params: any) {
+    return this.http.get<any[]>(`${this.baseUrl}/rollos/estado`, { params });
+  }
+
+
+  getSemana(fecha: string) {
+    return this.http.get(`${this.baseUrl}/rollos/semana?fecha=${fecha}`);
+  }
+
+  getEstadoSemana(params: any) {
+    return this.http.get(`${this.baseUrl}/rollos/estado-semana`, { params });
+  }
+
+  crearSemana(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/crear-semana`, data);
+  }
+
+  cerrarSemana(data: any) {
+
+    return this.http.post(`${this.baseUrl}/rollos/cerrar-semana`, data);
+  }
+  getTotalFundas(params: any) {
+    return this.http.get(`${this.baseUrl}/rollos/total-fundas`, { params });
+  }
+  registrarMovimiento(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/registrar-movimiento`, data);
+  }
+
+  despachoPorPersona(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/despacho-persona`, data);
+  }
+  getMovimientos(idcontrol: number) {
+    return this.http.get(`${this.baseUrl}/rollos/movimientos/${idcontrol}`);
+  }
+  generarControlPersonas(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/personas/generar`, data);
+  }
+
+  getControlPersonas(data: any) {
+    return this.http.post<any[]>(`${this.baseUrl}/rollos/personas/listar`, data);
+  }
+  guardarEntrega(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/personas/guardar`, data);
+  }
+  getPersonas(idhacienda: number) {
+    return this.http.get(`${this.baseUrl}/rollos/personas/${idhacienda}`);
+  }
+
+  asignarPersona(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/asignar-persona`, data);
+  }
+
+  getHistorialPersona(data: any) {
+    return this.http.post(`${this.baseUrl}/rollos/historial-persona`, data);
+  }
+
 }

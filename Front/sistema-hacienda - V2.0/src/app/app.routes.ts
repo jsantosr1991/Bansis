@@ -90,6 +90,15 @@ export const routes: Routes = [
           title: 'Soporte Técnico',
           breadcrumb: 'Soporte Técnico'
         }
+      },
+      {
+        path: 'inventario',
+        loadChildren: () => import('./modulos/inventario/inventario.routes').then(m => m.INVENTARIO_ROUTES),
+        canActivate: [RoleGuard],
+        data: {
+          title: 'Inventario',
+          breadcrumb: 'Inventario Sisemas'
+        }
       }
     ]
   },
