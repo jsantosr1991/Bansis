@@ -1,0 +1,163 @@
+<div class="module-card historial">
+
+    <!-- HEADER -->
+    <div class="module-header d-flex justify-content-between align-items-center">
+
+        <div>
+            <h4 class="module-title">
+                <i class="bi bi-journal-text"></i>
+                Historial de Asignaciones
+            </h4>
+            <small class="text-muted">Control de entregas de equipos</small>
+        </div>
+
+    </div>
+    <!-- 🔍 FILTROS -->
+    <div class="filters-bar">
+
+        <!-- BUSCADOR -->
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar producto, usuario..." [(ngModel)]="searchTerm"
+                (input)="applyFilters()" />
+        </div>
+
+        <!-- FILTRO POR FECHA -->
+        <input type="date" [(ngModel)]="fechaInicio" (change)="applyFilters()">
+
+        <input type="date" [(ngModel)]="fechaFin" (change)="applyFilters()">
+
+        <!-- LIMPIAR -->
+        <button class="btn-clear" (click)="clearFilters()">
+            Limpiar
+        </button>
+
+    </div>
+
+    <!-- LISTA -->
+    <div class="table-container">
+
+        <table class="table table-hover">
+
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Movimiento</th>
+                    <th>Usuarios</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <ng-container *ngFor="let a of paginatedData">
+
+                    <!-- FILA PRINCIPAL -->
+                    <tr class="row-main" (click)="toggleRow(a)" [class.active]="isExpanded(a)">
+
+                        <td class="">
+
+
+                            <span>{{ a.fecha | date:'short' }}</span>
+                        </td>
+
+                        <td class="fw-semibold">
+                            <i class="bi" [ngClass]="isExpanded(a) ? 'bi-chevron-down' : 'bi-chevron-right'">
+                            </i>{{ a.producto }}
+                        </td>
+
+                        <td>
+                            <span class="badge qty">
+                                {{ a.cantidad }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="badge mov">
+                                ASIGNADO
+                            </span>
+                        </td>
+
+                        <td class="usuarios">
+                            <small>
+                                <b>R:</b> {{ a.usuario_recibe }} <br>
+                                <b>E:</b> {{ a.usuario_entrega }}
+                            </small>
+                        </td>
+
+                        <td></td>
+
+                    </tr>
+
+                    <!-- DETALLE EXPANDIDO -->
+                    <tr class="row-detail" *ngIf="isExpanded(a)">
+
+                        <td colspan="6">
+
+                            <div class="detail-card">
+
+                                <div class="detail-grid">
+
+                                    <div class="info-box">
+                                        <span>Producto</span>
+                                        <p>{{ a.producto }}</p>
+                                    </div>
+
+                                    <div class="info-box">
+                                        <span>Cantidad</span>
+                                        <p>{{ a.cantidad }}</p>
+                                    </div>
+
+                                    <div class="info-box">
+                                        <span>Recibe</span>
+                                        <p>{{ a.usuario_recibe }}</p>
+                                    </div>
+
+                                    <div class="info-box">
+                                        <span>Entrega</span>
+                                        <p>{{ a.usuario_entrega }}</p>
+                                    </div>
+
+                                </div>
+
+                                <div class="observacion">
+                                    <span>Observación</span>
+                                    <p>{{ a.observacion || 'Sin observación registrada' |uppercase}}</p>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                </ng-container>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- PAGINADOR -->
+    <div class="paginator">
+
+        <div class="info">
+            {{ sourceData.length ? startIndex + 1 : 0 }} - {{ endIndex }} de {{ sourceData.length }}
+        </div>
+
+        <div class="controls">
+
+            <button (click)="prevPage()" [disabled]="page === 1">←</button>
+
+            <span>{{ page }} / {{ totalPages }}</span>
+
+            <button (click)="nextPage()" [disabled]="page === totalPages">→</button>
+
+        </div>
+
+    </div>
+
+</div>

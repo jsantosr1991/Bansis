@@ -1,58 +1,110 @@
 <div class="module-card">
   <div class="card-body">
     <!-- FILA DE CAMPOS (Select + Input + otros) -->
-    <div class="form-inline mb-3">
-      <div class="form-group" *ngIf="permisoService.tieneGrupo('mayordomo'); else administradores">
-        <label for="idhacienda" class="me-2">Hacienda:</label>
-        <select class="form-control me-3" id="idhacienda" [(ngModel)]="idhaciendaSeleccionada"
-          (change)="onHaciendaSeleccionada()" disabled>
+    <div class="erp-header card shadow-sm mb-3">
 
-          <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
-        </select>
-      </div>
+      <!-- TOP: TÍTULO + ESTADO -->
+      <div class="card-body py-2 border-bottom d-flex justify-content-between align-items-center flex-wrap">
 
-      <ng-template #administradores>
-        <div class="form-group"
-          *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')">
-          <label for="idhacienda" class="me-3">Hacienda:</label>
-          <select class="form-control me-3" id="idhacienda" [(ngModel)]="idhaciendaSeleccionada"
-            (change)="onHaciendaSeleccionada()">
+        <div class="d-flex align-items-center gap-2">
+          <h6 class="mb-0 fw-bold">Registro Matascaídas</h6>
 
-            <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
-          </select>
+          <!-- ESTADO -->
+          <span *ngIf="semana" class="badge" [ngClass]="semanaBloqueada ? 'bg-warning text-dark' : 'bg-success'">
+
+            <i class="bi me-1" [ngClass]="semanaBloqueada ? 'bi-exclamation-triangle' : 'bi-check-circle'"></i>
+
+            {{ semanaBloqueada ? 'Semana registrada' : 'Disponible' }}
+          </span>
         </div>
-      </ng-template>
 
-      <div class="form-group-auto">
-        <label for="semana" class="fw-bold">Semana:</label>
-        <input id="semana" class="form-control form-control-sm" [(ngModel)]="semana"
-          (change)="cintasMatascaidas(semana)" />
+        <small class="text-muted">
+          {{ today | date:'dd/MM/yyyy' }}
+        </small>
+
       </div>
 
-      <div class="form-group-auto">
-        <label for="fecha" class="fw-bold">Fecha:</label>
-        <input type="text" id="fecha" class="form-control form-control-sm" [value]="today | date:'dd/MM/yyyy'"
-          disabled />
-      </div>
+      <!-- FILTROS -->
+      <div class="card-body py-3">
 
-      <!-- Aquí puedes agregar más campos fácilmente -->
-      <div class="form-group">
-        <div class="form-group"
-          *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')">
-          <label for="idmayordomo" class="me-2">Mayordomo:</label>
-          <select class="form-control me-3" id="idmayordomo" [(ngModel)]="idmayordomoSeleccionado"
-            (change)="onMayordomoSeleccionado()">
+        <div class="row g-3 align-items-end">
 
-            <option *ngFor="let h of Mayordomo" [value]="h.codempleado">{{ h.NOMBRE_CORTO }}</option>
-          </select>
+          <!-- HACIENDA -->
+          <div class="col-12 col-md-3" *ngIf="permisoService.tieneGrupo('mayordomo'); else adminHacienda">
+
+            <label class="form-label small fw-semibold">Hacienda</label>
+            <select class="form-select form-select-sm" [(ngModel)]="idhaciendaSeleccionada"
+              (change)="onHaciendaSeleccionada()" disabled>
+              <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
+            </select>
+          </div>
+
+          <ng-template #adminHacienda>
+            <div class="col-12 col-md-3"
+              *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')">
+
+              <label class="form-label small fw-semibold">Hacienda</label>
+              <select class="form-select form-select-sm" [(ngModel)]="idhaciendaSeleccionada"
+                (change)="onHaciendaSeleccionada()">
+
+                <option *ngFor="let h of haciendas" [value]="h.id">{{ h.nombre }}</option>
+              </select>
+            </div>
+          </ng-template>
+
+          <!-- SEMANA -->
+          <div class="col-6 col-md-2">
+
+            <label class="form-label small fw-semibold">Semana</label>
+
+            <div class="input-group input-group-sm">
+
+              <input type="text" class="form-control" [(ngModel)]="semana"
+                (ngModelChange)="validarSemana(); cintasMatascaidas(semana)" [class.input-error]="semanaBloqueada"
+                [class.input-ok]="!semanaBloqueada && semana" />
+
+              <!-- ICONO LIMPIO -->
+              <span class="input-group-text bg-white border-start-0">
+
+                <i *ngIf="!semanaBloqueada" class="bi bi-check-circle text-success"></i>
+
+                <i *ngIf="semanaBloqueada" class="bi bi-exclamation-circle text-warning"></i>
+
+              </span>
+
+            </div>
+
+
+          </div>
+
+          <!-- FECHA -->
+          <div class="col-6 col-md-2">
+            <label class="form-label small fw-semibold">Fecha</label>
+            <input type="text" class="form-control form-control-sm" [value]="today | date:'dd/MM/yyyy'" disabled />
+          </div>
+
+          <!-- MAYORDOMO -->
+          <div class="col-12 col-md-3"
+            *ngIf="permisoService.tieneGrupo('administradores') || permisoService.tieneGrupo('sistemas')">
+
+            <label class="form-label small fw-semibold">Mayordomo</label>
+            <select class="form-select form-select-sm" [(ngModel)]="idmayordomoSeleccionado"
+              (change)="onMayordomoSeleccionado()">
+
+              <option *ngFor="let h of Mayordomo" [value]="h.codempleado">
+                {{ h.NOMBRE_CORTO }}
+              </option>
+            </select>
+          </div>
+
         </div>
+
       </div>
     </div>
-
     <!-- TABLA -->
 
     <div class="grid-container">
-      <div class="matas-table-wrapper table-scroll">
+      <div class="matas-table-wrapper table-scroll" [class.tabla-bloqueada]="semanaBloqueada">
         <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
           <table>
 
@@ -86,15 +138,16 @@
               <tr *ngFor="let row of rows; trackBy: trackByRow">
                 <td class="sticky-col">{{ row }}</td>
                 <td *ngFor="let column of columns">
-                  <input [formControlName]="row + column.codigo" (change)="onInputChange(row, column.codigo)"
-                    type="text" class="cell-input" />
+                  <input [formControlName]="row + column.codigo" [readonly]="semanaBloqueada" type="text"
+                    class="cell-input" />
                 </td>
               </tr>
             </tbody>
 
           </table>
 
-          <button type="submit" class="btn btn-primary mt-3">
+          <button type="submit" class="btn mt-3" [ngClass]="semanaBloqueada ? 'btn-secondary' : 'btn-primary'"
+            [disabled]="semanaBloqueada">
             Guardar
           </button>
         </form>

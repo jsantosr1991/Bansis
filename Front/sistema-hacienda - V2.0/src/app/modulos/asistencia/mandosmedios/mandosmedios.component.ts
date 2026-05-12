@@ -1,11 +1,11 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {Asistencia, DiasCorteI} from '../../../interface/asistencia';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Asistencia, DiasCorteI } from '../../../interface/asistencia';
 import { AsistenciaService } from '../../../services/asistencia.service';
-import {FormsModule} from '@angular/forms';
-import {LoaderComponent} from '../../../shared/spinner/loader/loader.component';
-import {NgForOf, NgIf} from '@angular/common';
-import {AuthserviceService} from '../../../services/authservice.service';
-import {UserService} from '../../../services/user.service';
+import { FormsModule } from '@angular/forms';
+import { LoaderComponent } from '../../../shared/spinner/loader/loader.component';
+import { NgForOf, NgIf } from '@angular/common';
+import { AuthserviceService } from '../../../services/authservice.service';
+import { UserService } from '../../../services/user.service';
 declare var $: any;
 declare var bootstrap: any;
 @Component({
@@ -34,9 +34,10 @@ export class MandosmediosComponent implements OnInit {
   namehacienda: any = null;
   botonesHabilitados: boolean = false;
   columnsFaltasCantidad = [
-    { data: "trabajador", title: "Empleado",className: "text-center fw-semibold" },
-    {data: "faltas", title: 'Cantidad',className: "text-center fw-semibold"},
-    {data: "listaFaltas", title: 'Observacion',className: "text-center fw-semibold",
+    { data: "trabajador", title: "Empleado", className: "text-center fw-semibold" },
+    { data: "faltas", title: 'Cantidad', className: "text-center fw-semibold" },
+    {
+      data: "listaFaltas", title: 'Observacion', className: "text-center fw-semibold",
       render: function (data: any[], type: any, row: any) {
         if (!data || data.length === 0) return "-";
         return data.map((item: any) =>
@@ -48,9 +49,10 @@ export class MandosmediosComponent implements OnInit {
 
   ];
   columnsPermisosCantidad = [
-    { data: "trabajador", title: "Empleado",className: "text-center fw-semibold" },
-    {data: "justificados", title: 'Cantidad',className: "text-center fw-semibold"},
-    {data: "listaJustificaciones", title: 'Observacion',className: "text-center fw-semibold",
+    { data: "trabajador", title: "Empleado", className: "text-center fw-semibold" },
+    { data: "justificados", title: 'Cantidad', className: "text-center fw-semibold" },
+    {
+      data: "listaJustificaciones", title: 'Observacion', className: "text-center fw-semibold",
       render: function (data: any[], type: any, row: any) {
         if (!data || data.length === 0) return "-";
         return data.map((item: any) =>
@@ -63,9 +65,9 @@ export class MandosmediosComponent implements OnInit {
   ];
   mes: string = '';   // propiedad para el template
   estadoCorte: string | null = null;  // guardaremos solo el campo que necesitamos
-  hacienda= [
-    {id: '1', name: 'AGRICOLA E INDUSTRIAL PRIMOBANANO S.A.'},
-    {id: '8', name: 'SOCIEDAD FIDUCIARIA E INMOBILIARIA C.A.'},
+  hacienda = [
+    { id: '1', name: 'AGRICOLA E INDUSTRIAL PRIMOBANANO S.A.' },
+    { id: '8', name: 'SOCIEDAD FIDUCIARIA E INMOBILIARIA C.A.' },
 
   ]
   empresas: any[] = [];
@@ -87,7 +89,7 @@ export class MandosmediosComponent implements OnInit {
   @ViewChild('tablaPermisoCantidad') tablaPermisoCantidad!: ElementRef;
 
 
-  constructor(private service: AsistenciaService, protected permisoService: AuthserviceService, private userService: UserService,) {}
+  constructor(private service: AsistenciaService, protected permisoService: AuthserviceService, private userService: UserService,) { }
 
   ngOnInit(): void {
     const hoy = new Date();
@@ -111,7 +113,7 @@ export class MandosmediosComponent implements OnInit {
     this.service.obtenerEmpresas().subscribe({
       next: (res: any) => {
         this.empresas = res;
-      //  console.log(this.empresas)
+        //  console.log(this.empresas)
       },
       error: (err) => console.error('Error cargando empresas', err)
     });
@@ -137,98 +139,6 @@ export class MandosmediosComponent implements OnInit {
   };
 
 
-/*  cargarAsistencia() {
-    this.loading = true;
-    this.botonesHabilitados = false; // desactivar hasta que termine
-    // Usuarios mayordomo → deben tener idhaciendaSeleccionada
-    if (this.permisoService.tieneGrupo('mayordomo') && !this.idhaciendaSeleccionada) {
-      this.loading = false;
-      return;
-    }
-
-    let idhacienda: any;
-    let fecha: any;
-
-    if (this.permisoService.tieneGrupo('mayordomo')) {
-      idhacienda = this.idhaciendaSeleccionada;
-      fecha = this.asistencia.fecha;
-    } else {
-      idhacienda = this.asistencia.idhacienda; // viene del select
-      fecha = this.asistencia.fecha;
-    }
-
-    if (!idhacienda || !fecha) {
-      this.loading = false;
-      return;
-    }
-// convertir a Date
-    const fechaDate = new Date(fecha);
-// obtener nombre de mes en español
-    this.mes = fechaDate.toLocaleString('es-ES', {month: 'long'})
-    this.service.obtenerAsistenciaMM(idhacienda, fecha).subscribe({
-      next: (res) => {
-
-        // FILTROS
-        this.asistencias   = res.filter(x => x.asis === 'A');
-        this.faltas        = res.filter(x => x.asis === 'F');
-        this.permisos      = res.filter(x => x.asis === 'J');
-        this.vacaciones    = res.filter(x => x.asis === 'V');
-        this.sinMarcacion  = res.filter(x => x.asis === 'N');
-
-        // DATATABLES
-        this.initDataTable(this.tablaAsistencia, this.asistencias, this.colsAsistencias);
-        this.initDataTable(this.tablaFaltas, this.faltas, this.colsFaltas);
-        this.initDataTable(this.tablaPermisos, this.permisos, this.colsPermisos);
-        this.initDataTable(this.tablaVacaciones, this.vacaciones, this.colsVacaciones);
-        this.initDataTable(this.tablaSinMarcacion, this.sinMarcacion, this.colsSinMarcacion);
-        // 👉 ACTIVAR BOTONES si hubo resultados
-        this.botonesHabilitados = true;
-      },
-
-      error: (error) => {
-        console.log('Error en la consulta: ', error);
-        this.loading = false;
-        this.botonesHabilitados = false;
-      },
-
-      complete: () => {
-        this.loading = false;
-      }
-    });
-    this.service.obtenerFaltasPermisos(idhacienda,fecha).subscribe(re => {
-
-      // @ts-ignore
-      const faltas = re.filter(e => e.asis === 'F');
-      // @ts-ignore
-      const permisos = re.filter(e => e.asis === 'J');
-
-      this.agrupados = this.getAgrupadosPorTrabajador(faltas)
-      this.agrupados2 = this.getAgrupadosPorTrabajador(permisos)
-
-      this.totales = this.getTotales(this.agrupados);
-
-      this.totales2 = this.getTotales(this.agrupados2);
-
-      // @ts-ignore
-      $(this.tablaFaltaCantidad.nativeElement).DataTable({
-        data: this.agrupados,
-        columns: this.columnsFaltasCantidad,
-        destroy: true
-      });
-      // @ts-ignore
-      $(this.tablaPermisoCantidad.nativeElement).DataTable({
-        data: this.agrupados2,
-        columns: this.columnsPermisosCantidad,
-        destroy: true
-      });
-
-    })
-    this.service.obtenerDiasCorte(idhacienda,fecha).subscribe(re =>{
-      this.estadoCorte = re.length > 0 ? re[0].estado : null;
-    //  console.log("Estado corte:",this.estadoCorte);
-    })
-
-  }*/
   cargarAsistencia() {
     this.loading = true;
     this.botonesHabilitados = false;
@@ -320,12 +230,15 @@ export class MandosmediosComponent implements OnInit {
     { title: "Empleado", data: "NOMBRE_CORTO" },
     { title: "Cod", data: "COD_TRABAJ" },
     { title: "Cargo", data: "nomcargo" },
-    { title: "Fecha", data: "FECHA",   render: function (data: any) {
+    {
+      title: "Fecha", data: "FECHA", render: function (data: any) {
         if (data) {
           const [year, month, day] = data.split('-'); // Suponiendo que data está en formato "YYYY-MM-DD"
           return `${day}/${month}/${year}`; // Reordenar a DD/MM/YYYY
         }
-        return '';}},
+        return '';
+      }
+    },
     {
       title: "Entrada",
       data: "HoraE",

@@ -266,8 +266,8 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         const groupName = this.getGroupName();
         this.form.get('datosAdministrativos.control_interno.responsable_grupo')?.setValue(groupName);
         this.form.get('datosEntrevistador.entrevistador.grupo')?.setValue(groupName);
-        
-        console.log('Grupos cargados y departamento asignado:', groupName);
+
+        //  console.log('Grupos cargados y departamento asignado:', groupName);
       },
       error: (err) => console.error('Error cargando grupos:', err)
     });
@@ -497,8 +497,8 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         genero: ['', Validators.required],
         tieneDiscapacidad: [false],
         discapacidadDetalle: [{ value: '', disabled: true }, [
-            Validators.maxLength(150),
-            CustomValidators.noWhitespace
+          Validators.maxLength(150),
+          CustomValidators.noWhitespace
         ]],
         discapacidadPorcentaje: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]*$/)]],
         paisNacimiento: ['', Validators.required],
@@ -917,7 +917,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
       const isMandatory = ['CASADO', 'UNION LIBRE', 'UNIÓN LIBRE'].includes(estado?.toUpperCase());
 
       const fields = ['nombre', 'estado', 'edad', 'domicilio', 'ocupacion'];
-      
+
       fields.forEach(field => {
         const control = conyugeGroup.get(field);
         if (control) {
@@ -993,7 +993,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
         return g.nombre || g.NOMBRE || g.grupo || g.GRUPO || g.descripcion || g.DESCRIPCION || 'N/A';
       }
     }
-    
+
     // Mapa de respaldo mientras carga la base de datos o si el ID no se encuentra
     const groups: { [key: number]: string } = {
       1: 'ADMINISTRACION',

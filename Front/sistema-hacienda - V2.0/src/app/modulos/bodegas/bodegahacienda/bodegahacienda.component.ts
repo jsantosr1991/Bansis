@@ -40,7 +40,7 @@ export class BodegahaciendaComponent implements OnInit, OnDestroy {
   dataOriginal: any[] = [];
 
   CONFIG_FILTRO = {
-    grupoOcultar: 'bodega',
+    grupoOcultar: ['bodega'],
     gruposPermitidos: ['gerencia', 'administradores']
   };
 

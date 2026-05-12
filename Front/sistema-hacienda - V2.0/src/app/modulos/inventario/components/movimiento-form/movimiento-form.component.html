@@ -7,7 +7,7 @@
 
             <label>Producto</label>
 
-            <input class="form-control" [class.is-valid]="form.producto_id"
+            <input class="form-control text-uppercase" [class.is-valid]="form.producto_id"
                 [class.is-invalid]="!form.producto_id && touchedProducto" placeholder="Buscar producto..."
                 [(ngModel)]="searchProducto" (input)="filtrarProductos()" (focus)="showDropdown=true">
 
@@ -57,7 +57,7 @@
         <!-- CANTIDAD -->
         <div class="col-md-6">
             <label>Cantidad</label>
-            <input type="number" class="form-control" [(ngModel)]="form.cantidad">
+            <input type="number" class="form-control" [(ngModel)]="form.cantidad" min="0">
         </div>
 
         <!-- MOTIVO -->

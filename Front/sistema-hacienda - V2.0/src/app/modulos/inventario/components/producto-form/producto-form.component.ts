@@ -3,6 +3,8 @@ import { InventarioService } from '../../../../services/inventario.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from "../../pages/modal/modal.component";
+import { AlertService } from '../../../../services/alert.service';
+
 
 @Component({
   selector: 'app-producto-form',
@@ -31,7 +33,7 @@ export class ProductoFormComponent {
     bodega_id: 1
   };
 
-  constructor(private api: InventarioService) { }
+  constructor(private api: InventarioService, private alert: AlertService) { }
 
   ngOnInit() {
     this.api.getCategorias().subscribe((res: any) => {
@@ -45,12 +47,28 @@ export class ProductoFormComponent {
   }
 
   guardar() {
+
+    this.alert.loading('Guardando producto...');
+
     this.api.crearProducto(this.form).subscribe({
+
       next: () => {
+
+        this.alert.close();
+
+        this.alert.success('Producto creado correctamente');
+
         this.saved.emit();
         this.close.emit();
       },
-      error: err => alert(err.error.message || 'Error al guardar')
+
+      error: err => {
+
+        this.alert.close();
+
+        this.alert.error(err.error?.message || 'Error al guardar');
+      }
+
     });
   }
 }

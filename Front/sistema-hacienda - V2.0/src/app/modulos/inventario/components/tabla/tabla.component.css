@@ -63,3 +63,74 @@ tr.bg-light {
     font-size: 12px;
     color: #6c757d;
 }
+
+.estado-badge.pendiente {
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    animation: pulse 1.2s infinite;
+}
+
+.estado-badge.null {
+    background: rgba(220, 38, 38, 0.15);
+    color: #f09709;
+    animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* 🔥 FILA INTERACTIVA ERP */
+.row-main {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.row-main:hover {
+    background: #f3f4f6;
+}
+
+/* 🔥 FILA ACTIVA */
+.row-main.active {
+    background: rgba(37, 99, 235, 0.08);
+}
+
+/* 🔥 DETALLE SUAVE */
+.row-detail td {
+    background: #f9fafb;
+    border-top: none;
+}
+
+.detail-box {
+    padding: 10px;
+    border-left: 3px solid #2563eb;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.estado-badge i {
+    margin-right: 5px;
+    font-size: 14px;
+}

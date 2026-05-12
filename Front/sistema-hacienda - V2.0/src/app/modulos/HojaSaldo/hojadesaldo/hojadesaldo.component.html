@@ -2,44 +2,78 @@
 
 <div class="module-card">
   <div class="card-body">
-    <form [formGroup]="filtroForm" class="row g-3">
-      <div class="col-md-4">
-        <label class="form-label">Hacienda</label>
-        <select class="form-select" formControlName="idhacienda">
-          <option value="">Seleccione Hacienda</option>
-          <option *ngFor="let hacienda of haciendas" [value]="hacienda.id">{{ hacienda.nombre }}</option>
-        </select>
-      </div>
-      <!-- Año -->
-      <div class="col-md-3 col-lg-2">
-        <label class="form-label">Año</label>
-        <input type="number" class="form-control" formControlName="anio" min="2020" max="{{ anioDefault }}">
-      </div>
+    <form [formGroup]="filtroForm">
 
-      <!-- Código -->
-      <div class="col-md-5 col-lg-3 col-auto">
-        <label class="form-label">Cinta Color</label>
-        <select class="form-select" formControlName="codigo">
-          <option value="">Seleccione código</option>
-          <option *ngFor="let c of codigos" [value]="c.codigo" [ngStyle]="{
-            'background-color': getColorByNombre(c.color),
-            'color': getContrasteColor(getColorByNombre(c.color)),
-            'font-weight': 'bold'
-          }">
-            {{ c.codigo }} - {{ c.color }}
-          </option>
-        </select>
+      <div class="filters-bar">
 
+        <div class="row g-3 align-items-end">
 
+          <!-- HACIENDA -->
+          <div class="col-md-4">
+            <label class="filter-label">Hacienda</label>
+            <select class="form-control filter-input" formControlName="idhacienda">
+              <option value="">Seleccione Hacienda</option>
+              <option *ngFor="let hacienda of haciendas" [value]="hacienda.id">
+                {{ hacienda.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- AÑO -->
+          <div class="col-md-2">
+            <label class="filter-label">Año</label>
+            <input type="number" class="form-control filter-input" formControlName="anio" min="2020"
+              [max]="anioDefault">
+          </div>
+
+          <!-- CINTA COLOR -->
+          <div class="col-md-4">
+            <label class="filter-label">Cinta Color</label>
+            <select class="form-control filter-input" formControlName="codigo">
+              <option value="">Seleccione código</option>
+
+              <option *ngFor="let c of codigos" [value]="c.codigo" [ngStyle]="{
+              'background-color': getColorByNombre(c.color),
+              'color': getContrasteColor(getColorByNombre(c.color)),
+              'font-weight': '600'
+            }">
+
+                {{ c.codigo }} - {{ c.color }}
+
+              </option>
+            </select>
+          </div>
+
+          <!-- BOTÓN -->
+          <div class="col-md-2 d-grid">
+            <button type="button" class="btn btn-primary btn-pro">
+              <i class="bi bi-search me-1"></i>
+              Buscar
+            </button>
+          </div>
+
+        </div>
 
       </div>
 
     </form>
   </div>
 
-  <div *ngIf="datosPivotados.length > 0" class="table-responsive">
-    <table id="tablaProduccion" class="table table-bordered table-sm table-hover w-100"></table>
+  <div *ngIf="datosPivotados.length > 0" class="table-container">
 
+    <div class="table-header">
+      <h6 class="mb-0">
+        <i class="bi bi-table me-2"></i>
+        Resultados
+      </h6>
+    </div>
+
+    <div class="table-body">
+      <div class="table-responsive">
+        <table id="tablaProduccion" class="table table-hover align-middle w-100 table-modern">
+        </table>
+      </div>
+    </div>
 
   </div>
 </div>

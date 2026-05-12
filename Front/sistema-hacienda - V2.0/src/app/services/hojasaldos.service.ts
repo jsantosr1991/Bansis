@@ -75,6 +75,8 @@ export class HojasaldosService {
       responseType: 'blob'
     });
   }
-
+  validarSemana(data: any) {
+    return this.http.post(`${this.baseUrl}/validar-semana`, data);
+  }
 
 }

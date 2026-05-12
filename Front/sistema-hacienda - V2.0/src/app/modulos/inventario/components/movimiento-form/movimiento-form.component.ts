@@ -3,6 +3,7 @@ import { InventarioService } from '../../../../services/inventario.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from "../../pages/modal/modal.component";
+import { AlertService } from '../../../../services/alert.service';
 
 @Component({
   selector: 'app-movimiento-form',
@@ -46,7 +47,7 @@ export class MovimientoFormComponent implements OnInit {
     AJUSTE: ['INVENTARIO FISICO']
   };
 
-  constructor(private api: InventarioService) { }
+  constructor(private api: InventarioService, private alert: AlertService) { }
 
   ngOnInit() {
     this.form.tipo = this.tipo;
@@ -130,16 +131,27 @@ export class MovimientoFormComponent implements OnInit {
     }
 
     this.loading = true;
+    this.alert.loading('Guardando...');
 
     this.api.crearMovimiento(this.form).subscribe({
-      next: () => {
+      next: (res) => {
+
+
         this.loading = false;
+        this.alert.close();
+        this.alert.success('Guardado correctamente');
+
         this.saved.emit();
         this.close.emit();
       },
+
       error: err => {
+
+
+
         this.loading = false;
-        alert(err.error?.message || 'Error');
+        this.alert.close();
+        this.alert.error(err.error?.message || 'Error al guardar');
       }
     });
   }

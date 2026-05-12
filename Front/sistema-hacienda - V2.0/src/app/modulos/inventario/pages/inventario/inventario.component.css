@@ -1,0 +1,47 @@
+.kpi-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.kpi-card {
+    flex: 1;
+    min-width: 150px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 14px;
+    border-radius: 10px;
+
+    background: #fff;
+    border: 1px solid #e5e7eb;
+
+    font-size: 13px;
+}
+
+.kpi-card i {
+    font-size: 18px;
+}
+
+.kpi-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* COLORES */
+.kpi-card.danger {
+    border-left: 4px solid #dc2626;
+    color: #dc2626;
+}
+
+.kpi-card.warning {
+    border-left: 4px solid #f59e0b;
+    color: #b45309;
+}
+
+.kpi-card.success {
+    border-left: 4px solid #16a34a;
+    color: #166534;
+}

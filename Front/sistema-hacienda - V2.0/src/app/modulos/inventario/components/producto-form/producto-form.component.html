@@ -9,12 +9,12 @@
 
                 <div class="field">
                     <label>Nombre</label>
-                    <input class="form-control" [(ngModel)]="form.nombre">
+                    <input class="form-control text-uppercase" [(ngModel)]="form.nombre">
                 </div>
 
                 <div class="field">
                     <label>Código</label>
-                    <input class="form-control" [(ngModel)]="form.codigo">
+                    <input class="form-control text-uppercase " [(ngModel)]="form.codigo">
                 </div>
 
                 <div class="field">
@@ -28,7 +28,7 @@
                 </div>
                 <div class="field">
                     <label>Descripcion</label>
-                    <input class="form-control" [(ngModel)]="form.descripcion">
+                    <input class="form-control text-uppercase" [(ngModel)]="form.descripcion">
                 </div>
 
                 <div class="field">
@@ -38,13 +38,13 @@
 
                 <div class="field">
                     <label>Stock mínimo</label>
-                    <input type="number" class="form-control" [(ngModel)]="form.stock_minimo">
+                    <input type="number" class="form-control" [(ngModel)]="form.stock_minimo" min="0">
                 </div>
 
                 <!-- OPCIONAL -->
                 <div class="field">
                     <label>Stock inicial</label>
-                    <input type="number" class="form-control" [(ngModel)]="form.stock_inicial">
+                    <input type="number" class="form-control" [(ngModel)]="form.stock_inicial" min="0">
                 </div>
 
             </div>

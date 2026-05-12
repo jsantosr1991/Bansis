@@ -1,43 +1,104 @@
-/* Asegurar que la tabla sea desplazable en pantallas pequeñas */
+/* 🔥 CONTENEDOR GENERAL */
+.table-container {
+  margin-top: 20px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* 🔥 HEADER */
+.table-header {
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* 🔥 BODY */
+.table-body {
+  padding: 12px;
+}
+
+/* 🔥 TABLA */
+.table-modern {
+  font-size: 13px;
+  border-collapse: separate !important;
+  border-spacing: 0;
+}
+
+/* 🔥 HEAD */
+.table-modern thead th {
+  background: #111827;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  border: none;
+}
+
+/* 🔥 CELDAS */
+.table-modern td {
+  padding: 8px 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* 🔥 HOVER */
+.table-modern tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+/* 🔥 FILAS */
+.table-modern tbody tr {
+  transition: all 0.15s ease;
+}
+
+/* 🔥 ESPACIADO EXTRA */
 .table-responsive {
-  overflow-x: auto;  /* Hacer la tabla desplazable horizontalmente */
+  padding: 5px;
 }
 
-/* Fijar las cabeceras de la tabla */
-.table th {
-  position: sticky;
-  top: 0;
-  background-color: #f8f9fa;  /* Color de fondo para la cabecera */
-  z-index: 1000;  /* Asegura que la cabecera esté por encima del contenido */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);  /* Sombra para la cabecera para mejor visibilidad */
+.card-body {
+  padding-bottom: 5px;
 }
-
-/* Para hacer que las filas de totales se destaquen */
-.fila-total {
-  background-color: #f1f1f1; /* Un color claro para resaltar la fila total */
-  font-weight: bold;  /* Poner la fila total en negrita */
-  border-top: 2px solid #000;  /* Borde superior para diferenciarla */
-}
-
-/* Asegurar que las celdas no se estiren demasiado */
-.table td, .table th {
-  padding: 8px;
-  text-align: center;
-}
-.celda-saldo div {
-  background-color: #fff3cd !important; /* amarillo claro */
-  font-weight: bold;
-  color: #856404 !important;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-
 
 /* Opcional: Ajustes en pantallas más pequeñas */
 @media (max-width: 768px) {
   .table {
-    table-layout: auto; /* Hace que la tabla se ajuste automáticamente */
+    table-layout: auto;
+    /* Hace que la tabla se ajuste automáticamente */
+  }
+}
+
+.erp-header {
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.erp-header .form-label {
+  margin-bottom: 2px;
+  color: #6b7280;
+}
+
+.input-error {
+  border-color: #ffc107;
+  background-color: #fff8e1;
+}
+
+.input-ok {
+  border-color: #198754;
+  background-color: #f0fff4;
+}
+
+/* Mejor espaciado */
+.row.g-3>* {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+/* Responsive fino */
+@media (max-width: 768px) {
+  .erp-header .card-body {
+    padding: 10px;
   }
 }

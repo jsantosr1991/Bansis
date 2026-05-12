@@ -262,7 +262,8 @@
                             <ng-template #sinAsignacionUI>
 
                                 <button class="btn btn-dark btn-sm fw-bold px-3"
-                                    (click)="abrirAsignacionMultiple(); $event.stopPropagation()">
+                                    (click)="abrirAsignacionMultiple(); $event.stopPropagation()"
+                                    [disabled]="estadoSemana === 'cerrada'">
 
                                     <i class="bi bi-person-plus me-1"></i>
                                     Asignar seleccionados

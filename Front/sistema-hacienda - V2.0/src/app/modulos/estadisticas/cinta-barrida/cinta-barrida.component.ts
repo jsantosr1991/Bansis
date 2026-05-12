@@ -37,7 +37,7 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
   coloresIds: any[] = [];
   DatosEnfunde: any[] = [];
   // Año seleccionado, por defecto será el año actual
-  anioSeleccionado: number = new Date().getFullYear() - 1;
+  anioSeleccionado: number = new Date().getFullYear();
   //año consulta actual
   anioDefault: number = new Date().getFullYear();
   // Año digitado por el usuario (por defecto vacío)
@@ -643,6 +643,7 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
     const data = { fecha: this.today };
     this.cintaService.getSemanaActual(data).subscribe((r) => {
       this.today = r;
+
     });
   }
 
@@ -695,16 +696,13 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Esta función se ejecuta cuando uno de los select cambia
   onSelectChange() {
-    console.log('ID:', this.selectedId);
-    console.log('CODIGO:', this.selectedCodigo);
+
 
     if (this.selectedId != null && this.selectedCodigo != null) {
 
       const selectedHacienda = this.hacienda.find(
         dm => Number(dm.id) === Number(this.selectedId)
       );
-
-      console.log(selectedHacienda)
 
       this.selectedHaciendaName = selectedHacienda
         ? selectedHacienda.name
@@ -909,8 +907,7 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
             };
 
           this.crearGraficosGenerales(tipo, data, config);
-          console.log(data)
-          console.log("tipo", tipo)
+
           this.loading = false;
         },
         (error) => {
@@ -1007,7 +1004,7 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
         try {
           chart.destroy();
           delete this.charts[id];
-          console.log(`Gráfico con id ${id} destruido correctamente.`);
+
         } catch (error) {
           console.warn(`Error destruyendo gráfico con id ${id}:`, error);
         }
@@ -1130,9 +1127,9 @@ export class CintaBarridaComponent implements OnInit, AfterViewInit, OnDestroy {
       try {
         this.charts[canvasId].destroy();
         delete this.charts[canvasId];
-        console.log(`🧹 Gráfico con id ${canvasId} destruido antes de recrearse.`);
+        //   console.log(`🧹 Gráfico con id ${canvasId} destruido antes de recrearse.`);
       } catch (error) {
-        console.warn(`Error destruyendo gráfico con id ${canvasId}:`, error);
+        //  console.warn(`Error destruyendo gráfico con id ${canvasId}:`, error);
       }
     }
 

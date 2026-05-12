@@ -428,7 +428,7 @@ export class DatosAdministrativosComponent implements OnInit, OnChanges {
         this.isLoadingLabores = false;
       },
       error: (err) => {
-        console.error('Error cargando labores:', err);
+
         this.laboresDisponibles = [];
         this.isLoadingLabores = false;
       }

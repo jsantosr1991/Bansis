@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../../../shared/spinner/loader/loader.component';
 import { UserService } from '../../../services/user.service';
 import { FiltroHaciendaComponent } from '../../../shared/filtro-hacienda/filtro-hacienda.component';
+import { AlertService } from '../../../services/alert.service';
 
 declare var $: any;
 
@@ -31,7 +32,7 @@ export class ItemsdespachadosComponent implements OnInit {
 
   //SE CONFIGURA LOS GRUPOS PARA EL FILTRO ESCOGER HACIENDA
   CONFIG_FILTRO = {
-    grupoOcultar: 'bodega',
+    grupoOcultar: ['bodega'],
     gruposPermitidos: ['gerencia', 'administradores']
   };
   detalle: any[] = [];
@@ -67,7 +68,8 @@ export class ItemsdespachadosComponent implements OnInit {
   constructor(
     protected permisoService: AuthserviceService,
     private serviceBodega: BodegahaciendaService,
-    private userService: UserService
+    private userService: UserService,
+    private alert: AlertService
   ) { }
 
   ngOnInit(): void {
@@ -206,29 +208,47 @@ export class ItemsdespachadosComponent implements OnInit {
 
   cargarDespachados(): void {
 
-    if (!this.idhaciendaSeleccionada) return;
+    if (!this.idhaciendaSeleccionada) {
+      this.alert.warning('Debe seleccionar una hacienda');
+      return;
+    }
+
+    // 🔥 VALIDACIÓN PARA RANGO
+    if (this.filtros.tipo === 'rango') {
+      if (!this.filtros.desde || !this.filtros.hasta) {
+        this.alert.warning('Debe seleccionar ambas fechas');
+        return;
+      }
+    }
 
     this.loading = true;
 
     const payload = {
       fechai: this.filtros.desde || this.fechaSeleccionada,
-      fechaf: this.filtros.hasta || null, // 🔥 CLAVE
+      fechaf: this.filtros.hasta || null,
       idhacienda: this.idhaciendaSeleccionada,
     };
+
+
 
     this.serviceBodega.despachado(payload).subscribe({
       next: (data: any[]) => {
 
         this.dataOriginal = data ?? [];
 
-        const dataFiltrada = this.filtrarData();
+        // 🔥 SIN RESULTADOS
+        if (!this.dataOriginal.length) {
+          this.alert.info('No hay datos para el filtro seleccionado');
+        }
 
+        const dataFiltrada = this.filtrarData();
         this.renderTable(dataFiltrada);
 
         this.loading = false;
       },
       error: err => {
         console.error(err);
+        this.alert.error('Error al cargar los despachos');
         this.loading = false;
       }
     });
@@ -312,9 +332,12 @@ export class ItemsdespachadosComponent implements OnInit {
         .row($(event.currentTarget).parents('tr'))
         .data();
 
-      if (rowData) {
-        this.abrirDetalle(rowData.Documento);
+      if (!rowData) {
+        this.alert.error('No se pudo obtener la fila seleccionada');
+        return;
       }
+
+      this.abrirDetalle(rowData);
     });
   }
 
@@ -322,15 +345,32 @@ export class ItemsdespachadosComponent implements OnInit {
      DETALLE (IGUAL)
   ========================= */
 
-  abrirDetalle(documento: string) {
+  abrirDetalle(rowData: any) {
 
-    this.documentoActual = documento;
+
+
+    if (!rowData) {
+      this.alert.error('Error al obtener los datos del registro');
+      return;
+    }
+
+    this.documentoActual = rowData.Documento;
+
+    // 🔥 VALIDACIÓN DE FECHA
+    if (!rowData.fecha_despacho) {
+      this.alert.error('No se encontró la fecha del registro');
+      return;
+    }
+
+    const fecha = rowData.fecha_despacho.substring(0, 10);
 
     const payload = {
-      fechai: this.filtros.desde || this.fechaSeleccionada,
+      fechai: fecha,
       idhac: this.idhaciendaSeleccionada,
-      Document: documento
+      Document: rowData.Documento
     };
+
+
 
     this.serviceBodega.detalleDespacho(payload).subscribe({
       next: (data: any[]) => {
@@ -338,15 +378,23 @@ export class ItemsdespachadosComponent implements OnInit {
         this.detalle = data ?? [];
         this.comentariosAbiertos = {};
 
+        // 🔥 SIN DETALLE
+        if (!this.detalle.length) {
+          this.alert.warning('Este documento no tiene detalle');
+          return;
+        }
+
         const modal = new (window as any).bootstrap.Modal(
           document.getElementById('modalDetalle')
         );
         modal.show();
       },
-      error: err => console.error(err)
+      error: err => {
+        console.error(err);
+        this.alert.error('Error al cargar el detalle del despacho');
+      }
     });
   }
-
   /* =========================
      EVENTOS (SE RESPETAN)
   ========================= */
@@ -386,6 +434,11 @@ export class ItemsdespachadosComponent implements OnInit {
   * FILTRO HACIENDA
   * ========================= */
   onHaciendaChange(hacienda: any): void {
+
+    if (!hacienda) {
+      this.alert.warning('Seleccione una hacienda válida');
+      return;
+    }
 
     this.idhaciendaSeleccionada = hacienda.id;
     this.namehacienda = hacienda.name;

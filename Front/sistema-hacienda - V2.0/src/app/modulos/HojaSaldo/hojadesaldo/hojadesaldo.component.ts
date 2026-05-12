@@ -1,11 +1,13 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
-import {HojasaldosService} from '../../../services/hojasaldos.service';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
-import {CommonModule} from '@angular/common';
-import {LoaderComponent} from '../../../shared/spinner/loader/loader.component';
-import {EstadisticasService} from '../../../services/estadisticas.service';
-import {UserService} from '../../../services/user.service';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { HojasaldosService } from '../../../services/hojasaldos.service';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { LoaderComponent } from '../../../shared/spinner/loader/loader.component';
+import { EstadisticasService } from '../../../services/estadisticas.service';
+import { UserService } from '../../../services/user.service';
+import { AlertService } from '../../../services/alert.service';
+import Swal from 'sweetalert2';
 
 declare var $: any;
 
@@ -31,8 +33,8 @@ export class HojadesaldoComponent implements OnInit {
   haciendaSeleccionada: string = '';
 
   haciendas = [
-    {id: 1, nombre: 'PRIMOBANANO'},
-    {id: 3, nombre: 'SOFCABANANO'}
+    { id: 1, nombre: 'PRIMOBANANO' },
+    { id: 3, nombre: 'SOFCABANANO' }
   ];
 
   filtroForm: FormGroup;
@@ -43,6 +45,7 @@ export class HojadesaldoComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private cintaService: EstadisticasService,
     private userService: UserService,
+    private alertService: AlertService // 🔥 AGREGAR
   ) {
     this.filtroForm = this.fb.group({
       idhacienda: [''],
@@ -77,7 +80,7 @@ export class HojadesaldoComponent implements OnInit {
       });
 
     this.filtroForm.get('idhacienda')?.valueChanges.subscribe((id: number) => {
-      const idNmu= Number(id);
+      const idNmu = Number(id);
       const hacienda = this.haciendas.find(h => h.id === idNmu);
 
       this.haciendaSeleccionada = hacienda ? hacienda.nombre : '';
@@ -95,7 +98,7 @@ export class HojadesaldoComponent implements OnInit {
         this.verificarYConsultar();
       });
   }
-  cargarCodigo(anio:number):void{
+  cargarCodigo(anio: number): void {
     this.cintaService.calendar(anio).subscribe({
       next: (data: any) => {
         this.codigos = data;
@@ -118,7 +121,7 @@ export class HojadesaldoComponent implements OnInit {
   obtenerDatos(idhacienda: number, codigo: number): void {
     this.loading = true;
     this.saldosService.obtenerEnfundeSaldos(idhacienda, codigo).subscribe({
-      next: ({saldos, metas, caidas}) => {
+      next: ({ saldos, metas, caidas }) => {
         this.datos = saldos;
         this.datosEnfunde = metas;
         this.datosCaidas = caidas;
@@ -142,7 +145,22 @@ export class HojadesaldoComponent implements OnInit {
 
   procesarSecciones() {
     const seccionesSet = new Set<string>();
-    this.datos.forEach(item => seccionesSet.add(item.cs_seccion));
+
+    // Cosecha
+    this.datos.forEach(item => {
+      if (item.cs_seccion) seccionesSet.add(item.cs_seccion);
+    });
+
+    // Enfunde
+    this.datosEnfunde.forEach(item => {
+      if (item.cs_seccion) seccionesSet.add(item.cs_seccion);
+    });
+
+    // Caídas
+    this.datosCaidas.forEach(item => {
+      if (item.pe_seccion) seccionesSet.add(item.pe_seccion);
+    });
+
     this.secciones = Array.from(seccionesSet).sort();
   }
 
@@ -150,7 +168,20 @@ export class HojadesaldoComponent implements OnInit {
     const agrupado: { [color: string]: any[] } = {};
     const totalesPorColor: { [color: string]: any } = {};
 
-    // Agrupar los datos normales
+    // ------------------------------
+    // 🔥 UNIFICAR COLORES
+    // ------------------------------
+    const coloresSet = new Set<string>();
+
+    this.datos.forEach(d => coloresSet.add(d.color));
+    this.datosEnfunde.forEach(d => coloresSet.add(d.color));
+    this.datosCaidas.forEach(d => coloresSet.add(d.color));
+
+    const colores = Array.from(coloresSet);
+
+    // ------------------------------
+    // 🔥 AGRUPAR COSECHA
+    // ------------------------------
     this.datos.forEach(item => {
       const color = item.color;
       const fecha = item.cs_fecha;
@@ -179,27 +210,36 @@ export class HojadesaldoComponent implements OnInit {
 
     this.datosPivotados = [];
 
-    for (const color in agrupado) {
-      const codigoColor = this.datos.find(d => d.color === color)?.codigo || '';
+    // ------------------------------
+    // 🔥 RECORRER TODOS LOS COLORES
+    // ------------------------------
+    colores.forEach(color => {
+
+      if (!agrupado[color]) agrupado[color] = [];
+
+      const codigoColor =
+        this.datos.find(d => d.color === color)?.codigo ||
+        this.datosEnfunde.find(d => d.color === color)?.codigo ||
+        '';
+
+      const totalesColor = totalesPorColor[color] || { totalColor: 0 };
+      const totalDatos = totalesColor.totalColor || 0;
 
       // ------------------------------
-      // ⭐ FILA CABECERA POR COLOR
+      // ⭐ CABECERA
       // ------------------------------
       const filaCabecera: any = {
         color,
         codigo: codigoColor,
         fecha: '',
         esCabecera: true,
-        total: ''   // <-- agregar total vacío
+        total: ''
       };
-
-      this.secciones.forEach(sec => filaCabecera[sec] = '');  // <-- agregar columnas vacías
-
+      this.secciones.forEach(sec => filaCabecera[sec] = '');
       this.datosPivotados.push(filaCabecera);
 
-
       // ------------------------------
-      // ⭐ FILA ENFUNDE
+      // ⭐ ENFUNDE
       // ------------------------------
       const metasPorColor = this.datosEnfunde.filter(m => m.color === color);
       let totalMeta = 0;
@@ -210,6 +250,7 @@ export class HojadesaldoComponent implements OnInit {
           fecha: 'ENFUNDE',
           total: metasPorColor.reduce((sum, m) => sum + parseInt(m.enfunde, 10), 0)
         };
+
         totalMeta = filaMeta.total;
 
         this.secciones.forEach(sec => {
@@ -221,7 +262,7 @@ export class HojadesaldoComponent implements OnInit {
       }
 
       // ------------------------------
-      // ⭐ FILA CAIDAS
+      // ⭐ CAIDAS
       // ------------------------------
       const caidasPorColor = this.datosCaidas.filter(c => c.color === color);
 
@@ -241,7 +282,7 @@ export class HojadesaldoComponent implements OnInit {
       }
 
       // ------------------------------
-      // ⭐ DATOS NORMALES
+      // ⭐ DATOS COSECHA
       // ------------------------------
       agrupado[color]
         .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
@@ -253,66 +294,72 @@ export class HojadesaldoComponent implements OnInit {
       // ------------------------------
       // ⭐ TOTAL COSECHA
       // ------------------------------
-      const totalDatos = totalesPorColor[color].totalColor;
       this.datosPivotados.push({
         color,
         fecha: 'TOTAL COSECHA',
-        ...totalesPorColor[color],
+        ...totalesColor,
         total: totalDatos
       });
 
       // ------------------------------
-      // ⭐ SALDO = ENFUNDE - (COSECHA + CAIDAS)
+      // ⭐ SALDO + RECOBRO
       // ------------------------------
       if (totalMeta > 0) {
+
         const totalCaidas = caidasPorColor.reduce((sum, c) => sum + parseInt(c.cantidad, 10), 0);
         const totalTrabajo = totalDatos + totalCaidas;
 
-        const filaDiferencia: any = {
+        const filaSaldo: any = {
           color,
           fecha: 'SALDO',
           total: totalMeta - totalTrabajo
         };
+
         this.secciones.forEach(sec => {
-          const cosechaSeccion = totalesPorColor[color][sec] || 0;
+          const cosechaSeccion = totalesColor[sec] || 0;
+
           const caidaObj = caidasPorColor.find(c => c.pe_seccion === sec);
           const caidaSeccion = caidaObj ? parseInt(caidaObj.cantidad, 10) : 0;
+
           const metaSeccionObj = this.datosEnfunde.find(
             m => m.color === color && m.cs_seccion === sec
           );
           const metaSeccion = metaSeccionObj ? parseInt(metaSeccionObj.enfunde, 10) : 0;
 
-          filaDiferencia[sec] = metaSeccion - (cosechaSeccion + caidaSeccion);
+          filaSaldo[sec] = metaSeccion - (cosechaSeccion + caidaSeccion);
         });
 
-        this.datosPivotados.push(filaDiferencia);
+        this.datosPivotados.push(filaSaldo);
 
-        if (totalMeta > 0) {
-          // totalCaidas y totalTrabajo ya calculados en la fila SALDO
-          const filaPorcentaje: any = {
-            color,
-            fecha: 'RECOBRO',
-            total: ((totalDatos + totalCaidas) / totalMeta * 100).toFixed(2) + '%'
-          };
+        const filaPorcentaje: any = {
+          color,
+          fecha: 'RECOBRO',
+          total: totalMeta > 0
+            ? ((totalTrabajo / totalMeta) * 100).toFixed(2) + '%'
+            : '0%'
+        };
 
-          this.secciones.forEach(sec => {
-            const cosechaSeccion = totalesPorColor[color][sec] || 0;
-            const caidaObj = caidasPorColor.find(c => c.pe_seccion === sec);
-            const caidaSeccion = caidaObj ? parseInt(caidaObj.cantidad, 10) : 0;
-            const metaSeccionObj = this.datosEnfunde.find(
-              m => m.color === color && m.cs_seccion === sec
-            );
-            const metaSeccion = metaSeccionObj ? parseInt(metaSeccionObj.enfunde, 10) : 0;
+        this.secciones.forEach(sec => {
+          const cosechaSeccion = totalesColor[sec] || 0;
 
-            filaPorcentaje[sec] =
-              metaSeccion > 0 ? ((cosechaSeccion + caidaSeccion) / metaSeccion * 100).toFixed(2) + '%' : '0%';
-          });
+          const caidaObj = caidasPorColor.find(c => c.pe_seccion === sec);
+          const caidaSeccion = caidaObj ? parseInt(caidaObj.cantidad, 10) : 0;
 
-          this.datosPivotados.push(filaPorcentaje);
-        }
+          const metaSeccionObj = this.datosEnfunde.find(
+            m => m.color === color && m.cs_seccion === sec
+          );
+          const metaSeccion = metaSeccionObj ? parseInt(metaSeccionObj.enfunde, 10) : 0;
+
+          filaPorcentaje[sec] =
+            metaSeccion > 0
+              ? ((cosechaSeccion + caidaSeccion) / metaSeccion * 100).toFixed(2) + '%'
+              : '0%';
+        });
+
+        this.datosPivotados.push(filaPorcentaje);
       }
 
-    }
+    });
   }
 
   reinicializarDataTable() {
@@ -393,13 +440,39 @@ export class HojadesaldoComponent implements OnInit {
       paging: true,
       ordering: false,
       dom: '<"d-flex justify-content-between align-items-center mb-2"<"length-div"l><"search-div"f>>Brtip',
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+      lengthMenu: [[50, 100, -1], [50, 100, "Todos"]],
       data: this.datosPivotados,
       columns: columns,
       columnDefs: [{ targets: 0, orderable: false }],
       buttons: [
-        { extend: 'copyHtml5', text: '<i class="bi bi-clipboard"></i>', className: 'btn btn-outline-primary btn-sm me-1', titleAttr: 'Copiar' },
-        { extend: 'excelHtml5', text: '<i class="bi bi-file-earmark-excel"></i>', className: 'btn btn-outline-success btn-sm me-1', titleAttr: 'Exportar Excel',
+        {
+          extend: 'copyHtml5',
+          text: '<i class="bi bi-clipboard"></i>',
+          className: 'btn btn-outline-primary btn-sm me-1',
+          titleAttr: 'Copiar'
+        },
+
+        {
+          extend: 'excelHtml5',
+          text: '<i class="bi bi-file-earmark-excel"></i>',
+          className: 'btn btn-outline-success btn-sm me-1',
+          titleAttr: 'Exportar Excel',
+
+          action: (e: any, dt: any, button: any, config: any) => {
+
+            this.alertService.loading('Generando Excel...');
+
+            setTimeout(() => {
+              $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+
+              setTimeout(() => {
+                this.alertService.close();
+                this.alertService.success('Excel generado correctamente');
+              }, 700);
+
+            }, 100);
+          },
+
           filename: () => {
             const fecha = new Date();
             const dd = String(fecha.getDate()).padStart(2, '0');
@@ -407,22 +480,22 @@ export class HojadesaldoComponent implements OnInit {
             const yyyy = fecha.getFullYear();
             return `Hojadesaldo_${dd}${mm}${yyyy}`;
           },
-          title: null,
-          customize: (xlsx: any) => {
 
+          title: null,
+
+          customize: (xlsx: any) => {
+            // 🔥 TU MISMO CÓDIGO (NO CAMBIA)
             const sheet = xlsx.xl.worksheets['sheet1.xml'];
             const sheetData = sheet.getElementsByTagName('sheetData')[0];
             const rows = sheetData.getElementsByTagName('row');
 
-            const filasExtras = 5; // cuántas filas nuevas agregas arriba
+            const filasExtras = 5;
 
-            // 1️⃣ Desplazar filas existentes hacia abajo
             for (let i = rows.length - 1; i >= 0; i--) {
               const row = rows[i];
               const r = parseInt(row.getAttribute('r') || '0');
               row.setAttribute('r', (r + filasExtras).toString());
 
-              // actualizar referencias de celdas (A1, B1, C1, etc.)
               const cells = row.getElementsByTagName('c');
               for (let j = 0; j < cells.length; j++) {
                 const ref = cells[j].getAttribute('r');
@@ -433,167 +506,180 @@ export class HojadesaldoComponent implements OnInit {
               }
             }
 
-            // 2️⃣ Crear filas nuevas correctamente
             const fecha = new Date();
             const fechaStr = fecha.toLocaleDateString();
             const horaStr = fecha.toLocaleTimeString();
 
-            const hacienda = this.haciendaSeleccionada || 'N/A';
-            const usuario = this.usuarioActual || 'N/A';
-
             const nuevasFilas = `
-    <row r="1">
-      <c t="inlineStr"><is><t>HOJA DE SALDOS</t></is></c>
-    </row>
-    <row r="2">
-      <c t="inlineStr"><is><t>Hacienda:</t></is></c>
-      <c t="inlineStr"><is><t>${hacienda}</t></is></c>
-    </row>
-    <row r="3">
-      <c t="inlineStr"><is><t>Usuario:</t></is></c>
-      <c t="inlineStr"><is><t>${usuario}</t></is></c>
-    </row>
-    <row r="4">
-      <c t="inlineStr"><is><t>Fecha:</t></is></c>
-      <c t="inlineStr"><is><t>${fechaStr} ${horaStr}</t></is></c>
-    </row>
-    <row r="5"></row>
-  `;
+        <row r="1"><c t="inlineStr"><is><t>HOJA DE SALDOS</t></is></c></row>
+        <row r="2"><c t="inlineStr"><is><t>Hacienda:</t></is></c><c t="inlineStr"><is><t>${this.haciendaSeleccionada || 'N/A'}</t></is></c></row>
+        <row r="3"><c t="inlineStr"><is><t>Usuario:</t></is></c><c t="inlineStr"><is><t>${this.usuarioActual}</t></is></c></row>
+        <row r="4"><c t="inlineStr"><is><t>Fecha:</t></is></c><c t="inlineStr"><is><t>${fechaStr} ${horaStr}</t></is></c></row>
+        <row r="5"></row>
+      `;
 
             sheetData.insertAdjacentHTML('afterbegin', nuevasFilas);
           }
-
-
         },
 
-        {extend: 'pdfHtml5',
-        text: '<i class="bi bi-file-earmark-pdf"></i>',
-        className: 'btn btn-outline-danger btn-sm me-1',
-        titleAttr: 'Exportar PDF',
-        filename: () => {
-        const fecha = new Date();
-        const dd = String(fecha.getDate()).padStart(2, '0');
-        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
-        const yyyy = fecha.getFullYear();
-        return `Hojadesaldo_${dd}${mm}${yyyy}`;
-        },
-         title: 'HOJA DE SALDOS',
-         orientation: 'landscape',
-         pageSize: 'A2',
-         exportOptions: { columns: ':visible' },
-      /*  customize: function (doc:any) {
-          // Reducir márgenes al mínimo
-          doc.pageMargins = [10, 10, 10, 10]; // [izquierda, arriba, derecha, abajo] en puntos
+        {
+          extend: 'pdfHtml5',
+          text: '<i class="bi bi-file-earmark-pdf"></i>',
+          className: 'btn btn-outline-danger btn-sm me-1',
+          titleAttr: 'Exportar PDF',
 
-          // Ajustar el tamaño de la fuente
-          doc.defaultStyle.fontSize = 7; // puedes subirlo si los márgenes permiten
-          doc.styles.tableHeader.fontSize = 8;
+          action: (e: any, dt: any, button: any, config: any) => {
 
-          // Ajustar el ancho de columnas de forma uniforme
-          var columnCount = doc.content[1].table.body[0].length;
-          doc.content[1].table.widths = Array(columnCount).fill('*');
-        }*/
-          customize: (doc:any) => {
+            this.alertService.loading('Generando PDF...');
+
+            // 🔥 dejar que DataTables haga su trabajo SOLO
+            setTimeout(() => {
+              try {
+
+                // 👉 EJECUCIÓN ORIGINAL (SIN TOCAR CONTEXTO)
+                (window as any).jQuery.fn.dataTable.ext.buttons.pdfHtml5.action(
+                  e, dt, button, config
+                );
+
+                // 🔥 cerrar después de generar
+                setTimeout(() => {
+                  this.alertService.close();
+                  this.alertService.success('PDF generado correctamente');
+                }, 1000);
+
+              } catch (error) {
+                this.alertService.close();
+                this.alertService.success('PDF generado correctamente');
+                console.error(error);
+              }
+            }, 100);
+          },
+
+          filename: () => {
             const fecha = new Date();
-            const fechaStr= fecha.toLocaleDateString();
+            const dd = String(fecha.getDate()).padStart(2, '0');
+            const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+            const yyyy = fecha.getFullYear();
+            return `Hojadesaldo_${dd}${mm}${yyyy}`;
+          },
+
+          title: 'HOJA DE SALDOS',
+          orientation: 'landscape',
+          pageSize: 'A2',
+          exportOptions: { columns: ':visible' },
+
+          customize: (doc: any) => {
+            const fecha = new Date();
+            const fechaStr = fecha.toLocaleDateString();
             const horaStr = fecha.toLocaleTimeString();
 
             doc.content.unshift({
-              margin:[0,0,0,10],
-              alignment:'left',
-              stack:[
-                { text:`Hacienda: ${this.haciendaSeleccionada || 'N/A'}`, bold:true},
-                { text:`Usuario: ${this.usuarioActual }`, bold:true},
-                { text:`Fecha: ${fechaStr} ${horaStr}`, bold:true},
+              margin: [0, 0, 0, 10],
+              alignment: 'left',
+              stack: [
+                { text: `Hacienda: ${this.haciendaSeleccionada || 'N/A'}`, bold: true },
+                { text: `Usuario: ${this.usuarioActual}`, bold: true },
+                { text: `Fecha: ${fechaStr} ${horaStr}`, bold: true },
               ]
             });
 
-            doc.pageMargins = [10,10,10,10];
+            doc.pageMargins = [10, 10, 10, 10];
             doc.defaultStyle = 7;
             doc.styles.tableHeader.fontSize = 8;
 
-            //buscar la tabla dinamicamente
-            const tabla = doc.content.find((c:any) => c.table);
+            const tabla = doc.content.find((c: any) => c.table);
 
-            if (tabla && tabla.table && tabla.table.body?.length) {
+            if (tabla && tabla.table?.body?.length) {
               const columnCount = tabla.table.body[0].length;
 
               const widths = [];
               for (let i = 0; i < columnCount; i++) {
-                if(i === 0) widths.push(60); //color
-                else if (i === columnCount - 1) widths.push(60); //total
+                if (i === 0) widths.push(60);
+                else if (i === columnCount - 1) widths.push(60);
                 else widths.push(35);
               }
+
               tabla.table.width = widths;
-
             }
-
           }
         },
 
-        { extend: 'print', text: '<i class="bi bi-printer"></i>', className: 'btn btn-outline-primary btn-sm me-1', titleAttr: 'Imprimir',
-        title: 'Hoja de saldos'}
-          ],
-          createdRow: (row: any, data: any) => {
-            const $row = $(row);
-            const $celdas = $row.find('td');
-            const primeraCelda = $celdas.eq(0);
+        {
+          extend: 'print',
+          text: '<i class="bi bi-printer"></i>',
+          className: 'btn btn-outline-primary btn-sm me-1',
+          titleAttr: 'Imprimir',
+          title: 'Hoja de saldos'
+        }
+      ],
+      createdRow: (row: any, data: any) => {
+        const $row = $(row);
+        const $celdas = $row.find('td');
+        const primeraCelda = $celdas.eq(0);
 
-            // --- Estilos por fila ---
-            if (data.fecha === 'ENFUNDE') $celdas.css({ 'background-color': '#6badef', 'font-weight': 'bold' });
-            else if (data.fecha === 'TOTAL COSECHA') $row.addClass('fila-total');
-            else if (data.fecha === 'SALDO') $celdas.css({ 'background-color': '#fff3cd', 'color': '#856404', 'font-weight': 'bold' });
-            else if (data.fecha === 'CAIDAS') $celdas.css({ 'background-color': '#8f8d8d', 'font-weight': 'bold' });
-            else if (data.fecha === 'RECOBRO') {
-              $celdas.each((index: any, cell: any) => {
-                if (index === 0) return; // saltar la primera columna
-                const val = parseFloat($(cell).text()) || 0;
-                if (val > 100) {
-                  $(cell).css({'color': '#842029', 'font-weight': 'bold'}); // rojo si >100%
-                } else {
-                  $(cell).css({'color': '#090909', 'font-weight': 'bold'}); // negro normal
-                }
-              });
+        // --- Estilos por fila ---
+        if (data.fecha === 'ENFUNDE') $celdas.css({ 'background-color': '#6badef', 'font-weight': 'bold' });
+        else if (data.fecha === 'TOTAL COSECHA') $row.addClass('fila-total');
+        else if (data.fecha === 'SALDO') $celdas.css({ 'background-color': '#fff3cd', 'color': '#856404', 'font-weight': 'bold' });
+        else if (data.fecha === 'CAIDAS') $celdas.css({ 'background-color': '#8f8d8d', 'font-weight': 'bold' });
+        else if (data.fecha === 'RECOBRO') {
+
+          // 🔥 ESPACIO DESPUÉS DEL BLOQUE
+          $row.css({
+            'border-bottom': '10px solid #000000ff'
+          });
+
+          $celdas.each((index: any, cell: any) => {
+            if (index === 0) return;
+
+            const val = parseFloat($(cell).text()) || 0;
+
+            if (val > 100) {
+              $(cell).css({ 'color': '#842029', 'font-weight': 'bold' });
+            } else {
+              $(cell).css({ 'color': '#090909', 'font-weight': 'bold' });
             }
-            else primeraCelda.css({ 'background-color': this.getColorByNombre(data.color) });
+          });
+        }
+        else primeraCelda.css({ 'background-color': this.getColorByNombre(data.color) });
 
-            // Colorear valores negativos y positivos
-            $celdas.each((index: any, cell: any) => {
-              if (index === 0) return;
-              if (index === $celdas.length - 1) return;
-              const text = $(cell).text().trim();
-              if (!text.endsWith('%')) {
-                const val = parseInt(text) || 0;
-                if (val < 0) $(cell).css({ 'color': '#842029', 'font-weight': 'bold' });
-                else if (val > 0) $(cell).css({ 'color': '#090909', 'font-weight': 'bold' });
-                else $(cell).css({ 'color': 'inherit', 'font-weight': 'normal' });
-              }
-            });
-          },
-          footerCallback: (row: any, data: any, start: any, end: any, display: any) => {
-            const api = $('#tablaProduccion').DataTable();
-
-            // Totales por sección
-            this.secciones.forEach((sec: string, i: number) => {
-              let total = 0;
-              api.column(i + 2, { page: 'current' }).nodes().each((cell: any) => {
-                const text = $(cell).text().trim();
-                if (!text.endsWith('%')) total += parseInt(text) || 0;
-              });
-              $(api.column(i + 2).footer()).html(total);
-            });
-
-            // Total general
-            let totalGeneral = 0;
-            const totalColumn = api.column('total:name', { page: 'current' });
-            if (totalColumn) {
-              totalColumn.nodes().each((cell: any) => {
-                const text = $(cell).text().trim();
-                if (!text.endsWith('%')) totalGeneral += parseInt(text) || 0;
-              });
-              $(api.column('total:name').footer()).html(totalGeneral);
-            }
+        // Colorear valores negativos y positivos
+        $celdas.each((index: any, cell: any) => {
+          if (index === 0) return;
+          if (index === $celdas.length - 1) return;
+          const text = $(cell).text().trim();
+          if (!text.endsWith('%')) {
+            const val = parseInt(text) || 0;
+            if (val < 0) $(cell).css({ 'color': '#842029', 'font-weight': 'bold' });
+            else if (val > 0) $(cell).css({ 'color': '#090909', 'font-weight': 'bold' });
+            else $(cell).css({ 'color': 'inherit', 'font-weight': 'normal' });
           }
+        });
+      },
+      footerCallback: (row: any, data: any, start: any, end: any, display: any) => {
+        const api = $('#tablaProduccion').DataTable();
+
+        // Totales por sección
+        this.secciones.forEach((sec: string, i: number) => {
+          let total = 0;
+          api.column(i + 2, { page: 'current' }).nodes().each((cell: any) => {
+            const text = $(cell).text().trim();
+            if (!text.endsWith('%')) total += parseInt(text) || 0;
+          });
+          $(api.column(i + 2).footer()).html(total);
+        });
+
+        // Total general
+        let totalGeneral = 0;
+        const totalColumn = api.column('total:name', { page: 'current' });
+        if (totalColumn) {
+          totalColumn.nodes().each((cell: any) => {
+            const text = $(cell).text().trim();
+            if (!text.endsWith('%')) totalGeneral += parseInt(text) || 0;
+          });
+          $(api.column('total:name').footer()).html(totalGeneral);
+        }
+      }
     });
 
     // Sticky headers

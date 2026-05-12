@@ -6,7 +6,10 @@ import Swal from 'sweetalert2';
 })
 export class AlertService {
 
-  // 🔥 TOAST GLOBAL
+
+  /* =========================
+   * TOAST BASE (GLOBAL)
+   * ========================= */
   private toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -16,39 +19,71 @@ export class AlertService {
   });
 
   /* =========================
-   * TOASTS (rápidos)
+   * TOASTS PRO (TIPO ODOO)
    * ========================= */
 
   success(message: string) {
     this.toast.fire({
       icon: 'success',
-      title: message
+      title: message,
+      background: '#f0fdf4',
+      color: '#166534',
+      iconColor: '#22c55e'
     });
   }
 
   info(message: string) {
     this.toast.fire({
       icon: 'info',
-      title: message
+      title: message,
+      background: '#eff6ff',
+      color: '#1e3a8a',
+      iconColor: '#3b82f6'
     });
   }
 
   warning(message: string) {
     this.toast.fire({
       icon: 'warning',
-      title: message
+      title: message,
+      background: '#fffbeb',
+      color: '#92400e',
+      iconColor: '#f59e0b'
     });
   }
 
   error(message: string) {
     this.toast.fire({
       icon: 'error',
-      title: message
+      title: message,
+      background: '#fef2f2',
+      color: '#991b1b',
+      iconColor: '#ef4444'
     });
   }
 
   /* =========================
-   * MODALES (importantes)
+   * LOADING (🔥 CLAVE PRO)
+   * ========================= */
+
+  loading(message: string = 'Procesando...') {
+    Swal.fire({
+      title: message,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  close() {
+    Swal.close();
+  }
+
+  /* =========================
+   * MODALES PRO
    * ========================= */
 
   modalInfo(title: string, message: string) {
@@ -64,7 +99,8 @@ export class AlertService {
     return Swal.fire({
       icon: 'error',
       title,
-      text: message
+      text: message,
+      confirmButtonColor: '#dc2626'
     });
   }
 
@@ -72,18 +108,38 @@ export class AlertService {
     return Swal.fire({
       icon: 'warning',
       title,
-      text: message
+      text: message,
+      confirmButtonColor: '#f59e0b'
     });
   }
 
+  /* =========================
+   * CONFIRMACIÓN PRO
+   * ========================= */
+
   confirm(title: string, message: string) {
     return Swal.fire({
-      icon: 'warning',
+      icon: 'question',
       title,
       text: message,
       showCancelButton: true,
       confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#6b7280'
+    });
+  }
+
+  /* =========================
+   * ACCIÓN EXITOSA (MODAL GRANDE)
+   * ========================= */
+
+  successModal(title: string, message: string) {
+    return Swal.fire({
+      icon: 'success',
+      title,
+      text: message,
+      confirmButtonColor: '#16a34a'
     });
   }
 }

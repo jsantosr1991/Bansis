@@ -58,6 +58,20 @@
 
         </div>
       </div>
+      <!-- 🔥 RANGO DE FECHAS -->
+      <div *ngIf="filtros.tipo === 'rango'" class="row mt-2">
+
+        <div class="col-md-3">
+          <label>Desde</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.desde">
+        </div>
+
+        <div class="col-md-3">
+          <label>Hasta</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.hasta">
+        </div>
+
+      </div>
 
       <!-- 🔥 BOTÓN -->
       <div class="col-md-1 d-grid">

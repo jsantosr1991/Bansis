@@ -6,6 +6,7 @@ import { UserService } from '../../services/user.service';
 import { AuthserviceService } from '../../services/authservice.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-matascaidas',
@@ -19,7 +20,7 @@ export class MatascaidasComponent implements OnInit {
   codEmpleado = '';
   user: string | null = '';
   anio: number = 0;
-
+  semanaBloqueada: boolean = false;
   array = [] as any;
   semana = '';
 
@@ -39,36 +40,30 @@ export class MatascaidasComponent implements OnInit {
     private servicio: HojasaldosService,
     private userService: UserService,
     private router: Router, // 👈 agrega esto
-    protected permisoService: AuthserviceService) {
+    protected permisoService: AuthserviceService,
+    private alertService: AlertService) {
   }
 
   ngOnInit(): void {
-    this.semanaMatascaidas();
-    this.user = this.userService.getUsername();
-    this.anio = this.today.getFullYear();
-    this.today
 
-    // Obtener el ID de la hacienda desde el token del usuario
-    this.idhaciendaSeleccionada = this.userService.getCodEmpresa();  // ajusta el método según tu implementación
-    // console.log("Hacienda seleccionada desde el token:", this.idhaciendaSeleccionada);
+    this.user = this.userService.getUsername() ?? '';
+    this.anio = this.today.getFullYear();
+
+    this.idhaciendaSeleccionada = this.userService.getCodEmpresa();
 
     this.gridForm = this.fb.group({});
 
     this.haciendas = [
       { id: 1, nombre: 'PRIMOBANANO' },
-
       { id: 8, nombre: 'SOFCABANANO' }
     ];
+
     this.onHaciendaSeleccionada();
+
+    this.semanaMatascaidas(); // 👈 AL FINAL
   }
 
-  semanaMatascaidas() {
-    this.servicio.obtenerSemanaMatasCaidas().subscribe((data: any[]) => {
-      this.semana = data[0]?.semana;
-      this.cintasMatascaidas(this.semana)
 
-    })
-  }
 
   cintasMatascaidas(semana: any) {
 
@@ -150,58 +145,76 @@ export class MatascaidasComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.gridForm.valid) {
-      const gridData = this.getGridData();
 
-      // Agrega información adicional que tu backend pueda necesitar
-      const payload = {
-        semana: this.semana,
-        anio: this.anio,
-        user: this.user,
-        codEmpleado: this.codEmpleado,
-        idHacienda: this.idhaciendaSeleccionada,
-        nombreHacienda: this.nombreHaciendaSeleccionado,
-        datos: gridData
-      };
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: "¿Deseas guardar los cambios?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, guardar',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const idGuardado = 1; // ID simulado
-          // Aquí va tu lógica de guardado o envío
-          this.servicio.guardar(payload).subscribe({
-            next: (resp) => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Guardado correctamente',
-                text: 'Los datos se han guardado con éxito'
+    // 🔥 VALIDACIÓN SEMANA BLOQUEADA
+    if (this.semanaBloqueada) {
+      this.alertService.warning('No puedes guardar. La semana ya está registrada');
+      return;
+    }
 
+    // 🔥 VALIDAR FORM VACÍO
+    const gridData = this.getGridData();
 
-              }).then(() => {
-                this.router.navigate(['/balanza/historicomatascaidas']);
-                this.gridForm.reset();
-              });
+    if (!gridData.length) {
+      this.alertService.warning('Debe ingresar al menos un valor');
+      return;
+    }
 
-            },
-            error: () => {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo guardar la información'
-              });
-            }
+    const payload = {
+      semana: this.semana,
+      anio: this.anio,
+      user: this.user,
+      codEmpleado: this.codEmpleado,
+      idHacienda: this.idhaciendaSeleccionada,
+      nombreHacienda: this.nombreHaciendaSeleccionado,
+      datos: gridData
+    };
+
+    // 🔥 CONFIRMACIÓN PRO
+    this.alertService.confirm(
+      '¿Guardar información?',
+      'Se registrarán los datos ingresados'
+    ).then(result => {
+
+      if (!result.isConfirmed) return;
+
+      // 🔥 LOADING PRO
+      this.alertService.loading('Guardando información...');
+
+      this.servicio.guardar(payload).subscribe({
+        next: () => {
+
+          this.alertService.close();
+
+          this.alertService.successModal(
+            'Guardado correctamente',
+            'Los datos fueron registrados con éxito'
+          ).then(() => {
+            this.router.navigate(['/balanza/historicomatascaidas']);
+            this.gridForm.reset();
           });
+
+        },
+        error: (err) => {
+
+          this.alertService.close();
+
+          if (err.status === 400) {
+            this.alertService.warning(err.error.mensaje);
+
+            this.semanaBloqueada = true;
+
+            return;
+          }
+
+          this.alertService.modalError(
+            'Error',
+            'No se pudo guardar la información'
+          );
         }
       });
 
-      // console.log('Enviando al backend:', payload);
-      //  console.log('Datos guardados:', gridData);
-    }
+    });
   }
 
   getGridData(): any[] {
@@ -264,5 +277,53 @@ export class MatascaidasComponent implements OnInit {
     this.nombreHaciendaSeleccionado = hacienda ? hacienda.nombre : '';
   }
 
+  validarSemana(): void {
+
+    if (!this.semana || !this.idhaciendaSeleccionada) return;
+
+    this.servicio.validarSemana({
+      semana: this.semana,
+      anio: this.anio,
+      idHacienda: this.idhaciendaSeleccionada,
+      codEmpleado: this.codEmpleado
+    }).subscribe({
+      next: (resp: any) => {
+
+        if (resp.existe) {
+
+          this.semanaBloqueada = true;
+
+          this.alertService.warning(`⚠️ Ya registraste la semana ${this.semana}`);
+
+        } else {
+
+          this.semanaBloqueada = false;
+        }
+      },
+      error: () => {
+        this.alertService.error('Error al validar la semana');
+      }
+    });
+  }
+
+  semanaMatascaidas() {
+    this.servicio.obtenerSemanaMatasCaidas().subscribe((data: any[]) => {
+
+      this.semana = data[0]?.semana;
+
+      // 🔥 VALIDAR AUTOMÁTICAMENTE
+      setTimeout(() => {
+        this.validarSemana();
+      }, 0);
+
+      this.cintasMatascaidas(this.semana);
+    });
+  }
+  onSemanaChange(): void {
+    this.semana = this.gridForm.get('semana')?.value;
+
+    this.validarSemana();
+    this.cintasMatascaidas(this.semana);
+  }
 }
 

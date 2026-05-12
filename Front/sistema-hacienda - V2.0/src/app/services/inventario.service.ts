@@ -47,4 +47,24 @@ export class InventarioService {
   getBodegas() {
     return this.http.get(`${this.baseUrl}/inventario/bodegas`);
   }
+
+
+  // 🔥 ASIGNAR PRODUCTO
+  asignarProducto(data: any) {
+    return this.http.post(`${this.baseUrl}/inventario/asignar`, data);
+  }
+
+  // 📊 HISTORIAL
+  getAsignaciones() {
+    return this.http.get<any[]>(`${this.baseUrl}/inventario/asignaciones`);
+  }
+  // 🔄 DEVOLVER
+  devolverProducto(data: any) {
+    return this.http.post(`${this.baseUrl}/inventario/devolver`, data);
+  }
+
+  // 👤 USUARIOS (DINÁMICO)
+  getUsuarios() {
+    return this.http.get(`${this.baseUrl}/users`);
+  }
 }

@@ -17,7 +17,7 @@ interface Hacienda {
 })
 export class FiltroHaciendaComponent implements OnInit {
 
-  @Input() grupoOcultar: string = '';
+  @Input() grupoOcultar: string[] = [];
   @Input() gruposPermitidos: string[] = [];
 
   @Output() cambioHacienda = new EventEmitter<any>();
@@ -44,7 +44,7 @@ export class FiltroHaciendaComponent implements OnInit {
     this.namehacienda = this.userService.getNomEmpresa();
 
     const tieneGrupoOcultar = this.grupoOcultar
-      ? this.permisoService.tieneGrupo(this.grupoOcultar)
+      ? this.permisoService.tieneAlgunGrupo(this.grupoOcultar)
       : false;
 
     const tienePermitidos = this.gruposPermitidos.length > 0

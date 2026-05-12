@@ -15,7 +15,7 @@ export class DataTableComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private initialized = false;
 
-  constructor(private dtService: DataTableService) {}
+  constructor(private dtService: DataTableService) { }
 
   ngAfterViewInit(): void {
     // Espera a que el DOM esté listo antes de inicializar
@@ -25,7 +25,7 @@ export class DataTableComponent implements AfterViewInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     // Si cambia el refreshTrigger, reiniciamos la tabla
     if (changes['refreshTrigger'] && !changes['refreshTrigger'].firstChange) {
-      console.log('🔁 Refrescando DataTable por trigger:', this.refreshTrigger);
+
       this.reinitTable();
     }
   }
@@ -39,7 +39,7 @@ export class DataTableComponent implements AfterViewInit, OnDestroy, OnChanges {
       setTimeout(() => {
         this.dtService.init(`#${this.tableId}`, this.options);
         this.initialized = true;
-        console.log('✅ DataTable inicializado:', this.tableId);
+
       }, 200); // pequeño delay para asegurar que el DOM tenga datos
     }
   }
@@ -48,7 +48,7 @@ export class DataTableComponent implements AfterViewInit, OnDestroy, OnChanges {
     if (this.initialized) {
       this.dtService.destroy(`#${this.tableId}`);
       this.initialized = false;
-      console.log('♻️ DataTable destruido para reinicializar');
+
     }
 
     // Esperar un poco más para que Angular haya renderizado los nuevos datos

@@ -1,0 +1,578 @@
+<!-- labores-agricolas.component.html -->
+<app-loader [loading]="loading"></app-loader>
+<div class="module-card">
+    <!-- HEADER ERP -->
+    <div class="erp-header card border-0 shadow-sm mb-3 compact-header">
+
+        <div class="card-body p-3">
+
+            <!-- TOP -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <!-- IZQUIERDA -->
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- ICON -->
+                    <div class="erp-icon-mini">
+
+                        <i class="bi bi-tree-fill"></i>
+
+                    </div>
+
+                    <!-- INFO -->
+                    <div>
+
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                            <h4 class="mb-0 fw-bold title-erp">
+
+                                Labores Agrícolas
+
+                            </h4>
+
+                            <!-- BADGE -->
+                            <span *ngIf="cabecera?.estado === 'CERRADO'"
+                                class="badge rounded-pill bg-success px-3 py-2">
+
+                                <i class="bi bi-lock-fill me-1"></i>
+                                SEMANA CERRADA
+
+                            </span>
+
+                            <span *ngIf="cabecera?.estado !== 'CERRADO'"
+                                class="badge rounded-pill bg-warning text-dark px-3 py-2">
+
+                                <i class="bi bi-pencil-square me-1"></i>
+                                EN PROCESO
+
+                            </span>
+
+                        </div>
+
+                        <!-- HACIENDA -->
+                        <div class="fw-semibold text-success small">
+
+                            {{ namehacienda }}
+
+                        </div>
+
+                        <!-- SUBTITLE -->
+                        <div class="text-muted subtitle-erp">
+
+                            Control y validación colaborativa de labores agrícolas semanales
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- DERECHA -->
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    <!-- SEMANA -->
+                    <div class="mini-card">
+
+                        <div class="mini-icon bg-primary">
+
+                            <i class="bi bi-calendar-week"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="mini-label">
+                                Semana
+                            </div>
+
+                            <div class="mini-value">
+                                {{ filtro.semana }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- PERIODO -->
+                    <div class="mini-card">
+
+                        <div class="mini-icon bg-dark">
+
+                            <i class="bi bi-grid"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="mini-label">
+                                Periodo
+                            </div>
+
+                            <div class="mini-value">
+                                {{ filtro.periodo }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- TIPO -->
+                    <div class="mini-card">
+
+                        <div class="mini-icon bg-success">
+
+                            <i class="bi bi-diagram-3"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="mini-label">
+                                Tipo
+                            </div>
+
+                            <div class="mini-value">
+                                {{ tipoSeleccionado }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PANEL COLABORATIVO -->
+            <div class="status-strip mt-3">
+
+                <!-- USUARIO -->
+                <div *ngIf="usuarioCerro" class="status-item success">
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                    <span>
+                        Usted ya cerró su parte semanal
+                    </span>
+
+                </div>
+
+                <!-- OTROS -->
+                <div *ngIf="usuariosCerrados.length > 0" class="status-item warning">
+
+                    <i class="bi bi-people-fill"></i>
+
+                    <span>
+                        Ya finalizaron:
+                        <strong>{{ usuariosCerrados.join(', ') }}</strong>
+                    </span>
+
+                </div>
+
+                <!-- FALTA -->
+                <div *ngIf="cabecera?.estado !== 'CERRADO'" class="status-item info">
+
+                    <i class="bi bi-info-circle-fill"></i>
+
+                    <span>
+                        La semana se cerrará cuando todos finalicen
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- FILTROS -->
+    <div class="filters-bar">
+
+        <div class="row g-2 align-items-end">
+
+            <!-- HACIENDA -->
+            <div class="col-md-4">
+
+                <app-filtro-hacienda [grupoOcultar]="CONFIG_FILTRO.grupoOcultar"
+                    [gruposPermitidos]="CONFIG_FILTRO.gruposPermitidos" (cambioHacienda)="onHaciendaChange($event)">
+
+                </app-filtro-hacienda>
+
+            </div>
+
+
+            <!-- AÑO -->
+            <div class="col-md-2">
+                <label>Año</label>
+
+                <input type="number" class="form-control" [(ngModel)]="filtro.anio" (change)="cargarDatos()"
+                    disabled="true">
+            </div>
+            <div class=" col-md-2">
+                <label>Semana</label>
+
+                <select class="form-select" [(ngModel)]="filtro.semana" (change)="cargarDatos()">
+
+                    <option *ngFor="let s of [].constructor(53); let i = index" [ngValue]="i + 1">
+
+                        {{ i + 1 }}
+
+                    </option>
+
+                </select>
+            </div>
+
+
+
+            <!-- PERIODO -->
+            <div class="col-md-1">
+
+                <label>Periodo</label>
+
+                <input class="form-control input-pro text-center" [value]="filtro.periodo">
+
+            </div>
+
+            <!-- 👑 TIPO SOLO ADMIN -->
+            <div class="col-md-2" *ngIf="esAdmin()">
+
+                <label>Tipo</label>
+
+                <select class="form-select" [(ngModel)]="tipoSeleccionado" (change)="cargarDatos()">
+
+                    <option value="FITO">
+                        FITO
+                    </option>
+
+                    <option value="MMEDIOS">
+                        MMEDIOS
+                    </option>
+
+                </select>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="module-card">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover table-bordered align-middle table-sm">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>Labor</th>
+                        <th>Cantidad</th>
+                        <th>Has</th>
+                        <th>Medida</th>
+                        <th>Sección</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <ng-container *ngFor="let l of detalleFiltrado()">
+
+                        <!-- FILA PRINCIPAL -->
+                        <tr class="row-main" (click)="toggleDetalle(l)" [class.active]="l.expandido" [ngClass]="{
+                'table-success': l.cantidad > 0,
+                'table-danger': l.cantidad == 0
+            }">
+
+                            <!-- LABOR -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <i class="bi bi-chevron-right" *ngIf="origenGuardadas">
+                                    </i>
+
+                                    {{ l.nombre }}
+
+                                </div>
+                            </td>
+
+                            <!-- CANTIDAD -->
+                            <td width="140">
+
+                                <div class="d-flex gap-1">
+
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="l.cantidad"
+                                        [disabled]="bloqueado" readonly>
+
+                                    <!-- BOTÓN CÁLCULO -->
+                                    <button *ngIf="tipoSeleccionado === 'MMEDIOS'" class="btn btn-outline-info btn-sm"
+                                        type="button" (click)="toggleCalculo(l); $event.stopPropagation()">
+
+                                        <i class="bi bi-calculator"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                            <!-- HAS -->
+                            <td width="180">
+
+                                <!-- FITO -->
+                                <ng-container *ngIf="tipoSeleccionado !== 'MMEDIOS'">
+
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="l.has_hechas"
+                                        [disabled]="bloqueado">
+
+                                </ng-container>
+
+                                <!-- MMEDIOS -->
+                                <ng-container *ngIf="tipoSeleccionado === 'MMEDIOS'">
+
+                                    <!-- VISUAL -->
+                                    <div *ngIf="!l.editandoHas"
+                                        class="d-flex justify-content-between align-items-center">
+
+                                        <span>
+
+                                            {{ l.has_hechas || 0 }}
+
+                                        </span>
+
+                                        <button class="btn btn-sm btn-outline-primary" type="button"
+                                            (click)="activarEdicionHas(l); $event.stopPropagation()"
+                                            [disabled]="bloqueado">
+
+                                            <i class="bi bi-pencil"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                    <!-- EDICIÓN -->
+                                    <div *ngIf="l.editandoHas" class="d-flex gap-1 align-items-center">
+
+                                        <input type="number" class="form-control form-control-sm"
+                                            [(ngModel)]="l.hasTemp">
+
+                                        <button class="btn btn-success btn-sm" type="button"
+                                            (click)="guardarHas(l); $event.stopPropagation()">
+
+                                            <i class="bi bi-check"></i>
+
+                                        </button>
+
+                                        <button class="btn btn-secondary btn-sm" type="button"
+                                            (click)="cancelarHas(l); $event.stopPropagation()">
+
+                                            <i class="bi bi-x"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                </ng-container>
+
+                            </td>
+
+                            <!-- MEDIDA -->
+                            <td>
+
+                                {{ l.medida }}
+
+                            </td>
+
+                            <!-- SECCIÓN -->
+                            <td width="180">
+
+                                <!-- VISUAL -->
+                                <div *ngIf="!l.editandoSeccion"
+                                    class="d-flex justify-content-between align-items-center">
+
+                                    <span>
+
+                                        {{ l.seccion || '-' }}
+
+                                    </span>
+
+                                    <!-- BOTÓN EDITAR -->
+                                    <button class="btn btn-sm btn-outline-primary" type="button"
+                                        (click)="activarEdicionSeccion(l); $event.stopPropagation()"
+                                        [disabled]="bloqueado">
+
+                                        <i class="bi bi-pencil"></i>
+
+                                    </button>
+
+                                </div>
+
+                                <!-- MODO EDICIÓN -->
+                                <div *ngIf="l.editandoSeccion" class="d-flex gap-1 align-items-center">
+
+                                    <input type="text" class="form-control form-control-sm" [(ngModel)]="l.seccionTemp"
+                                        maxlength="10">
+
+                                    <!-- GUARDAR -->
+                                    <button class="btn btn-success btn-sm" type="button"
+                                        (click)="guardarSeccion(l); $event.stopPropagation()">
+
+                                        <i class="bi bi-check"></i>
+
+                                    </button>
+
+                                    <!-- CANCELAR -->
+                                    <button class="btn btn-secondary btn-sm" type="button"
+                                        (click)="cancelarSeccion(l); $event.stopPropagation()">
+
+                                        <i class="bi bi-x"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        <!-- FILA DETALLE -->
+                        <tr class="row-detail" *ngIf="l.expandido">
+
+                            <!-- FILA DETALLE -->
+                        <tr class="row-detail" *ngIf="l.expandido">
+
+                            <td colspan="5" class="bg-light p-0">
+
+                                <div class="detail-box p-2">
+
+                                    <!-- SIN DETALLE -->
+                                    <div *ngIf="!l.detalleProductos?.length" class="text-muted small">
+
+                                        Sin detalle de productos
+
+                                    </div>
+
+                                    <!-- DETALLE -->
+                                    <div *ngFor="let p of l.detalleProductos"
+                                        class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 small">
+
+                                        <!-- PRODUCTO -->
+                                        <div class="flex-fill">
+
+                                            <div class="fw-semibold text-dark">
+
+
+
+                                                {{ p.producto || '-' }}
+
+                                            </div>
+
+                                            <div class="text-muted">
+
+                                                Sección:
+                                                <strong>{{ p.seccion || '-' }}</strong>
+
+                                            </div>
+
+                                        </div>
+
+
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+
+                        </tr>
+
+                        <!-- FILA CÁLCULO -->
+                        <tr *ngIf="tipoSeleccionado === 'MMEDIOS' && l.mostrarCalculo">
+
+                            <td colspan="5" class="bg-light">
+
+                                <div class="p-2 d-flex justify-content-between align-items-center">
+
+                                    <div>
+
+                                        <strong>Kgs o Sacos aplicados por Ha:</strong>
+
+                                        {{ l.cantidad || 0 | number:'1.2-2' }}
+
+                                        ÷
+
+                                        {{ l.has_hechas || 0 | number:'1.2-2'}}
+
+                                        =
+
+                                        <span class="fw-bold text-primary">
+
+                                            {{ calcularRendimiento(l) }}
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </ng-container>
+
+                </tbody>
+
+                <!-- FOOTER -->
+                <tfoot>
+
+                    <tr>
+
+                        <th>Total</th>
+
+                        <th>
+
+                            {{ totalCantidad() | number:'1.2-2' }}
+
+                        </th>
+
+                        <th>
+
+                            {{ totalHas() | number:'1.2-2'}}
+
+                        </th>
+
+                        <th colspan="2"></th>
+
+                    </tr>
+
+                </tfoot>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="module-actions d-flex justify-content-end gap-2">
+
+        <!-- GUARDAR -->
+        <button class="btn btn-primary" (click)="guardar()" [disabled]="bloqueado">
+
+            <i class="bi bi-save me-1"></i>
+
+            Guardar
+
+        </button>
+
+
+    </div>
+
+</div>

@@ -1,19 +1,69 @@
-.badge {
-    padding: 4px 8px;
-    border-radius: 6px;
+/* HEADER ERP */
+.kardex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 12px;
+}
+
+/* BADGE MOVIMIENTOS */
+.badge-stock {
+    background: #2563eb;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+}
+
+/* TABLA */
+.kardex-table {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+/* FILA */
+.kardex-row {
+    transition: all 0.15s ease;
+}
+
+.kardex-row:hover {
+    background: #f3f4f6;
+}
+
+/* BADGES TIPO MOVIMIENTO */
+.badge-kardex {
     font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
 }
 
-.bg-success {
-    background: #28a745;
-    color: #fff;
+/* INGRESO */
+.badge-kardex.ingreso {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
 }
 
-.bg-danger {
-    background: #dc3545;
-    color: #fff;
+/* SALIDA */
+.badge-kardex.salida {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
 }
 
-.bg-warning {
-    background: #ffc107;
+/* AJUSTE */
+.badge-kardex.ajuste {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+/* EMPTY STATE */
+.empty-state {
+    padding: 20px;
+    color: #9ca3af;
+    font-style: italic;
 }

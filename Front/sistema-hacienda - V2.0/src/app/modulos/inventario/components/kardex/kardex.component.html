@@ -1,24 +1,30 @@
 <app-modal title="Kardex de Producto" (close)="close.emit()">
 
     <!-- HEADER -->
-    <div class="mb-3">
+    <div class="kardex-header">
 
-        <h5 class="mb-0">
-            {{ producto?.nombre }}
-        </h5>
+        <div>
+            <h5 class="mb-0 fw-bold">
+                {{ producto?.nombre }}
+            </h5>
 
-        <small class="text-muted">
-            Código: {{ producto?.codigo }}
-        </small>
+            <small class="text-muted">
+                Código: <span class="fw-semibold">{{ producto?.codigo }}</span>
+            </small>
+        </div>
+
+        <span class="badge-stock">
+            {{ data.length || 0 }} movimientos
+        </span>
 
     </div>
 
     <!-- TABLA -->
-    <div class="table-responsive">
+    <div class="table-responsive kardex-table">
 
-        <table class="table table-sm table-hover">
+        <table class="table table-sm align-middle">
 
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Fecha</th>
                     <th>Tipo</th>
@@ -30,21 +36,19 @@
 
             <tbody>
 
-                <tr *ngFor="let k of data">
+                <tr *ngFor="let k of data" class="kardex-row">
 
-                    <td>{{ formatearFecha(k.fecha) }}</td>
+                    <td class="text-muted">
+                        {{ formatearFecha(k.fecha) }}
+                    </td>
 
                     <td>
-                        <span [ngClass]="{
-              'badge bg-success': k.tipo === 'INGRESO',
-              'badge bg-danger': k.tipo === 'SALIDA',
-              'badge bg-warning text-dark': k.tipo === 'AJUSTE'
-            }">
+                        <span class="badge-kardex" [ngClass]="k.tipo.toLowerCase()">
                             {{ k.tipo }}
                         </span>
                     </td>
 
-                    <td class="text-end">
+                    <td class="text-end fw-semibold">
                         {{ k.cantidad }}
                     </td>
 
@@ -58,10 +62,9 @@
 
                 </tr>
 
-                <!-- VACÍO -->
                 <tr *ngIf="!data.length">
-                    <td colspan="5" class="text-center text-muted">
-                        Sin movimientos
+                    <td colspan="5" class="text-center empty-state">
+                        Sin movimientos registrados
                     </td>
                 </tr>
 
@@ -70,7 +73,6 @@
         </table>
 
     </div>
-
     <!-- FOOTER -->
     <div class="d-flex justify-content-end mt-3">
         <button class="btn btn-secondary" (click)="close.emit()">

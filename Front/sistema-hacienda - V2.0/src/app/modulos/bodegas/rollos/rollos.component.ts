@@ -48,7 +48,7 @@ export class RollosComponent implements OnInit {
 
 
   CONFIG_FILTRO = {
-    grupoOcultar: 'bodega',
+    grupoOcultar: ['bodega'],
     gruposPermitidos: ['gerencia', 'administradores']
   };
   dataAgrupada: any[] = [];

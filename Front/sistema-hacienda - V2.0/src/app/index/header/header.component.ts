@@ -53,7 +53,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('HeaderComponent cargado');
+    // console.log('HeaderComponent cargado');
     this.username = this.userService.getUsername() ?? '';
     this.userRole = Number(this.userService.getRolId()) || 0;
     this.userGroup = Number(this.userService.getGroupId()) || 0;
@@ -64,7 +64,7 @@ export class HeaderComponent implements OnInit {
 
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
-        console.log('navegacion completada');
+        //console.log('navegacion completada');
         this.breadcrumbs = [];
         let currentRoute = this.route.root;
 

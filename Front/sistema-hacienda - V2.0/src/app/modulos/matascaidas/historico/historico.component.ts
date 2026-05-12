@@ -114,8 +114,7 @@ export class HistoricoComponent implements OnInit, OnDestroy {
               .filter(l => String(l.codempleado).trim() === codCab)
               .map(l => l.lote?.toString().trim());
 
-            console.log('Empleado:', codCab);
-            console.log('Lotes BD:', lotesBD);
+
 
             // 🔥 3. LOTES DESDE REPORTE (solo apoyo)
             const lotesResp = resp.map(r => r.lote?.toString().trim());
@@ -127,7 +126,7 @@ export class HistoricoComponent implements OnInit, OnDestroy {
               .filter(l => l) // quitar null
               .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-            console.log('Lotes finales:', this.allLotes);
+
 
             // 🔥 5. ARMAR REPORTE
             this.buildColumns(this.allColumns);

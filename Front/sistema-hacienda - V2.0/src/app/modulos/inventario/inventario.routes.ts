@@ -21,5 +21,11 @@ export const INVENTARIO_ROUTES: Routes = [
         path: 'productos',
         loadComponent: () => import('./components/producto-form/producto-form.component')
             .then(m => m.ProductoFormComponent)
+    },
+    {
+        path: 'historialasignaciones',
+        loadComponent: () => import('./pages/historialasignacion/historialasignacion.component')
+            .then(m => m.HistorialasignacionComponent),
+        data: { breadcrumb: 'Historial de Asignaciones' }
     }
 ]

@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 export class TablaComponent {
   @Input() data: any[] = [];
   @Output() verKardex = new EventEmitter();
+  @Output() asignar = new EventEmitter();
 
   page = 1;
   pageSize = 10;

@@ -18,7 +18,7 @@
 
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <i class="fa" [ngClass]="isExpanded(p) ? 'fa-chevron-down' : 'fa-chevron-right'">
+                        <i class="bi" [ngClass]="isExpanded(p) ? 'bi-chevron-down' : 'bi-chevron-right'">
                         </i>
 
                         {{ p.nombre }}
@@ -26,15 +26,40 @@
                 </td>
 
                 <td>
-                    <span [class.text-danger]="p.stock <= 5">
-                        {{ p.stock }}
+                    <span class="estado-badge" [ngClass]="{
+                        'completo': p.stock > 2,
+                        'parcial': p.stock > 0 && p.stock <= 2,
+                        'pendiente': p.stock == 0,
+                        'null':p.stock == null
+                    
+                        }">
+
+                        <i class="bi" [ngClass]="{
+                            'bi-check-circle-fill': p.stock > 2,
+                            'bi-exclamation-triangle-fill': p.stock > 0 && p.stock <= 2,
+                            'bi-x-circle-fill': p.stock == 0,
+                            'bi-slash-square-fill':p.stock == null
+                        }"></i>
+
+                        {{ p.stock ?? 0 }}
+
                     </span>
                 </td>
 
                 <td (click)="$event.stopPropagation()">
-                    <button class="btn btn-sm btn-info" (click)="verKardex.emit(p)">
-                        Kardex
-                    </button>
+
+                    <div class="d-flex gap-1">
+
+                        <button class="btn-accion" title="Kardex" (click)="verKardex.emit(p)">
+                            <i class="bi bi-card-checklist"></i>
+                        </button>
+
+                        <button class="btn-accion" style="background:#10b981" title="Asignar" (click)="asignar.emit(p)">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </button>
+
+                    </div>
+
                 </td>
             </tr>
 

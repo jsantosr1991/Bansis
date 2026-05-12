@@ -8,9 +8,9 @@ export const MENU_CONFIG = [
     roles: ['superadmin'],
     grupos: ['administradores', 'sistemas'],
     submenus: [
-      { title: 'Ver usuarios', route: '/usuarios', roles: ['superadmin'], grupos: ['administradores', 'sistemas'] },
       { title: 'Crear usuario', route: '/usuarios/createusuario', roles: ['superadmin'], grupos: ['administradores', 'sistemas'] },
-      { title: 'Privilegios Temporales', route: '/usuarios/privilegios-temporales', roles: ['superadmin'], grupos: ['administradores', 'sistemas'] },
+      { title: 'Ver usuarios', route: '/usuarios', roles: ['superadmin'], grupos: ['administradores', 'sistemas'] },
+      { title: 'Privilegios Temp', route: '/usuarios/privilegios-temporales', roles: ['superadmin'], grupos: ['administradores', 'sistemas'] },
     ]
   },
   {
@@ -20,8 +20,10 @@ export const MENU_CONFIG = [
     grupos: ['campo', 'oficina'],
     submenus: [
       { title: 'Ver Hoja de Saldos', route: '/balanza', roles: ['todos'], grupos: ['campo', 'oficina'] },
-      { title: 'Historial', route: '/balanza/historicomatascaidas', roles: ['todos'], grupos: ['campo', 'oficina'] },
       { title: 'Matas Caidas', route: '/balanza/matascaidas', roles: ['superadmin', 'usercampo'], grupos: ['campo', 'oficina'] },
+      { title: 'Lab Agricolas', route: '/balanza/laboresagricolas', roles: ['superadmin', 'usercampo', 'usermmfito'], grupos: ['campo', 'oficina'] },
+      { title: 'H. Matas Caidas', route: '/balanza/historicomatascaidas', roles: ['todos'], grupos: ['campo', 'oficina'] },
+
     ]
   },
   {
@@ -39,7 +41,6 @@ export const MENU_CONFIG = [
     roles: ['todos'],
     grupos: ['campo', 'oficina', 'jefes'],
     submenus: [
-      { title: 'Asistencia General', route: '/asistencia', roles: ['superadmin'], grupos: ['administradores'] },
       { title: 'Asistencia Haciendas', route: '/asistencia/asistenciamandosmedios', roles: ['todos'], grupos: ['todos'] },
     ]
   },
@@ -49,9 +50,9 @@ export const MENU_CONFIG = [
     roles: ['todos'],
     grupos: ['bodega', 'sistemas', 'administradores'],
     submenus: [
-      { title: 'Ver Solicitudes', route: '/bodegas/bodegahacienda', roles: ['todos'], grupos: ['todos'] },
-      { title: 'Ver Despachos', route: '/bodegas/itemdespachado', roles: ['todos'], grupos: ['oficina', 'bodega'] },
-      { title: 'Rollos', route: '/bodegas/rollos', roles: ['todos'], grupos: ['oficina', 'bodega'] },
+      { title: 'Solicitudes', route: '/bodegas/bodegahacienda', roles: ['todos'], grupos: ['sistemas', 'administradores', 'bodega'] },
+      { title: 'Historico Despachos', route: '/bodegas/itemdespachado', roles: ['todos'], grupos: ['sistemas', 'administradores', 'bodega'] },
+      { title: 'Rollos por Enfunde', route: '/bodegas/rollos', roles: ['todos'], grupos: ['sistemas', 'administradores', 'bodega'] },
 
     ]
   },
@@ -61,13 +62,13 @@ export const MENU_CONFIG = [
     image: 'assets/images/SistemaHac/Logo/talento-humano.svg',
     route: '/solicitud-empleo/pages/listaSolicitudes',
     roles: ['todos'],
-    grupos: ['administradores', 'rrhh'],
+    grupos: ['administradores', 'rrhh', 'sistemas'],
     submenus: [
       {
         title: 'Ver Solicitudes',
         route: '/solicitud-empleo/pages/listaSolicitudes',
         roles: ['todos'],
-        grupos: ['administradores', 'rrhh']
+        grupos: ['administradores', 'sistemas', 'rrhh']
       },
       {
         title: 'Nueva Solicitud',
@@ -84,17 +85,18 @@ export const MENU_CONFIG = [
     grupos: ['todos'],
     submenus: [
       {
-        title: 'Mis Solicitudes',
-        route: '/soporte-tecnico/lista',
-        roles: ['todos'],
-        grupos: ['todos']
-      },
-      {
         title: 'Nueva Solicitud',
         route: '/soporte-tecnico/nueva',
         roles: ['todos'],
         grupos: ['todos']
       },
+      {
+        title: 'Mis Solicitudes',
+        route: '/soporte-tecnico/lista',
+        roles: ['todos'],
+        grupos: ['todos']
+      },
+
       {
         title: 'Gestión Sistemas',
         route: '/soporte-tecnico/gestion',
@@ -113,7 +115,13 @@ export const MENU_CONFIG = [
         title: 'Vista General',
         route: '/inventario',
         roles: ['todos'],
-        grupos: ['todos']
+        grupos: ['sistemas', 'administradores']
+      },
+      {
+        title: 'Historial Asignacion',
+        route: '/inventario/historialasignaciones',
+        roles: ['todos'],
+        grupos: ['sistemas', 'administradores']
       }
 
     ]

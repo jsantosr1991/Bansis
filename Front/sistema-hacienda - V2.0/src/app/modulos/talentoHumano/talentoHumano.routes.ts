@@ -5,7 +5,7 @@ export const TALENTO_HUMANO_ROUTES: Routes = [
     {
         path: '',
         canActivate: [RoleGuard],
-        data: { grupos: ['administradores', 'rrhh'] },
+        data: { grupos: ['administradores', 'rrhh', 'sistemas'] },
         children: [
             {
                 path: 'pages/nuevaSolicitud',

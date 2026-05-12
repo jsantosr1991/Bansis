@@ -1,0 +1,61 @@
+<app-modal title="Asignar Equipo a Usuario" (close)="close.emit()">
+
+    <div class="erp-modal">
+        <div class="erp-body">
+            <div class="mb-2">
+                <strong>{{ producto?.nombre }}</strong>
+            </div>
+
+            <div class="mb-3">
+                <label>Usuario</label>
+
+                <div class="autocomplete">
+
+                    <input type="text" class="form-control" placeholder="Buscar usuario..." [(ngModel)]="searchUsuario"
+                        (input)="filtrarUsuarios()" (focus)="showDropdown = true">
+
+                    <!-- DROPDOWN -->
+                    <div class="dropdown" *ngIf="showDropdown">
+
+                        <div class="dropdown-item" *ngFor="let u of usuariosFiltrados" (click)="seleccionarUsuario(u)">
+
+                            <strong>{{ u.nombres }}</strong><br>
+                            <small class="text-muted">{{ u.codempleado }}</small>
+
+                        </div>
+
+                        <div *ngIf="usuariosFiltrados.length === 0" class="dropdown-empty">
+                            Sin resultados
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Cantidad</label>
+                <input type="number" class="form-control" [(ngModel)]="form.cantidad" min="0">
+            </div>
+
+            <div class="mb-3">
+                <label>Observación</label>
+                <textarea class="form-control text-uppercase" [(ngModel)]="form.observacion"></textarea>
+            </div>
+
+        </div>
+
+        <div class="erp-footer d-flex justify-content-end gap-2">
+
+            <button class="btn btn-secondary" (click)="close.emit()">
+                Cancelar
+            </button>
+
+            <button class="btn btn-primary" (click)="guardar()" [disabled]="loading">
+                {{ loading ? 'Asignando...' : 'Asignar' }}
+            </button>
+
+        </div>
+
+    </div>
+</app-modal>
