@@ -238,11 +238,29 @@
                             <!-- 🔵 SI ES PERSONA NORMAL -->
                             <ng-container *ngIf="grupo.idlotero; else sinAsignacionUI">
 
+
                                 <!-- 🆕 BOTÓN HISTORIAL -->
                                 <button class="btn btn-outline-dark btn-sm" title="Ver historial"
                                     (click)="verHistorial(grupo); $event.stopPropagation()">
                                     <i class="bi bi-clock-history"></i>
                                 </button>
+
+                                <!-- 🔥 BOTÓN REEMPLAZO -->
+                                <button class="btn btn-outline-warning btn-sm" title="Asignar reemplazo"
+                                    [disabled]="estadoSemana === 'cerrada'"
+                                    (click)="abrirModalReemplazo(grupo); $event.stopPropagation()">
+
+                                    <i class="bi bi-person-fill-gear"></i>
+                                </button>
+
+                                <!-- 🔥 BADGE REEMPLAZO -->
+                                <span *ngIf="grupo.tieneReemplazo" class="badge bg-warning text-dark align-self-center">
+
+                                    R:
+                                    {{ grupo.nombreReemplazo }}
+                                </span>
+
+
 
                                 <!-- INPUT -->
                                 <input type="number" class="form-control form-control-sm text-end" style="width: 90px;"
@@ -426,4 +444,109 @@
 
         </div>
     </div>
+</div>
+
+
+<!-- 🔥 MODAL REEMPLAZO -->
+<div class="modal fade" id="modalReemplazo" tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning-subtle">
+
+                <h5 class="modal-title">
+                    <i class="bi bi-person-fill-gear me-2"></i>
+                    Asignar Reemplazo
+                </h5>
+
+                <button type="button" class="btn-close" (click)="cerrarModalReemplazo()">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="alert alert-light border">
+
+                    <div>
+                        <small class="text-muted">
+                            Titular
+                        </small>
+                    </div>
+
+                    <b>
+                        {{ controlSeleccionado?.nombre }}
+                    </b>
+
+                </div>
+
+                <!-- PERSONA -->
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Persona reemplazo
+                    </label>
+
+                    <ng-select [items]="personasDisponibles" bindLabel="nombre" bindValue="idlotero"
+                        [(ngModel)]="reemplazoSeleccionado" placeholder="Buscar persona..." [searchFn]="buscarPersona"
+                        [clearable]="true" [virtualScroll]="true">
+
+                        <!-- OPCIÓN -->
+                        <ng-template ng-option-tmp let-item="item">
+
+                            <b>{{ item.idlotero }}</b>
+                            -
+                            {{ item.nombre }}
+
+                        </ng-template>
+
+                        <!-- LABEL -->
+                        <ng-template ng-label-tmp let-item="item">
+
+                            <b>{{ item.idlotero }}</b>
+                            -
+                            {{ item.nombre }}
+
+                        </ng-template>
+
+                    </ng-select>
+
+                </div>
+
+                <!-- MOTIVO -->
+                <div>
+
+                    <label class="form-label">
+                        Motivo
+                    </label>
+
+                    <textarea class="form-control" rows="3" [(ngModel)]="motivoReemplazo"
+                        placeholder="Motivo del reemplazo...">
+                    </textarea>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-secondary" (click)="cerrarModalReemplazo()">
+
+                    Cancelar
+
+                </button>
+
+                <button class="btn btn-warning" (click)="guardarReemplazo()" [disabled]="!reemplazoSeleccionado">
+
+                    Guardar reemplazo
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

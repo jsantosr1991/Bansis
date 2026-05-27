@@ -31,7 +31,7 @@
             "styles": [
               "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/assets/fonts/bootstrap/bootstrap-icons.css",
+              "src/assets/icons-1.13.1/font/bootstrap-icons.css",
               "node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css",
               "node_modules/@ng-select/ng-select/themes/material.theme.css"
             ],

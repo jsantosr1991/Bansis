@@ -253,6 +253,7 @@ import { UserService } from '../../../../services/user.service';
                 <span *ngIf="form.get('datosPersonales.tieneDiscapacidad')?.value"> ({{ form.get('datosPersonales.discapacidadDetalle')?.value || 'Sin detalle' }}) - <strong>{{ form.get('datosPersonales.discapacidadPorcentaje')?.value || 0 }}%</strong></span>
               </div>
               <div class="print-field d-flex gap-2"><span class="label">Vacunas:</span> 
+              <span [class.fw-bold]="form.get('datosPersonales.vacunaCovid0')?.value">0° dosis [{{ form.get('datosPersonales.vacunaCovid0')?.value ? 'X' : '' }}]</span>
                 <span [class.fw-bold]="form.get('datosPersonales.vacunaCovid1')?.value">1° dosis [{{ form.get('datosPersonales.vacunaCovid1')?.value ? 'X' : '' }}]</span>
                 <span [class.fw-bold]="form.get('datosPersonales.vacunaCovid2')?.value">2° dosis [{{ form.get('datosPersonales.vacunaCovid2')?.value ? 'X' : '' }}]</span>
                 <span [class.fw-bold]="form.get('datosPersonales.vacunaCovid3')?.value">3° dosis [{{ form.get('datosPersonales.vacunaCovid3')?.value ? 'X' : '' }}]</span>
@@ -1176,6 +1177,7 @@ export class VerSolicitudComponent implements OnInit {
           CustomValidators.noWhitespace
         ]],
         correo: ['', [Validators.required, Validators.email]],
+        vacunaCovid0: [false],
         vacunaCovid1: [false],
         vacunaCovid2: [false],
         vacunaCovid3: [false],
@@ -1440,7 +1442,7 @@ export class VerSolicitudComponent implements OnInit {
         }
 
         this.form.patchValue(data);
-        
+
         // Detectar automáticamente si no se conoce la fecha exacta basado en los datos cargados
         const dfGroup = this.form.get('datosFamiliares') as FormGroup;
         if (dfGroup) {

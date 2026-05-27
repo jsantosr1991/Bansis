@@ -24,4 +24,7 @@ export class LaboresService {
   cerrar(data: any) {
     return this.http.post(`${this.baseUrl}/labores/cerrar`, data);
   }
+  getReporte(payload: any) {
+    return this.http.post(`${this.baseUrl}/labores/reportesemanal`, payload);
+  }
 }

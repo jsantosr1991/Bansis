@@ -600,3 +600,209 @@ HEADER ERP
     }
 
 }
+
+/* LABORES COMPARTIDAS */
+.shared-row {
+    position: relative;
+    border-left: 4px solid #198754 !important;
+}
+
+/* BADGE */
+.badge.bg-info-subtle {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* SECCION */
+textarea.form-control {
+    resize: vertical;
+    min-height: 60px;
+}
+
+
+/* ===================================================== */
+/* PRINT */
+/* ===================================================== */
+
+.print-container {
+
+    display: none;
+
+}
+
+/* ========================================================= IMPRESIÓN ERP PROFESIONAL ========================================================= */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-container,
+    .print-container * {
+        visibility: visible;
+    }
+
+    .print-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 25px;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+    }
+}
+
+/* CONTENEDOR */
+.print-container {
+    display: none;
+}
+
+@media print {
+    .print-container {
+        display: block;
+    }
+}
+
+/* HEADER */
+.print-header {
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.print-header h1 {
+    font-size: 22px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #0f172a;
+}
+
+.empresa {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #475569;
+    font-weight: 600;
+}
+
+.header-info {
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.header-info span {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* TABLA */
+.erp-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.erp-print-table thead th {
+    background: #1e293b;
+    color: white;
+    padding: 10px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.erp-print-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #dbe2ea;
+    font-size: 13px;
+}
+
+/* FILA LABOR */
+.labor-row {
+    background: #fff;
+}
+
+.labor-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* DETALLE FERTILIZACIÓN */
+.fert-detail td {
+    background: #f8fafc;
+    padding-top: 0;
+    padding-bottom: 14px;
+}
+
+.fert-box {
+    display: flex;
+    gap: 40px;
+    padding: 10px 15px;
+    border-left: 4px solid #1e293b;
+    margin-top: 5px;
+}
+
+.fert-item {
+    min-width: 180px;
+}
+
+.fert-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+.fert-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* FOOTER */
+.print-footer {
+    margin-top: 30px;
+    border-top: 1px solid #cbd5e1;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.unidad-print {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.cantidad-cell {
+    white-space: nowrap;
+}
+
+.cantidad-print {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.unidad-print {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    vertical-align: middle;
+}

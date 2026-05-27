@@ -47,6 +47,15 @@ export class RollosComponent implements OnInit {
   personaSeleccionada: number | null = null;
 
 
+  // 🔥 REEMPLAZO
+  controlSeleccionado: any = null;
+
+  reemplazoSeleccionado: number | null = null;
+
+  motivoReemplazo: string = '';
+
+
+
   CONFIG_FILTRO = {
     grupoOcultar: ['bodega'],
     gruposPermitidos: ['gerencia', 'administradores']
@@ -194,35 +203,34 @@ export class RollosComponent implements OnInit {
   }
 
   buscar() {
-
-    if (!this.semana || !this.periodo || !this.idhaciendaSeleccionada) return;
-
-    this.loading = true;
-
-    this.consultarEstadoSemana();
-
-    // 🔥 SIEMPRE USAR SECCIÓN (NO PERSONA)
-    this.rollosService.getEstado({
-      semana: this.semana,
-      periodo: this.periodo,
-      anio: this.anio,
-      idhacienda: this.idhaciendaSeleccionada
-    }).subscribe({
+    if (!this.semana || !this.periodo || !this.idhaciendaSeleccionada) return; this.loading = true; this.consultarEstadoSemana(); this.rollosService.getEstado({ semana: this.semana, periodo: this.periodo, anio: this.anio, idhacienda: this.idhaciendaSeleccionada }).subscribe({
       next: (res) => {
 
-
-
         this.data = res.map((item: any) => ({
+
           id: item.id ?? null,
+
           idlotero: item.idlotero ?? null,
-          seccion: item.seccion,
+
           nombre: item.nombre ?? null,
+
+          // 🔥 REEMPLAZO
+          reemplazo_idlotero: item.reemplazo_idlotero ?? null,
+
+          reemplazo_nombre: item.reemplazo_nombre ?? null,
+
+          tiene_reemplazo: item.tiene_reemplazo == 1,
+
+          seccion: item.seccion,
+
           fundas: Number(item.fundas),
+
           rollos_entregados: Number(item.rollos_entregados),
+
           entregado_real: Number(item.entregado_real ?? 0),
+
           diferencia: Number(item.diferencia ?? 0),
 
-          // 🔥 ESTA ES LA LÍNEA QUE TE FALTA
           arrastre_anterior: Number(item.arrastre_anterior ?? 0),
 
           nuevo: null
@@ -230,13 +238,11 @@ export class RollosComponent implements OnInit {
 
 
 
-        this.dataAgrupada = this.agruparPorPersona(this.data);
-
-        this.loading = false;
-      },
-      error: () => this.loading = false
+        this.dataAgrupada = this.agruparPorPersona(this.data); this.loading = false;
+      }, error: () => this.loading = false
     });
   }
+
 
   generarSemana() {
 
@@ -398,78 +404,55 @@ export class RollosComponent implements OnInit {
 
 
   agruparPorPersona(data: any[]) {
+    const map: any = {}; data.forEach(item => {
 
-    const map: any = {};
+      // 🔥 SI TIENE PERSONA → AGRUPAR POR PERSONA
+      // 🔥 SI NO TIENE → AGRUPAR POR LOTE
+      const key = item.idlotero
+        ? `PERSONA_${item.idlotero}`
+        : `LOTE_${item.seccion}`;
 
-    data.forEach(item => {
-
-      const key = item.idlotero || 'SIN_ASIGNACION';
 
       if (!map[key]) {
         map[key] = {
-          nombre: item.nombre,
+
+          nombre: item.idlotero
+            ? item.nombre
+            : `SIN ASIGNACIÓN (${item.seccion})`,
+
           idlotero: item.idlotero,
+
+          // 🔥 CLAVE NUEVA
+          seccion: item.seccion,
+
+
+
+          // 🔥 REEMPLAZO
+          tieneReemplazo: item.tiene_reemplazo,
+
+          nombreReemplazo: item.reemplazo_nombre,
+
+          idreemplazo: item.reemplazo_idlotero,
 
           totalFundas: 0,
           totalEstimado: 0,
           totalEntregado: 0,
-
           arrastre: 0,
           debeEntregar: 0,
           totalDiferencia: 0,
           avanceReal: 0,
-
           lotes: [],
           expanded: false,
           nuevoDespacho: null,
-
           _arrastreAsignado: false,
           _totalRealAsignado: false
+
         };
-      }
-
-      map[key].lotes.push(item);
-
-      map[key].totalFundas += Number(item.fundas ?? 0);
-      map[key].totalEstimado += Number(item.rollos_entregados ?? 0);
-
-      // 🔵 ENTREGADO REAL (solo una vez por persona)
-      if (!map[key]._totalRealAsignado) {
-        map[key].totalEntregado = Number(item.entregado_real ?? 0);
-        map[key]._totalRealAsignado = true;
-      }
-
-      // 🔴 ARRASTRE (LÓGICA ERP CORRECTA)
-      if (!map[key]._arrastreAsignado) {
-
-        const arrastreBD = Number(item.arrastre_anterior ?? 0);
-
-        map[key].arrastre = arrastreBD < 0
-          ? Math.abs(arrastreBD)   // debía → SUMA
-          : -arrastreBD;           // sobrante → RESTA
-
-        map[key]._arrastreAsignado = true;
-      }
-
+      } map[key].lotes.push(item); map[key].totalFundas += Number(item.fundas ?? 0); map[key].totalEstimado += Number(item.rollos_entregados ?? 0); if (!map[key]._totalRealAsignado) { map[key].totalEntregado = Number(item.entregado_real ?? 0); map[key]._totalRealAsignado = true; } if (!map[key]._arrastreAsignado) { const arrastreBD = Number(item.arrastre_anterior ?? 0); map[key].arrastre = arrastreBD < 0 ? Math.abs(arrastreBD) : -arrastreBD; map[key]._arrastreAsignado = true; }
     });
 
-    // 🔥 CALCULOS FINALES
-    Object.values(map).forEach((g: any) => {
+    Object.values(map).forEach((g: any) => { g.debeEntregar = g.totalEstimado + g.arrastre; g.totalDiferencia = g.totalEntregado - g.debeEntregar; g.avanceReal = g.debeEntregar > 0 ? (g.totalEntregado / g.debeEntregar) * 100 : 0; }); return Object.values(map);
 
-      // 🧮 DEBE ENTREGAR
-      g.debeEntregar = g.totalEstimado + g.arrastre;
-
-      // 📉 DIFERENCIA REAL
-      g.totalDiferencia = g.totalEntregado - g.debeEntregar;
-
-      // 📊 AVANCE %
-      g.avanceReal = g.debeEntregar > 0
-        ? (g.totalEntregado / g.debeEntregar) * 100
-        : 0;
-
-    });
-
-    return Object.values(map);
   }
 
   despacharPersona(grupo: any) {
@@ -504,36 +487,60 @@ export class RollosComponent implements OnInit {
     // ✅ flujo normal
     this.ejecutarDespacho(grupo, null);
   }
+
   ejecutarDespacho(grupo: any, motivo: string | null) {
 
     const cantidad = Number(grupo.nuevoDespacho);
 
     const payload = {
+
       idhacienda: this.idhaciendaSeleccionada,
-      nombre: grupo.nombre.trim(),
+
+      // 🔥 DATOS PERSONA
+      idlotero: grupo.idlotero,
+      nombre: grupo.nombre,
+
+      // 🔥 REEMPLAZO
+      idreemplazo: grupo.idreemplazo ?? null,
+
+      // 🔥 MOVIMIENTO
       rollos: cantidad,
+
       semana: this.semana,
       periodo: this.periodo,
       anio: this.anio,
+
       motivo: motivo
     };
 
     this.rollosService.despachoPorPersona(payload)
       .subscribe({
+
         next: () => {
+
           this.alert.success('Despacho distribuido correctamente');
 
           grupo.nuevoDespacho = null;
+
           this.limpiarModal();
 
           this.buscar();
         },
+
         error: (err) => {
+
           console.error(err);
-          this.alert.modalError('Error', err.error?.error || 'No se pudo despachar');
+
+          this.alert.modalError(
+            'Error',
+            err.error?.error || 'No se pudo despachar'
+          );
         }
       });
   }
+
+
+
   confirmarDespacho() {
 
     if (!this.grupoPendiente) return;
@@ -735,4 +742,101 @@ export class RollosComponent implements OnInit {
 
     return ISOweekStart.toISOString().substring(0, 10);
   }
+
+
+  // 🔥 ABRIR MODAL REEMPLAZO
+  abrirModalReemplazo(grupo: any) {
+
+    this.controlSeleccionado = grupo;
+
+    this.reemplazoSeleccionado = null;
+
+    this.motivoReemplazo = '';
+
+    this.rollosService.getPersonas(this.idhaciendaSeleccionada)
+      .subscribe((res: any) => {
+
+        // 🔥 EXCLUIR TITULAR
+        this.personasDisponibles = res.filter(
+          (p: any) => p.idlotero != grupo.idlotero
+        );
+
+        const modal = new (window as any).bootstrap.Modal(
+          document.getElementById('modalReemplazo')
+        );
+
+        modal.show();
+      });
+  }
+
+  // 🔥 GUARDAR REEMPLAZO
+  guardarReemplazo() {
+
+    if (!this.reemplazoSeleccionado) {
+
+      this.alert.modalWarning(
+        'Seleccione',
+        'Debe seleccionar una persona'
+      );
+
+      return;
+    }
+    if (!this.controlSeleccionado?.lotes?.length) {
+      this.alert.modalError('Error', 'No existe control asociado');
+      return;
+    }
+
+    const payload = {
+
+      idhacienda: this.idhaciendaSeleccionada,
+      semana: this.semana,
+      periodo: this.periodo,
+      anio: this.anio,
+      idlotero: this.controlSeleccionado.idlotero,
+      reemplazo_idlotero: this.reemplazoSeleccionado,
+      motivo_reemplazo: this.motivoReemplazo
+    };
+
+    this.rollosService.guardarReemplazo(payload)
+      .subscribe({
+
+        next: () => {
+
+          this.alert.success('Reemplazo guardado');
+
+          this.cerrarModalReemplazo();
+
+          this.buscar();
+        },
+
+        error: (err) => {
+
+          console.error(err);
+
+          this.alert.modalError(
+            'Error',
+            err.error?.message || 'No se pudo guardar'
+          );
+        }
+      });
+  }
+
+  // 🔥 CERRAR MODAL
+  cerrarModalReemplazo() {
+
+    const modalEl = document.getElementById('modalReemplazo');
+
+    const modal = (window as any)
+      .bootstrap.Modal.getInstance(modalEl);
+
+    modal?.hide();
+
+    this.controlSeleccionado = null;
+
+    this.reemplazoSeleccionado = null;
+
+    this.motivoReemplazo = '';
+  }
+
+
 }

@@ -7,45 +7,124 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
-    public function listaEmpleados(Request $request){
+
+    public function listaEmpleados(Request $request)
+    {
         $search = trim($request->query('search', ''));
 
-        // Si no hay parámetro de búsqueda, devuelve todos
-        if ($search === '') {
-            $users = DB::connection('mysqlrrhh')->select('select * from v_matrrhh');
-            return response()->json($users);
-        }
+        // 🔍 Consulta base
+        $sql = "
+        SELECT
+            COD_TRABAJ,
+            COD_EMPRESA,
+            EMPRESA,
+            NUM_CEDULA,
 
-        // Si hay búsqueda, filtramos en la base de datos
-        $users = DB::connection('mysqlrrhh')->select("
-        select * from v_matrrhh
-        where NOMBRE_1 like ?
-           or APELLIDO_1 like ?
-           or NUM_CEDULA like ?
-    ", ["%$search%", "%$search%", "%$search%"]);
+            NOMBRE_1,
+            NOMBRE_2,
+
+            APELLIDO_1,
+            APELLIDO_2,
+
+      
+
+            CONCAT(
+                TRIM(NOMBRE_1), ' ',
+                COALESCE(TRIM(NOMBRE_2), ''), ' ',
+                TRIM(APELLIDO_1), ' ',
+                COALESCE(TRIM(APELLIDO_2), '')
+            ) AS NOMBRE_COMPLETO
+
+        FROM v_matrrhh2
+    ";
+
+        // 🔎 Si hay búsqueda
+        if ($search !== '') {
+
+            $sql .= "
+            WHERE
+                NOMBRE_1 LIKE ?
+                OR NOMBRE_2 LIKE ?
+                OR APELLIDO_1 LIKE ?
+                OR APELLIDO_2 LIKE ?
+                OR NUM_CEDULA LIKE ?
+                OR COD_TRABAJ LIKE ?
+        ";
+
+            $users = DB::connection('mysqlrrhh')->select($sql, [
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+            ]);
+        } else {
+
+            $users = DB::connection('mysqlrrhh')->select($sql);
+        }
 
         return response()->json($users);
     }
+
+
     public function ListaEmpleadosAdministrativos(Request $request)
     {
         $search = trim($request->query('search', ''));
 
-        // Si no hay parámetro de búsqueda, devuelve todos
-        if ($search === '') {
-            $users = DB::connection('mysql')->select('select * from v_administrativomm');
-            return response()->json($users);
-        }
+        $sql = "
+        SELECT
+            COD_TRABAJ,
+            COD_EMPRESA,
+            EMPRESA,
+            NUM_CEDULA,
 
-        // Si hay búsqueda, filtramos en la base de datos
-        $users = DB::connection('mysql')->select("
-        select * from v_administrativomm
-        where NOMBRE_1 like ?
-           or APELLIDO_1 like ?
-           or NUM_CEDULA like ?
-    ", ["%$search%", "%$search%", "%$search%"]);
+            NOMBRE_1,
+            NOMBRE_2,
+
+            APELLIDO_1,
+            APELLIDO_2,
+
+         
+
+            CONCAT(
+                TRIM(NOMBRE_1), ' ',
+                COALESCE(TRIM(NOMBRE_2), ''), ' ',
+                TRIM(APELLIDO_1), ' ',
+                COALESCE(TRIM(APELLIDO_2), '')
+            ) AS NOMBRE_COMPLETO
+
+        FROM v_administrativomm2
+    ";
+
+        if ($search !== '') {
+
+            $sql .= "
+            WHERE
+                NOMBRE_1 LIKE ?
+                OR NOMBRE_2 LIKE ?
+                OR APELLIDO_1 LIKE ?
+                OR APELLIDO_2 LIKE ?
+                OR NUM_CEDULA LIKE ?
+                OR COD_TRABAJ LIKE ?
+        ";
+
+            $users = DB::connection('mysql')->select($sql, [
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+                "%$search%",
+            ]);
+        } else {
+
+            $users = DB::connection('mysql')->select($sql);
+        }
 
         return response()->json($users);
     }
+
 
     public function registrarUsuario(Request $request)
     {
@@ -66,19 +145,19 @@ class UserController extends Controller
 
             // 🧹 Limpieza y normalización de datos
             $data = [
-                'name'        => strtoupper(trim($request->nombre ?? $request->name)),
-                'surname'     => strtoupper(trim($request->apellido ?? $request->surname)),
-                'email'       => strtolower(trim($request->email)),
-                'password'    => Hash::make(trim($request->password)),
-                'rol_id'      => $request->idRol ?? $request->rol_id,
-                'group_id'    => $request->idGrupo ?? $request->group_id,
-                'empresa_id'  => $request->idEmpresa ?? $request->empresa_id,
-                'empe_nom'    => strtoupper(trim($request->empresa ?? $request->empe_nom)),
-                'username'    => strtoupper(trim($request->username)),
+                'name' => strtoupper(trim($request->nombre ?? $request->name)),
+                'surname' => strtoupper(trim($request->apellido ?? $request->surname)),
+                'email' => strtolower(trim($request->email)),
+                'password' => Hash::make(trim($request->password)),
+                'rol_id' => $request->idRol ?? $request->rol_id,
+                'group_id' => $request->idGrupo ?? $request->group_id,
+                'empresa_id' => $request->idEmpresa ?? $request->empresa_id,
+                'empe_nom' => strtoupper(trim($request->empresa ?? $request->empe_nom)),
+                'username' => strtoupper(trim($request->username)),
                 'codempleado' => strtoupper(trim($request->codEmpleado ?? $request->codempleado)),
-                'status'      => 1,
-                'created_at'  => now(),
-                'updated_at'  => now(),
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
             // 💾 Inserción
@@ -113,85 +192,16 @@ class UserController extends Controller
             ], 500);
         }
     }
-    /**
-     * ✏️ Actualizar usuario existente
-     */
-  /*  public function actualizarUsuario(Request $request, $id)
-    {
-        try {
-            // ✅ Validar solo los campos editables
-            $request->validate([
-                'email'    => 'required|email|unique:users,email,' . $id,
-                'password' => 'nullable|string|min:6',
-                'idRol'    => 'required|integer',
-                'idGrupo'  => 'required|integer',
-            ]);
-
-            // 🔍 Verificar si existe
-            $user = DB::connection('mysql')->table('users')->where('id', $id)->first();
-
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario no encontrado',
-                ], 404);
-            }
-
-            // 🧹 Armar solo los datos que se pueden actualizar
-            $data = [
-                'email'     => strtolower(trim($request->email)),
-                'rol_id'    => $request->idRol,
-                'group_id'  => $request->idGrupo,
-                'updated_at'=> now(),
-            ];
-
-            // 🔐 Si se envía contraseña, actualízala
-            if ($request->filled('password')) {
-                $data['password'] = Hash::make(trim($request->password));
-            }
-
-            // 💾 Actualizar
-            DB::connection('mysql')
-                ->table('users')
-                ->where('id', $id)
-                ->update($data);
-
-            // 🔄 Obtener usuario actualizado
-            $updatedUser = DB::connection('mysql')
-                ->table('users')
-                ->where('id', $id)
-                ->first();
-
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Usuario actualizado correctamente',
-                'data' => $updatedUser,
-            ]);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar usuario',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }*/
     public function actualizarUsuario(Request $request, $id)
     {
         try {
             // Opcional: valida SOLO lo que venga en la request
             $request->validate([
-                'email'    => 'sometimes|email|unique:users,email,' . $id,
+                'email' => 'sometimes|email|unique:users,email,' . $id,
                 'password' => 'sometimes|nullable|string|min:6',
-                'idRol'    => 'sometimes|integer',
-                'idGrupo'  => 'sometimes|integer',
-                'status'   => 'sometimes|boolean',
+                'idRol' => 'sometimes|integer',
+                'idGrupo' => 'sometimes|integer',
+                'status' => 'sometimes|boolean',
             ]);
 
             // Verificar si el usuario existe
@@ -270,12 +280,39 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function listaRol(){
+    public function listaRol()
+    {
         $users = DB::connection('mysql')->select('select * from v_rol');
         return response()->json($users);
     }
-    public function listaGrupo(){
+    public function listaGrupo()
+    {
         $users = DB::connection('mysql')->select('select * from v_grupos');
         return response()->json($users);
     }
+
+    public function generarUsername(Request $request)
+    {
+        $base = strtolower(trim($request->base));
+
+        $username = $base;
+        $contador = 2;
+
+        // 🔍 Verificar si ya existe
+        while (
+            DB::connection('mysql')
+                ->table('users')
+                ->whereRaw('LOWER(username) = ?', [$username])
+                ->exists()
+        ) {
+
+            $username = $base . $contador;
+            $contador++;
+        }
+
+        return response()->json([
+            'username' => $username
+        ]);
+    }
+
 }

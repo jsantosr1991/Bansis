@@ -70,8 +70,11 @@ export class CreateComponent implements OnInit {
   }
 
 
+
   buscarUsuario() {
+
     this.loading = true;
+
     if (!this.searchTerm.trim()) {
       Swal.fire('Advertencia', 'Ingrese un nombre o apellido', 'info');
       return;
@@ -81,24 +84,52 @@ export class CreateComponent implements OnInit {
       administrativos: this.userService.buscarUsuario(this.searchTerm),
       otros: this.userService.buscarOtrosEmpleados(this.searchTerm)
     }).subscribe({
+
       next: (resp) => {
+
         const listaA = resp.administrativos || [];
         const listaB = resp.otros || [];
 
-        // unir resultados
-        this.usuariosEncontrados = [...listaA, ...listaB];
+        // 🔥 Unir listas
+        const combinados = [...listaA, ...listaB];
+
+        // 🔥 Eliminar duplicados por cédula
+        const unicos = combinados.filter(
+          (usuario, index, self) =>
+
+            index === self.findIndex(
+              u =>
+                u.NUM_CEDULA === usuario.NUM_CEDULA
+            )
+        );
+
+        this.usuariosEncontrados = unicos;
 
         if (this.usuariosEncontrados.length === 0) {
-          Swal.fire('Advertencia', 'No se encontraron empleados', 'warning');
+          Swal.fire(
+            'Advertencia',
+            'No se encontraron empleados',
+            'warning'
+          );
         }
+
         this.loading = false;
       },
+
       error: () => {
+
         this.loading = false;
-        Swal.fire('Error', 'Error al buscar empleados', 'error');
+
+        Swal.fire(
+          'Error',
+          'Error al buscar empleados',
+          'error'
+        );
       }
     });
   }
+
+
 
 
   seleccionarUsuario(user: any) {
@@ -123,13 +154,40 @@ export class CreateComponent implements OnInit {
   }
 
   // 👤 Generar nombre de usuario automáticamente
+
   generarNombreUsuario() {
+
     if (this.usuario.NOMBRE_1 && this.usuario.APELLIDO_1) {
-      const inicial = this.usuario.NOMBRE_1.trim().charAt(0).toLowerCase();
-      const apellido = this.usuario.APELLIDO_1.trim().toLowerCase().replace(/\s+/g, '');
-      this.usernameGenerado = `${inicial}${apellido}`;
+
+      const inicial =
+        this.usuario.NOMBRE_1
+          .trim()
+          .charAt(0)
+          .toLowerCase();
+
+      const apellido =
+        this.usuario.APELLIDO_1
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '');
+
+      const usernameBase = `${inicial}${apellido}`;
+
+      // 🔥 Consultar al backend si existe
+      this.userService.generarUsername(usernameBase)
+        .subscribe({
+          next: (resp: any) => {
+            this.usernameGenerado = resp.username;
+          },
+          error: () => {
+            // fallback
+            this.usernameGenerado = usernameBase;
+          }
+        });
     }
   }
+
+
 
   // 🔐 Generar password a partir del número de cédula
   generarPassword() {

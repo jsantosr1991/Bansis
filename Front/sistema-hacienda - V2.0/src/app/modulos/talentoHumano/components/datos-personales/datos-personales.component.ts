@@ -276,14 +276,18 @@ import { CustomValidators } from '../../utils/custom-validators';
             <div class="text-danger small mt-1" *ngIf="isInvalid('afiliadoIess')">Debe seleccionar una opción.</div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-12">
             <label class="form-label fw-bold d-block pb-2">Vacunación COVID-19 <span class="text-danger">*</span></label>
             <div class="d-flex gap-3 pt-1">
-              <div class="form-check form-switch p-2 border rounded bg-light flex-fill" [class.border-danger]="isInvalidVacuna()">
+               <div class="form-check form-switch p-2 border rounded bg-light flex-fill" [class.border-danger]="isInvalidVacuna()">
+                <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid0" id="v0" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
+                <label class="form-check-label fw-semibold" for="v0">Ninguna</label>
+              </div>
+              <div class="form-check form-switch p-2 border rounded bg-light flex-fill" >
                 <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid1" id="v1" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
                 <label class="form-check-label fw-semibold" for="v1">Dosis #1</label>
               </div>
-              <div class="form-check form-switch p-2 border rounded bg-light flex-fill" [class.border-danger]="isInvalidVacuna()">
+              <div class="form-check form-switch p-2 border rounded bg-light flex-fill">
                 <input class="form-check-input ms-0 me-3" type="checkbox" formControlName="vacunaCovid2" id="v2" (change)="validateVacunas()" [attr.disabled]="isReadOnly ? true : null">
                 <label class="form-check-label fw-semibold" for="v2">Dosis #2</label>
               </div>
@@ -292,10 +296,7 @@ import { CustomValidators } from '../../utils/custom-validators';
                 <label class="form-check-label fw-semibold" for="v3">Dosis #3</label>
               </div>
             </div>
-            <div class="text-danger small mt-1 animate-fade" *ngIf="isInvalidVacuna()">
-              <i class="bi bi-exclamation-triangle-fill me-1"></i> Se requiere esquema básico completo (mínimo 2 dosis).
-            </div>
-          </div>
+           
 
           <hr class="my-3 text-muted">
 
@@ -394,7 +395,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
     if (currentPais) {
       this.cargarProvincias(currentPais);
     }
-    
+
     // Iniciar otros manuales si es necesario (modo edición)
     this.checkManualFields();
 
@@ -476,11 +477,11 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
   private initPesoUI() {
     const pesoValue = this.form.get('peso')?.value;
     this.pesoUI.setValue(pesoValue, { emitEvent: false });
-    
+
     this.pesoUI.valueChanges.subscribe(val => {
       this.actualizarPesoBase(val);
     });
-    
+
     // Si el formulario principal cambia el peso (ej: al cargar), sincronizar UI
     this.form.get('peso')?.valueChanges.subscribe(val => {
       if (this.pesoUnidad === 'LB') {
@@ -490,7 +491,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
         this.pesoUI.setValue(parseFloat(kg.toFixed(2)), { emitEvent: false });
       }
     });
-    
+
     this.updatePesoUIState();
   }
 
@@ -522,7 +523,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
       this.form.get('peso')?.setValue(null);
       return;
     }
-    
+
     if (this.pesoUnidad === 'LB') {
       this.form.get('peso')?.setValue(val);
     } else {
@@ -604,7 +605,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
       provinciaOtro?.clearValidators();
       provinciaOtro?.disable();
       if (resetFull) provinciaOtro?.setValue('');
-      
+
       const selectedProv = this.provinciasDisponibles.find(p => p.nombre === provincia);
       if (selectedProv && selectedProv.codigo !== 'Otros') {
         this.cargarCantones(selectedProv.codigo);
@@ -678,7 +679,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
 
   private toTitleCase(str: string): string {
     if (!str) return str;
-    return str.trim().toLowerCase().split(/\s+/).map(word => 
+    return str.trim().toLowerCase().split(/\s+/).map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   }
@@ -691,16 +692,16 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
     if (tieneDisc) {
       descDetalle?.enable();
       porcDisc?.enable();
-      
+
       descDetalle?.setValidators([Validators.required, Validators.maxLength(150)]);
       porcDisc?.setValidators([Validators.required, Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]*$/)]);
     } else {
       descDetalle?.disable();
       porcDisc?.disable();
-      
+
       descDetalle?.setValue('');
       porcDisc?.setValue(0);
-      
+
       descDetalle?.clearValidators();
       porcDisc?.clearValidators();
     }
@@ -772,13 +773,13 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
 
   isInvalidVacuna(): boolean {
     const error = this.form.errors?.['minVaccinesRequired'];
-    const touched = !!(this.form.get('vacunaCovid1')?.touched || this.form.get('vacunaCovid2')?.touched);
+    const touched = !!(this.form.get('vacunaCovid0')?.touched);
     return !!(touched && error);
   }
 
   validateVacunas() {
-    this.form.get('vacunaCovid1')?.markAsTouched();
-    this.form.get('vacunaCovid2')?.markAsTouched();
+    this.form.get('vacunaCovid0')?.markAsTouched();
+
   }
 
   calcularEdad() {
@@ -786,7 +787,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
     if (fechaNac) {
       const today = new Date();
       const birthDate = new Date(fechaNac);
-      
+
       let years = today.getFullYear() - birthDate.getFullYear();
       let months = today.getMonth() - birthDate.getMonth();
       let days = today.getDate() - birthDate.getDate();
@@ -804,7 +805,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
 
       const totalAge = years >= 0 ? years : 0;
       const totalMonths = months >= 0 ? months : 0;
-      
+
       this.form.get('edad')?.setValue(totalAge, { emitEvent: false });
       this.edadTexto = `${totalAge} años y ${totalMonths} meses`;
 
@@ -820,7 +821,7 @@ export class DatosPersonalesComponent implements OnInit, OnChanges {
         // Cumple 18 el 2028-05-10
         const date18 = new Date(birthDate);
         date18.setFullYear(birthDate.getFullYear() + 18);
-        
+
         let diffYears = date18.getFullYear() - today.getFullYear();
         let diffMonths = date18.getMonth() - today.getMonth();
         let diffDays = date18.getDate() - today.getDate();

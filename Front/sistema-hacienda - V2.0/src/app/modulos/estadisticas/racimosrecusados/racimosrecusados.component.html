@@ -1,0 +1,642 @@
+<app-loader [loading]="loading"></app-loader>
+
+<div class="module-card dashboard-wrapper">
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="dashboard-header mb-4">
+
+        <div>
+
+            <h3 class="fw-bold mb-1">
+
+                <i class="bi bi-bar-chart-line-fill"></i>
+
+                Racimos Recusados por Daños
+
+            </h3>
+
+            <div class="text-muted">
+
+                {{ namehacienda || 'Seleccione Hacienda' }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- TOOLBAR -->
+    <!-- ========================================= -->
+
+    <div class="erp-toolbar">
+
+        <!-- IZQUIERDA -->
+        <div class="toolbar-left">
+
+            <button class="btn btn-filter" type="button" (click)="mostrarFiltros = !mostrarFiltros">
+
+                <i class="bi" [ngClass]="mostrarFiltros
+               ? 'bi-chevron-up'
+               : 'bi-funnel-fill'">
+                </i>
+
+                {{ mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros' }}
+
+            </button>
+
+            <!-- RESUMEN -->
+            <div class="toolbar-resume">
+
+                <span class="resume-chip">
+                    Semana {{ semana }}
+                </span>
+
+                <span class="resume-chip">
+                    Periodo {{ periodo }}
+                </span>
+
+                <span class="resume-chip">
+                    Año {{ anio }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- KPIS -->
+        <div class="toolbar-stats">
+            <div class="stat-pill critical-kpi">
+
+                <span>
+                    Lote crítico
+                </span>
+
+                <strong>
+                    {{ loteCritico }}
+                </strong>
+
+                <small>
+
+                    {{ danoCritico }}
+
+                    ·
+
+                    {{ totalCritico }}
+
+                </small>
+
+            </div>
+
+            <div class="stat-pill total">
+
+                <span>Total</span>
+
+                <strong>{{ totalRecusado }}</strong>
+
+            </div>
+
+            <div class="stat-pill danger">
+
+                <span>SEVERO</span>
+                <strong>{{ totalNivel1 }}</strong>
+
+            </div>
+
+            <div class="stat-pill warning">
+
+                <span>MODERADO</span>
+
+                <strong>{{ totalNivel2 }}</strong>
+
+            </div>
+
+            <div class="stat-pill success">
+
+                <span>LEVE</span>
+
+                <strong>{{ totalNivel3 }}</strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- COLLAPSE FILTROS -->
+    <!-- ========================================= -->
+
+    <div class="filters-collapse" [class.open]="mostrarFiltros">
+
+        <div class="filters-container">
+
+            <div class="filters-grid">
+
+                <!-- HACIENDA -->
+                <div class="filter-item full-width">
+
+                    <label>Hacienda</label>
+
+                    <app-filtro-hacienda [grupoOcultar]="CONFIG_FILTRO.grupoOcultar"
+                        [gruposPermitidos]="CONFIG_FILTRO.gruposPermitidos" (cambioHacienda)="onHaciendaChange($event)">
+                    </app-filtro-hacienda>
+
+                </div>
+
+                <!-- CONSULTA -->
+                <div class="filter-item full-width">
+
+                    <label>Consulta</label>
+
+                    <div class="erp-chip-container">
+
+                        <div class="erp-chip" [class.active]="tipoFiltro === 'dia'"
+                            (click)="seleccionarTipoFiltro('dia')">
+
+                            Día
+
+                        </div>
+
+                        <div class="erp-chip" [class.active]="tipoFiltro === 'semana'"
+                            (click)="seleccionarTipoFiltro('semana')">
+
+                            Semana
+
+                        </div>
+
+                        <div class="erp-chip" [class.active]="tipoFiltro === 'periodo'"
+                            (click)="seleccionarTipoFiltro('periodo')">
+
+                            Periodo
+
+                        </div>
+
+                        <div class="erp-chip" [class.active]="tipoFiltro === 'anio'"
+                            (click)="seleccionarTipoFiltro('anio')">
+
+                            Año
+
+                        </div>
+
+                        <div class="erp-chip" [class.active]="tipoFiltro === 'rango'"
+                            (click)="seleccionarTipoFiltro('rango')">
+
+                            Rango
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FECHA -->
+                <div class="filter-item compact-item" *ngIf="tipoFiltro === 'dia'">
+
+                    <label>Fecha</label>
+
+                    <input type="date" class="form-control" [(ngModel)]="fecha" (ngModelChange)="onFiltroChange()">
+
+                </div>
+
+                <!-- SEMANA -->
+                <div class="filter-item compact-item" *ngIf="tipoFiltro === 'semana'">
+
+                    <label>Semana</label>
+
+                    <div class="input-group week-group">
+
+                        <button class="btn btn-week" type="button" (click)="cambiarSemana(-1)">
+
+                            <i class="bi bi-dash"></i>
+
+                        </button>
+
+                        <input type="number" class="form-control text-center" [(ngModel)]="semana"
+                            (ngModelChange)="onFiltroChange()">
+
+                        <button class="btn btn-week" type="button" (click)="cambiarSemana(1)">
+
+                            <i class="bi bi-plus"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- PERIODO -->
+                <div class="filter-item compact-item" *ngIf="tipoFiltro === 'periodo'">
+
+                    <label>Periodo</label>
+
+                    <input type="number" class="form-control" [(ngModel)]="periodo" (ngModelChange)="onFiltroChange()">
+
+                </div>
+
+                <!-- AÑO -->
+                <div class="filter-item compact-item" *ngIf="tipoFiltro === 'anio'">
+
+                    <label>Año</label>
+
+                    <input type="number" class="form-control" [(ngModel)]="anio" (ngModelChange)="onFiltroChange()">
+
+                </div>
+
+                <!-- RANGO -->
+                <ng-container *ngIf="tipoFiltro === 'rango'">
+
+                    <div class="filter-item compact-item">
+
+                        <label>Desde</label>
+
+                        <input type="date" class="form-control" [(ngModel)]="desde" (ngModelChange)="onFiltroChange()">
+
+                    </div>
+
+                    <div class="filter-item compact-item">
+
+                        <label>Hasta</label>
+
+                        <input type="date" class="form-control" [(ngModel)]="hasta" (ngModelChange)="onFiltroChange()">
+
+                    </div>
+
+                </ng-container>
+
+
+                <!-- DAÑO -->
+                <div class="premium-dropdown">
+
+                    <label>Daño</label>
+
+                    <button type="button" class="premium-btn" (click)="mostrarDropdownDano = !mostrarDropdownDano">
+
+                        <span>
+                            <i class="bi bi-bug-fill"></i>
+                            {{ filtroDano || 'Todos los daños' }}
+                        </span>
+
+                        <i class="bi bi-chevron-down"></i>
+
+                    </button>
+
+                    <div class="premium-menu" *ngIf="mostrarDropdownDano">
+
+                        <button type="button" class="dropdown-item" (click)="
+                filtroDano='';
+                filtrarDatos();
+                mostrarDropdownDano=false
+            ">
+
+                            Todos
+
+                        </button>
+
+                        <button type="button" class="dropdown-item" *ngFor="let d of danos" (click)="
+                filtroDano=d;
+                filtrarDatos();
+                mostrarDropdownDano=false
+            ">
+
+                            {{ d }}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- NIVEL -->
+                <div class="premium-dropdown">
+
+                    <label>Nivel</label>
+
+                    <button type="button" class="premium-btn" (click)="mostrarDropdownNivel = !mostrarDropdownNivel">
+
+                        <span>
+                            <i class="bi bi-layers-fill"></i>
+                            {{ filtroNivel || 'Todos los niveles' }}
+                        </span>
+
+                        <i class="bi bi-chevron-down"></i>
+
+                    </button>
+
+                    <div class="premium-menu" *ngIf="mostrarDropdownNivel">
+
+                        <button type="button" class="dropdown-item" (click)="
+                filtroNivel='';
+                filtrarDatos();
+                mostrarDropdownNivel=false
+            ">
+
+                            Todos
+
+                        </button>
+
+                        <button type="button" class="dropdown-item" *ngFor="let n of niveles" (click)="
+        filtroNivel=getNombreNivel(n);
+        filtrarDatos();
+        mostrarDropdownNivel=false
+    ">
+
+                            {{ getNombreNivel(n) }}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- EDAD -->
+                <div class="premium-dropdown">
+
+                    <label>Edad</label>
+
+                    <button type="button" class="premium-btn" (click)="mostrarDropdownEdad = !mostrarDropdownEdad">
+
+                        <span>
+                            <i class="bi bi-calendar3"></i>
+                            {{ filtroEdad ? (filtroEdad + ' semanas') : 'Todas las edades' }}
+                        </span>
+
+                        <i class="bi bi-chevron-down"></i>
+
+                    </button>
+
+                    <div class="premium-menu" *ngIf="mostrarDropdownEdad">
+
+                        <button type="button" class="dropdown-item" (click)="
+                filtroEdad='';
+                filtrarDatos();
+                mostrarDropdownEdad=false
+            ">
+
+                            Todas
+
+                        </button>
+
+                        <button type="button" class="dropdown-item" *ngFor="let e of edades" (click)="
+                filtroEdad=e;
+                filtrarDatos();
+                mostrarDropdownEdad=false
+            ">
+
+                            {{ e }} semanas
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- CHART -->
+    <!-- ========================================= -->
+    <div class="module-card mt-1">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Daños en Racimos
+                </h5>
+
+                <small class="text-muted">
+                    Distribución de daños en racimos
+                </small>
+
+            </div>
+
+        </div>
+        <apx-chart [series]="chartSeries" [chart]="chartDetails" [labels]="chartLabels" [dataLabels]="chartDataLabels"
+            [tooltip]="chartTooltip" [legend]="chartLegend">
+
+        </apx-chart>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- ANALISIS POR LOTE -->
+    <!-- ========================================= -->
+
+    <div class="module-card mt-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-bar-chart-steps"></i>
+                    Daños por lote
+                </h5>
+
+                <small class="text-muted">
+                    Distribución de daños por sección/lote
+                </small>
+
+            </div>
+
+        </div>
+
+        <apx-chart [series]="chartSeriesLotes" [chart]="chartDetailsLotes" [xaxis]="chartXAxisLotes"
+            [plotOptions]="chartPlotOptionsLotes" [dataLabels]="chartDataLabelsLotes" [tooltip]="chartTooltipLotes">
+
+        </apx-chart>
+
+    </div>
+
+
+
+    <!-- ========================================= -->
+    <!-- TABLAS -->
+    <!-- ========================================= -->
+
+    <div class="row mt-4 g-4">
+
+        <!-- LOTES -->
+        <div class="col-xl-7">
+
+            <div class="module-card table-card h-100">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h5 class="fw-bold text-danger mb-0">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        Lotes Críticos
+
+                    </h5>
+
+                    <span class="badge bg-danger">
+
+                        {{ topSecciones.length }}
+
+                    </span>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Lote</th>
+
+                                <th>Total</th>
+
+                                <th>Estado</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of topSecciones">
+
+                                <td class="fw-bold">
+
+                                    {{ item.seccion }}
+
+                                </td>
+
+                                <td width="50%">
+
+                                    <div class="progress" style="height: 22px;">
+
+                                        <div class="progress-bar" [style.width.%]="
+                                            (item.total / totalRecusado) * 100">
+
+                                            {{ item.total }}
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="badge" [ngClass]="{
+
+                                        'bg-danger': item.total >= 50,
+
+                                        'bg-warning text-dark':
+                                        item.total >= 20 &&
+                                        item.total < 50,
+
+                                        'bg-success': item.total < 20
+
+                                    }">
+
+                                        {{
+
+                                        item.total >= 50
+                                        ? 'CRÍTICO'
+
+                                        : item.total >= 20
+                                        ? 'OBSERVACIÓN'
+
+                                        : 'CONTROLADO'
+
+                                        }}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="col-xl-5">
+
+            <div class="module-card table-card h-100">
+
+                <h5 class="fw-bold mb-3">
+
+                    <i class="bi bi-pie-chart-fill"></i>
+
+                    Resumen por daño
+
+                </h5>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Daño</th>
+
+                                <th class="text-end">
+
+                                    Total
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of resumenDanos">
+
+                                <td>
+
+                                    {{ item.dano }}
+
+                                </td>
+
+                                <td class="text-end fw-bold">
+
+                                    {{ item.total }}
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

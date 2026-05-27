@@ -27,12 +27,29 @@
       <li class="list-group-item list-item-pro" *ngFor="let user of usuariosEncontrados"
         (click)="seleccionarUsuario(user)">
 
-        <div class="fw-semibold">
-          {{ user.NOMBRE_1 }} {{ user.APELLIDO_1 }}
+
+        <div class="fw-bold text-uppercase">
+          {{ user.NOMBRE_1 }}
+          {{ user.NOMBRE_2 || '' }}
+          {{ user.APELLIDO_1 }}
+          {{ user.APELLIDO_2 || '' }}
         </div>
-        <small class="text-muted">
-          {{ user.NUM_CEDULA }}
+
+        <small class="text-muted d-block">
+          <strong>Cédula:</strong> {{ user.NUM_CEDULA }}
         </small>
+
+        <small class="text-primary d-block">
+          <strong>Código:</strong>
+          {{ user.COD_TRABAJ }}
+        </small>
+
+        <small class="text-secondary d-block">
+          <strong>Empresa:</strong>
+          {{ user.EMPRESA }}
+        </small>
+
+
 
       </li>
     </ul>
@@ -53,6 +70,15 @@
       <div class="col-md-6">
         <label>Apellido *</label>
         <input type="text" class="form-control input-pro" [(ngModel)]="usuario.APELLIDO_1" readonly>
+      </div>
+      <div class="col-md-6">
+        <label>Segundo Nombre</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.NOMBRE_2" readonly>
+      </div>
+
+      <div class="col-md-6">
+        <label>Segundo Apellido</label>
+        <input type="text" class="form-control input-pro" [(ngModel)]="usuario.APELLIDO_2" readonly>
       </div>
 
       <div class="col-md-6">

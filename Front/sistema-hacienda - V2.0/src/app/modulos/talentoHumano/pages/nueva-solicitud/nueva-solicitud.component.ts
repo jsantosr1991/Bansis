@@ -530,6 +530,7 @@ export class NuevaSolicitudComponent implements OnInit, OnDestroy {
           CustomValidators.noWhitespace
         ]],
         correo: ['', [Validators.required, Validators.email]],
+        vacunaCovid0: [false],
         vacunaCovid1: [false],
         vacunaCovid2: [false],
         vacunaCovid3: [false],

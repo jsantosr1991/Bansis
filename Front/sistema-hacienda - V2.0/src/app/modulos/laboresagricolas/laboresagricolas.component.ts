@@ -23,6 +23,7 @@ export class LaboresagricolasComponent {
   usuariosCerrados: string[] = [];
   usuarioCerro = false;
   laboresCompartidasGuardadas: number[] = [];
+  imprimirData: any[] = [];
 
   ESTADO_FILA = {
     HISTORICO: 'HISTORICO',   // viene de guardadas
@@ -703,10 +704,14 @@ export class LaboresagricolasComponent {
       return 0;
     }
 
-    return this.detalleAgrupado.reduce(
-      (sum, x) => sum + Number(x.cantidad || 0),
-      0
-    );
+    return this.detalleAgrupado
+      .filter((x: any) =>
+        Number(x.cod_labor || x.codlabor || 0) === 1082
+      )
+      .reduce(
+        (sum, x) => sum + Number(x.cantidad || 0),
+        0
+      );
 
   }
   totalHas() {
@@ -715,10 +720,14 @@ export class LaboresagricolasComponent {
       return 0;
     }
 
-    return this.detalleAgrupado.reduce(
-      (sum, x) => sum + Number(x.has_hechas || 0),
-      0
-    );
+    return this.detalleAgrupado
+      .filter((x: any) =>
+        Number(x.cod_labor || x.codlabor || 0) === 1082
+      )
+      .reduce(
+        (sum, x) => sum + Number(x.has_hechas || 0),
+        0
+      );
 
   }
   onCambioSemana() {
@@ -822,21 +831,47 @@ export class LaboresagricolasComponent {
   agruparDetalle() {
 
     if (!this.detalle || !Array.isArray(this.detalle)) {
+
       this.detalleAgrupado = [];
+
       return;
+
     }
 
     const agrupado: any = {};
 
     this.detalle.forEach((item: any) => {
 
-      const cantidad = Number(item.cantidad || item.cantidad_hecha || 0);
+      const cantidad = Number(
+        item.cantidad || item.cantidad_hecha || 0
+      );
 
       if (cantidad <= 0) return;
 
+      const codLabor = Number(
+        item.cod_labor || item.codlabor || 0
+      );
+
+      const esCompartida =
+        codLabor === 2112 || codLabor === 2116;
+
+      /*
+      |--------------------------------------------------------------
+      | KEY ORIGINAL
+      |--------------------------------------------------------------
+      | NO CAMBIAR
+      |--------------------------------------------------------------
+      */
+
       const key =
-        String(item.cod_labor || item.codlabor || '') + '_' +
+        String(codLabor) + '_' +
         String(item.nombre || '').trim();
+
+      /*
+      |--------------------------------------------------------------
+      | CREAR GRUPO
+      |--------------------------------------------------------------
+      */
 
       if (!agrupado[key]) {
 
@@ -851,28 +886,53 @@ export class LaboresagricolasComponent {
           has_hechas: 0,
 
           detalleProductos: [],
-          // 🔥 NUEVO
+
           bloqueado: this.origenGuardadas,
 
-          // 🔥 SOLO SI VIENE DE GUARDADAS
           expandible: this.origenGuardadas,
 
-          expandido: false
+          expandido: false,
+
+          esCompartida,
+
+          yaReportada:
+            esCompartida
+            && this.laboresCompartidasGuardadas.includes(codLabor)
 
         };
 
       }
 
+      /*
+      |--------------------------------------------------------------
+      | SUMAS
+      |--------------------------------------------------------------
+      */
+
       agrupado[key].cantidad += cantidad;
 
-      agrupado[key].has_hechas += Number(item.has_hechas || 0);
+      agrupado[key].has_hechas += Number(
+        item.has_hechas || 0
+      );
+
+      /*
+      |--------------------------------------------------------------
+      | DETALLE
+      |--------------------------------------------------------------
+      | SOLO AGREGAR SECCION
+      |--------------------------------------------------------------
+      */
 
       agrupado[key].detalleProductos.push({
 
         producto: item.producto || '',
+
         cantidad: cantidad,
+
         medida: item.medida || item.medida_labor || '',
+
         seccion: item.seccion || '',
+
         has_hechas: Number(item.has_hechas || 0)
 
       });
@@ -880,8 +940,8 @@ export class LaboresagricolasComponent {
     });
 
     this.detalleAgrupado = Object.values(agrupado);
-  }
 
+  }
   toggleDetalle(l: any) {
 
     // ❌ SI NO ES EXPANDIBLE, NO HACE NADA
@@ -934,6 +994,51 @@ export class LaboresagricolasComponent {
     }
 
     return 'PENDIENTE';
+
+  }
+
+  imprimirLabores() {
+
+    const payload = {
+
+      codhac: this.filtro.codhac,
+
+      semana: this.filtro.semana,
+
+      anio: this.filtro.anio
+
+    };
+
+    this.alert.loading('Generando reporte...');
+
+    this.service.getReporte(payload).subscribe({
+
+      next: (res: any) => {
+        console.log(res);
+
+        this.alert.close();
+
+        this.imprimirData = res.data || [];
+
+        setTimeout(() => {
+
+          window.print();
+
+        }, 300);
+
+      },
+
+      error: err => {
+
+        console.error(err);
+
+        this.alert.close();
+
+        this.alert.error('Error al generar reporte');
+
+      }
+
+    });
 
   }
 }

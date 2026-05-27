@@ -72,7 +72,7 @@ class Estadisticas extends Controller
         $cinta = $request->input('cinta');
         $hacienda = $request->input('hacienda');
 
-        $sql = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC GetHistCintaxHa ?,?', [ $cinta,$hacienda]);
+        $sql = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC GetHistCintaxHa ?,?', [$cinta, $hacienda]);
         return response()->json($sql);
     }
     public function LotesHistP2(Request $request)
@@ -90,7 +90,7 @@ class Estadisticas extends Controller
         $cinta = $request->input('cinta');
         $hacienda = $request->input('hacienda');
 
-        $sql = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC GetHistCintaxHa2 ?,?', [ $cinta,$hacienda]);
+        $sql = DB::connection('sql94')->select('SET NOCOUNT ON; EXEC GetHistCintaxHa2 ?,?', [$cinta, $hacienda]);
         return response()->json($sql);
     }
     public function LotesHistS(Request $request)
@@ -133,6 +133,51 @@ class Estadisticas extends Controller
         $sql = DB::connection('mysql2')->select('CALL Get_LoteroTerrestre (?)', [$hacienda]);
         return response()->json($sql);
     }
+
+
+
+    public function RacimosRecusados(Request $request)
+    {
+        $idhacienda = $request->codhac;
+
+        $semana = $request->semana;
+        $periodo = $request->periodo;
+        $anio = $request->anio;
+
+        // NUEVOS
+        $fecha = $request->fecha;
+
+        $desde = $request->desde;
+        $hasta = $request->hasta;
+
+        $tipoFiltro = $request->tipoFiltro;
+
+        $data = DB::connection('sql94')
+            ->select(
+                'EXEC Sp_Get_Recusados
+                @codhac = ?,
+                @semana = ?,
+                @periodo = ?,
+                @anio = ?,
+                @fecha = ?,
+                @desde = ?,
+                @hasta = ?,
+                @tipoFiltro = ?',
+                [
+                    $idhacienda,
+                    $semana,
+                    $periodo,
+                    $anio,
+                    $fecha,
+                    $desde,
+                    $hasta,
+                    $tipoFiltro
+                ]
+            );
+
+        return response()->json($data);
+    }
+
 
 
 }

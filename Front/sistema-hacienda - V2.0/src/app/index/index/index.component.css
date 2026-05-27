@@ -1,0 +1,84 @@
+/* ===== LAYOUT GENERAL ===== */
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.main-container {
+    flex: 1;
+    min-width: 0;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+}
+
+/* =========================
+   TABLETS Y MÓVILES
+========================= */
+@media (max-width: 768px) {
+
+    .main-container {
+        margin-left: 0;
+        width: 100%;
+    }
+
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+}
+
+/* =========================
+   LAYOUT GENERAL
+========================= */
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* CONTENIDO */
+.main-container {
+    flex: 1;
+    min-width: 0;
+
+    margin-left: 250px;
+
+    transition: margin-left 0.3s ease;
+}
+
+/* =========================
+   OVERLAY
+========================= */
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    z-index: 999;
+
+    backdrop-filter: blur(2px);
+}
+
+/* =========================
+   TABLETS Y MÓVILES
+========================= */
+
+@media (max-width: 992px) {
+
+    .main-container,
+    .content {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+        width: 100% !important;
+    }
+
+}

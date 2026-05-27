@@ -32,7 +32,8 @@ export const MENU_CONFIG = [
     roles: ['todos'],
     grupos: ['campo', 'oficina'],
     submenus: [
-      { title: 'Cinta Barrida', route: '/estadisticas', roles: ['todos'], grupos: ['campo', 'oficina'] },
+      { title: 'Cinta Barrida', route: '/estadisticas/cintabarrida', roles: ['todos'], grupos: ['campo', 'oficina'] },
+      { title: 'Racimos Recusados', route: '/estadisticas/racimosrecusados', roles: ['todos'], grupos: ['campo', 'oficina'] },
     ]
   },
   {

@@ -1,13 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
-import {Router, RouterOutlet} from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {AuthserviceService} from '../../services/authservice.service';
-import {MENU_CONFIG} from '../../settings/menu.config';
-import {MenuItem} from '../../settings/menu.interface';
-import {UserService} from '../../services/user.service';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { AuthserviceService } from '../../services/authservice.service';
+import { MENU_CONFIG } from '../../settings/menu.config';
+import { MenuItem } from '../../settings/menu.interface';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,34 +28,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthserviceService,
-    private userService:UserService
-  ) {}
-
- /* ngOnInit(): void {
-   //this.filtrarMenu();
-    const usuario = this.userService.getUser();
-   //console.log(usuario)
-  //  console.log('🔹 Filtrando menú con usuario:', this.userService.getUser());
-   // console.log('🔹 Grupos actuales:', this.authService['gruposUsuario']);
-    // Traer la info del usuario desde backend
-    this.authService.getUserInfoFromBackend().subscribe({
-       next: (data) => {
-         if (data) {
-           this.userService.setUser({
-             username: data.username,
-             rol_id: data.rol_id,
-             group_id: data.group_id,
-             codempleado: data.codempleado,
-             empe_nom: data.empe_nom,
-             empresa_id: data.empresa_id
-           });
-           console.log('Rol temporal activo:', data.rol_temporal);
-           console.log('Rol temporal :', data);
-         }
-       },
-       error: (err) => console.error('Error al obtener info del usuario:', err)
-     });
-  }*/
+    private userService: UserService
+  ) { }
 
   ngOnInit(): void {
     // Obtener info del usuario desde backend

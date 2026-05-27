@@ -99,4 +99,6 @@ export class BodegahaciendaService {
     return this.http.post(`${this.baseUrl}/rollos/historial-persona`, data);
   }
 
+  guardarReemplazo(payload: any) { return this.http.post(`${this.baseUrl}/rollos/guardar-reemplazo`, payload); }
+
 }

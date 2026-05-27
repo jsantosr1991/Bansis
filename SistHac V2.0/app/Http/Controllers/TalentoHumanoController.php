@@ -18,6 +18,7 @@ use Carbon\Carbon;
  * SEGURIDAD:
  * - Escritura: Únicamente en la base de datos 'sistemahacienda' (local/copia).
  * - Lectura: Consulta de labores en la conexión 'mysqlrrhh' (PRODUCCIÓN - SOLO LECTURA).
+ * - Sincronización: Inserción/Actualización en 'sql_prueba' (BASE DE DATOS DE PRUEBA de SQL SERVER).
  */
 class TalentoHumanoController extends Controller
 {
@@ -77,7 +78,7 @@ class TalentoHumanoController extends Controller
                 $query->where('id', '!=', $excludeId);
             }
 
-            $duplicado = $query->first(['id', 'codigo_solicitud', 'nombres', 'apellido_paterno', 'apellido_materno']);
+            $duplicado = $query->latest('id')->first(['id', 'codigo_solicitud', 'nombres', 'apellido_paterno', 'apellido_materno', 'estado_solicitud']);
 
             if ($duplicado) {
                 return response()->json([
@@ -86,19 +87,17 @@ class TalentoHumanoController extends Controller
                     'solicitud' => [
                         'id' => $duplicado->id,
                         'codigo' => $duplicado->codigo_solicitud,
-                        'nombre_completo' => "{$duplicado->nombres} {$duplicado->apellido_paterno} {$duplicado->apellido_materno}"
+                        'nombre_completo' => "{$duplicado->nombres} {$duplicado->apellido_paterno} {$duplicado->apellido_materno}",
+                        'estado' => $duplicado->estado_solicitud
                     ],
                     'message' => 'Esta cédula ya está registrada en el sistema.'
                 ]);
             }
 
-            // 3. Consultar SRI (Nombre completo)
-            $sriData = $idService->getSriData($cedula);
-
+            // 3. Respuesta de éxito (sin SRI según requerimiento)
             return response()->json([
                 'exists' => false,
                 'valid' => true,
-                'sri_data' => $sriData,
                 'message' => 'Cédula válida y disponible.'
             ]);
         }
@@ -202,6 +201,56 @@ class TalentoHumanoController extends Controller
     }
 
     /**
+     * Sube una fotografía y retorna la ruta pública.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadFoto(Request $request)
+    {
+        Log::info('Endpoint /upload-foto alcanzado');
+        try {
+            if (!$request->hasFile('foto')) {
+                return response()->json(['error' => 'No se encontró ningún archivo'], 400);
+            }
+
+            $file = $request->file('foto');
+            
+            // Validar que sea una imagen
+            if (!getimagesize($file)) {
+                return response()->json(['error' => 'El archivo no es una imagen válida'], 400);
+            }
+
+            // Nombre único limpio
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'foto_' . time() . '_' . uniqid() . '.' . $extension;
+            
+            // Ruta específica solicitada por el usuario
+            $destinationPath = public_path('storage/fotos_solicitudes');
+            
+            // Asegurar que el directorio existe
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $file->move($destinationPath, $filename);
+
+            // Retornar la ruta relativa para guardar en BD
+            $relativeUrl = 'fotos_solicitudes/' . $filename;
+
+            return response()->json([
+                'success' => true,
+                'foto_url' => $relativeUrl,
+                'message' => 'Foto subida correctamente'
+            ]);
+        }
+        catch (\Exception $e) {
+            Log::error('Error al subir foto: ' . $e->getMessage());
+            return response()->json(['error' => 'Error interno al procesar la imagen'], 500);
+        }
+    }
+
+    /**
      * Convierte recursivamente todos los valores de un array a mayúsculas.
      * Ignora campos específicos como 'correo' o IDs.
      * 
@@ -210,13 +259,20 @@ class TalentoHumanoController extends Controller
      */
     private function convertToUppercase($data)
     {
+        $excludedFields = [
+            'correo', 'foto_url', 'fotoUrl', 'foto_base64', 'email', 'id', 'user_id', 
+            'created_at', 'updated_at', 'deleted_at', 'company_id', 'group_id',
+            'responsable_id', 'usuario_id', 'fecha', 'fecha_ingreso', 'fecha_entrevista',
+            'fecha_nacimiento', 'aplica'
+        ];
+
         if (!is_array($data)) {
             return is_string($data) ? strtoupper($data) : $data;
         }
 
         foreach ($data as $key => $value) {
-            // No convertir correos, IDs, fechas o booleanos
-            if (in_array($key, ['correo', 'id', 'company_id', 'responsable_id', 'usuario_id', 'fecha', 'fecha_ingreso', 'fecha_entrevista', 'fecha_nacimiento', 'aplica'])) {
+            // No convertir correos, IDs, fechas, fotos o booleanos
+            if (in_array($key, $excludedFields)) {
                 continue;
             }
 
@@ -320,10 +376,12 @@ class TalentoHumanoController extends Controller
                     'apellido_materno' => $datosPers['apellidoMaterno'] ?? '',
                     'nombres' => $datosPers['nombres'] ?? '',
                     'cedula' => $datosPers['cedula'] ?? null,
+                    'foto_url' => $this->processBase64Photo($datosPers['foto_base64'] ?? $allInput['foto_base64'] ?? null) 
+                                  ?? $this->cleanFotoUrl($datosPers['foto_url'] ?? $datosPers['fotoUrl'] ?? $allInput['foto_url'] ?? $allInput['fotoUrl'] ?? null),
                     'apodo' => $datosPers['apodo'] ?? null,
                     'genero' => $datosPers['genero'] ?? null,
                     'tiene_discapacidad' => filter_var($datosPers['tieneDiscapacidad'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                    'discapacidad_porcentaje' => (int)($datosPers['discapacidadPorcentaje'] ?? 0),
+                    'discapacidad_porcentaje' => $datosPers['discapacidadPorcentaje'] ?? 0,
                     'discapacidad_detalle' => $datosPers['discapacidadDetalle'] ?? null,
                     'pais_nacimiento' => $datosPers['paisNacimiento'] ?? null,
                     'pais_nacimiento_otro' => $datosPers['paisNacimientoOtro'] ?? null,
@@ -384,12 +442,14 @@ class TalentoHumanoController extends Controller
                     // SECCIÓN 6: DATOS FAMILIARES PRINCIPALES
                     'padre_nombre' => data_get($datosFam, 'padre.nombre'),
                     'padre_estado' => data_get($datosFam, 'padre.estado'),
+                    'padre_fecha_nacimiento' => data_get($datosFam, 'padre.fecha_nacimiento'),
                     'padre_edad' => data_get($datosFam, 'padre.edad'),
                     'padre_domicilio' => data_get($datosFam, 'padre.domicilio'),
                     'padre_ocupacion' => data_get($datosFam, 'padre.ocupacion'),
 
                     'madre_nombre' => data_get($datosFam, 'madre.nombre'),
                     'madre_estado' => data_get($datosFam, 'madre.estado'),
+                    'madre_fecha_nacimiento' => data_get($datosFam, 'madre.fecha_nacimiento'),
                     'madre_edad' => data_get($datosFam, 'madre.edad'),
                     'madre_domicilio' => data_get($datosFam, 'madre.domicilio'),
                     'madre_ocupacion' => data_get($datosFam, 'madre.ocupacion'),
@@ -417,6 +477,11 @@ class TalentoHumanoController extends Controller
                     'edu_superior_estado' => data_get($datosEdu, 'superior.estado'),
                     'edu_superior_anio' => data_get($datosEdu, 'superior.anio'),
 
+                    'edu_posgrado_institucion' => data_get($datosEdu, 'posgrado.institucion'),
+                    'edu_posgrado_carrera' => data_get($datosEdu, 'posgrado.carrera_programa'),
+                    'edu_posgrado_estado' => data_get($datosEdu, 'posgrado.estado'),
+                    'edu_posgrado_anio' => data_get($datosEdu, 'posgrado.anio'),
+
                     // SECCIÓN 9: EXPERIENCIA LABORAL HEADER
                     'exp_sin_experiencia' => $expLab['sin_experiencia'] ?? null,
                     'exp_descripcion_labores' => $expLab['descripcion_labores'] ?? null,
@@ -428,6 +493,8 @@ class TalentoHumanoController extends Controller
                     'salud_fracturas_detalle' => data_get($salud, 'fracturas.detalle'),
                     'salud_quemaduras' => data_get($salud, 'quemaduras.aplica'),
                     'salud_quemaduras_detalle' => data_get($salud, 'quemaduras.detalle'),
+                    'salud_alergias' => data_get($salud, 'alergias.aplica') ?? 0,
+                    'salud_alergias_detalle' => data_get($salud, 'alergias.detalle'),
                     'salud_accidentes_laborales' => data_get($salud, 'accidentes_laborales.aplica'),
                     'salud_accidentes_laborales_detalle' => data_get($salud, 'accidentes_laborales.detalle'),
                     'salud_otros_antecedentes' => $salud['otros_antecedentes'] ?? null,
@@ -453,6 +520,8 @@ class TalentoHumanoController extends Controller
                         $solicitud->hermanos()->create([
                             'nombre' => $h['nombre'] ?? null,
                             'genero' => $h['genero'] ?? null,
+                            'es_mayor_menor' => $h['es_mayor_menor'] ?? null,
+                            'numero_hermano' => $h['numero_hermano'] ?? null,
                             'estado' => $h['estado'] ?? null,
                             'edad' => $h['edad'] ?? null,
                             'domicilio' => $h['domicilio'] ?? null,
@@ -628,6 +697,41 @@ class TalentoHumanoController extends Controller
                 'familiaresEmpresa', 'observaciones'
             ])->findOrFail($id);
 
+            // Determinar si esta es la ficha aprobada más reciente y si tiene reingresos activos
+            $cedula = $solicitud->cedula;
+            $esElUltimoAprobado = false;
+            $tieneReingresoActivo = false;
+            $ultimoIdRelacionado = null;
+
+            // SOLO buscar registros relacionados si hay una cédula válida ingresada
+            if (!empty($cedula)) {
+                if ($solicitud->estado_solicitud === 'APROBADO') {
+                    $ultimaAprobada = SolicitudEmpleo::where('cedula', $cedula)
+                        ->where('estado_solicitud', 'APROBADO')
+                        ->latest('id')
+                        ->first();
+                    
+                    if ($ultimaAprobada && $ultimaAprobada->id == $solicitud->id) {
+                        $esElUltimoAprobado = true;
+                    }
+
+                    $activa = SolicitudEmpleo::where('cedula', $cedula)
+                        ->whereIn('estado_solicitud', ['PENDIENTE', 'EN_REVISION', 'BORRADOR'])
+                        ->latest('id')
+                        ->first();
+                    
+                    if ($activa) {
+                        $tieneReingresoActivo = true;
+                    }
+                }
+                
+                // Obtener el ID más reciente de todos para esta cédula (para el botón "Ir a ficha más reciente")
+                $elMasReciente = SolicitudEmpleo::where('cedula', $cedula)
+                    ->latest('id')
+                    ->first(['id']);
+                $ultimoIdRelacionado = $elMasReciente ? $elMasReciente->id : null;
+            }
+
             // Opciones válidas de los selects del frontend
             $areasValidas = ['Campo', 'Empacadora', 'Administración'];
             $paisesValidos = ['Ecuador', 'Colombia', 'Perú', 'Venezuela', 'Argentina', 'Chile', 'Otros'];
@@ -675,6 +779,9 @@ class TalentoHumanoController extends Controller
             $data = [
                 'id' => $solicitud->id,
                 'codigo_solicitud' => $solicitud->codigo_solicitud,
+                'es_el_ultimo_aprobado' => $esElUltimoAprobado,
+                'tiene_reingreso_activo' => $tieneReingresoActivo,
+                'ultimo_id_relacionado' => $ultimoIdRelacionado,
                 'datosAdministrativos' => [
                     'company_id' => $solicitud->company_id,
                     'company_name' => $solicitud->company_name,
@@ -709,10 +816,7 @@ class TalentoHumanoController extends Controller
                         'fecha_entrevista' => $solicitud->fecha_entrevista,
                         'responsable_id' => $solicitud->responsable_id,
                         'responsable_nombre' => $solicitud->responsable_nombre,
-                        'responsable_grupo' => DB::table('users')
-                            ->join('groups', 'users.group_id', '=', 'groups.id')
-                            ->where('users.id', $solicitud->responsable_id)
-                            ->value('groups.nombre') ?? $solicitud->responsable_grupo,
+                        'responsable_grupo' => $solicitud->responsable_grupo,
                     ]
                 ],
                 'datosPersonales' => [
@@ -720,10 +824,12 @@ class TalentoHumanoController extends Controller
                     'apellidoMaterno' => $solicitud->apellido_materno,
                     'nombres' => $solicitud->nombres,
                     'cedula' => $solicitud->cedula,
+                    // Usar URL dinámica basada en la petición actual para ignorar APP_URL de .env erróneos
+                    'foto_url' => $solicitud->foto_url ? url('/') . '/storage/' . $solicitud->foto_url : null,
                     'apodo' => $solicitud->apodo,
                     'genero' => $solicitud->genero,
                     'tieneDiscapacidad' => (bool)$solicitud->tiene_discapacidad,
-                    'discapacidadPorcentaje' => (int)$solicitud->discapacidad_porcentaje,
+                    'discapacidadPorcentaje' => $solicitud->discapacidad_porcentaje,
                     'discapacidadDetalle' => $solicitud->discapacidad_detalle,
                     'paisNacimiento' => $this->normalizeSelectValue($solicitud->pais_nacimiento, $paisesValidos),
                     'paisNacimientoOtro' => $solicitud->pais_nacimiento_otro,
@@ -785,6 +891,8 @@ class TalentoHumanoController extends Controller
                     'padre' => [
                         'nombre' => $solicitud->padre_nombre,
                         'estado' => $solicitud->padre_estado,
+                        'fecha_nacimiento' => $solicitud->padre_fecha_nacimiento,
+                        'no_conoce_fecha' => is_null($solicitud->padre_fecha_nacimiento) && !is_null($solicitud->padre_edad),
                         'edad' => $solicitud->padre_edad,
                         'domicilio' => $solicitud->padre_domicilio,
                         'ocupacion' => $solicitud->padre_ocupacion,
@@ -792,6 +900,8 @@ class TalentoHumanoController extends Controller
                     'madre' => [
                         'nombre' => $solicitud->madre_nombre,
                         'estado' => $solicitud->madre_estado,
+                        'fecha_nacimiento' => $solicitud->madre_fecha_nacimiento,
+                        'no_conoce_fecha' => is_null($solicitud->madre_fecha_nacimiento) && !is_null($solicitud->madre_edad),
                         'edad' => $solicitud->madre_edad,
                         'domicilio' => $solicitud->madre_domicilio,
                         'ocupacion' => $solicitud->madre_ocupacion,
@@ -807,6 +917,8 @@ class TalentoHumanoController extends Controller
                 return [
                 'nombre' => $h->nombre,
                 'genero' => $h->genero ?? 'MASCULINO',
+                'es_mayor_menor' => $h->es_mayor_menor,
+                'numero_hermano' => $h->numero_hermano,
                 'estado' => $h->estado ?? 'VIVO',
                 'edad' => $h->edad,
                 'domicilio' => $h->domicilio,
@@ -857,6 +969,12 @@ class TalentoHumanoController extends Controller
                         'estado' => $solicitud->edu_superior_estado,
                         'anio' => $solicitud->edu_superior_anio,
                     ],
+                    'posgrado' => [
+                        'institucion' => $solicitud->edu_posgrado_institucion,
+                        'carrera_programa' => $solicitud->edu_posgrado_carrera,
+                        'estado' => $solicitud->edu_posgrado_estado,
+                        'anio' => $solicitud->edu_posgrado_anio,
+                    ],
                     'cursos' => $solicitud->cursos->map(function ($c) {
                 return [
                 'nombre' => $c->nombre_curso,
@@ -898,6 +1016,10 @@ class TalentoHumanoController extends Controller
                     'accidentes_laborales' => [
                         'aplica' => (bool)$solicitud->salud_accidentes_laborales,
                         'detalle' => $solicitud->salud_accidentes_laborales_detalle
+                    ],
+                    'alergias' => [
+                        'aplica' => (bool)$solicitud->salud_alergias,
+                        'detalle' => $solicitud->salud_alergias_detalle
                     ],
                     'otros_antecedentes' => $solicitud->salud_otros_antecedentes,
                     'deporte' => $solicitud->salud_deporte,
@@ -941,20 +1063,13 @@ class TalentoHumanoController extends Controller
                 'datosEntrevistador' => [
                     'entrevistador' => [
                         'nombre' => $solicitud->responsable_nombre,
-                        'grupo' => DB::table('users')
-                            ->join('groups', 'users.group_id', '=', 'groups.id')
-                            ->where('users.id', $solicitud->responsable_id)
-                            ->value('groups.nombre') ?? $solicitud->responsable_grupo,
+                        'grupo' => $solicitud->responsable_grupo,
                         'fecha' => $solicitud->fecha_entrevista
                     ],
                     'aprobacion' => [
                         'estado' => $solicitud->estado_solicitud,
                         'aprobado_por' => $solicitud->aprobado_por,
-                        'grupo' => DB::table('users')
-                            ->join('groups', 'users.group_id', '=', 'groups.id')
-                            ->where('users.username', $solicitud->aprobado_por)
-                            ->orWhere('users.empe_nom', $solicitud->aprobado_por)
-                            ->value('groups.nombre') ?? $solicitud->aprobacion_grupo,
+                        'grupo' => $solicitud->aprobacion_grupo,
                         'fecha' => $solicitud->aprobacion_fecha,
                     ]
                 ]
@@ -1003,6 +1118,11 @@ class TalentoHumanoController extends Controller
                     $solicitudData['codigo_solicitud'] = $this->generateCodigoSolicitud();
                 }
 
+                // Habilitar actualización de estado (BORRADOR, PENDIENTE, etc.)
+                if (isset($allInput['estado_solicitud'])) {
+                    $solicitudData['estado_solicitud'] = $allInput['estado_solicitud'];
+                }
+
                 if (isset($allInput['datosAdministrativos'])) {
                     $datosAdmin = $allInput['datosAdministrativos'];
 
@@ -1024,7 +1144,9 @@ class TalentoHumanoController extends Controller
                     }
 
                     if (isset($datosAdmin['fechas_control'])) {
-                        $solicitudData['fecha_revision_guayaquil'] = $datosAdmin['fechas_control']['fecha_revision_guayaquil'] ?? $solicitud->fecha_revision_guayaquil;
+                        if (array_key_exists('fecha_revision_guayaquil', $datosAdmin['fechas_control'])) {
+                            $solicitudData['fecha_revision_guayaquil'] = $datosAdmin['fechas_control']['fecha_revision_guayaquil'];
+                        }
                         if (array_key_exists('reingreso_fecha', $datosAdmin['fechas_control']))
                             $solicitudData['reingreso_fecha'] = $datosAdmin['fechas_control']['reingreso_fecha'];
                         if (array_key_exists('fecha_salida', $datosAdmin['fechas_control']))
@@ -1065,14 +1187,30 @@ class TalentoHumanoController extends Controller
                     $solicitudData['apellido_materno'] = $datosPers['apellidoMaterno'] ?? $solicitud->apellido_materno;
                     $solicitudData['nombres'] = $datosPers['nombres'] ?? $solicitud->nombres;
                     $solicitudData['cedula'] = $datosPers['cedula'] ?? $solicitud->cedula;
+                    
+                    // Actualización de foto mejorada para permitir eliminación
+                    if (array_key_exists('foto_base64', $datosPers) || array_key_exists('foto_url', $datosPers)) {
+                        $newBase64 = $datosPers['foto_base64'] ?? $allInput['foto_base64'] ?? null;
+                        $newUrl = $datosPers['foto_url'] ?? $datosPers['fotoUrl'] ?? $allInput['foto_url'] ?? $allInput['fotoUrl'] ?? null;
+                        
+                        if (!empty($newBase64)) {
+                            $solicitudData['foto_url'] = $this->processBase64Photo($newBase64);
+                        } else if (!empty($newUrl)) {
+                            $solicitudData['foto_url'] = $this->cleanFotoUrl($newUrl);
+                        } else {
+                            // Se envió el campo pero está vacío o nulo -> eliminar foto
+                            $solicitudData['foto_url'] = null;
+                        }
+                    }
+                    
                     if (array_key_exists('apodo', $datosPers))
                         $solicitudData['apodo'] = $datosPers['apodo'];
                     $solicitudData['genero'] = $datosPers['genero'] ?? $solicitud->genero;
                     $solicitudData['tiene_discapacidad'] = isset($datosPers['tieneDiscapacidad']) ? filter_var($datosPers['tieneDiscapacidad'], FILTER_VALIDATE_BOOLEAN) : $solicitud->tiene_discapacidad;
-                    if (array_key_exists('discapacidadPorcentaje', $datosPers))
-                        $solicitudData['discapacidad_porcentaje'] = (int)$datosPers['discapacidadPorcentaje'];
                     if (array_key_exists('discapacidadDetalle', $datosPers))
                         $solicitudData['discapacidad_detalle'] = $datosPers['discapacidadDetalle'];
+                    if (array_key_exists('discapacidadPorcentaje', $datosPers))
+                        $solicitudData['discapacidad_porcentaje'] = $datosPers['discapacidadPorcentaje'] ?? 0;
                     $solicitudData['pais_nacimiento'] = $datosPers['paisNacimiento'] ?? $solicitud->pais_nacimiento;
                     if (array_key_exists('paisNacimientoOtro', $datosPers))
                         $solicitudData['pais_nacimiento_otro'] = $datosPers['paisNacimientoOtro'];
@@ -1167,14 +1305,14 @@ class TalentoHumanoController extends Controller
                 if (isset($allInput['datosFamiliares'])) {
                     $datosFam = $allInput['datosFamiliares'];
 
-                    Log::info('Actualizando datos familiares para solicitud ' . $id);
-
                     if (isset($datosFam['padre'])) {
                         $p = $datosFam['padre'];
                         if (array_key_exists('nombre', $p))
                             $solicitudData['padre_nombre'] = $p['nombre'];
                         if (array_key_exists('estado', $p))
                             $solicitudData['padre_estado'] = $p['estado'];
+                        if (array_key_exists('fecha_nacimiento', $p))
+                            $solicitudData['padre_fecha_nacimiento'] = $p['fecha_nacimiento'];
                         if (array_key_exists('edad', $p))
                             $solicitudData['padre_edad'] = $p['edad'];
                         if (array_key_exists('domicilio', $p))
@@ -1189,6 +1327,8 @@ class TalentoHumanoController extends Controller
                             $solicitudData['madre_nombre'] = $m['nombre'];
                         if (array_key_exists('estado', $m))
                             $solicitudData['madre_estado'] = $m['estado'];
+                        if (array_key_exists('fecha_nacimiento', $m))
+                            $solicitudData['madre_fecha_nacimiento'] = $m['fecha_nacimiento'];
                         if (array_key_exists('edad', $m))
                             $solicitudData['madre_edad'] = $m['edad'];
                         if (array_key_exists('domicilio', $m))
@@ -1217,6 +1357,8 @@ class TalentoHumanoController extends Controller
                             $solicitud->hermanos()->create([
                                 'nombre' => $h['nombre'],
                                 'genero' => $h['genero'] ?? null,
+                                'es_mayor_menor' => $h['es_mayor_menor'] ?? null,
+                                'numero_hermano' => $h['numero_hermano'] ?? null,
                                 'estado' => $h['estado'] ?? null,
                                 'edad' => $h['edad'] ?? null,
                                 'domicilio' => $h['domicilio'] ?? null,
@@ -1294,6 +1436,17 @@ class TalentoHumanoController extends Controller
                             $solicitudData['edu_superior_anio'] = $datosEdu['superior']['anio'];
                     }
 
+                    if (isset($datosEdu['posgrado'])) {
+                        if (array_key_exists('institucion', $datosEdu['posgrado']))
+                            $solicitudData['edu_posgrado_institucion'] = $datosEdu['posgrado']['institucion'];
+                        if (array_key_exists('carrera_programa', $datosEdu['posgrado']))
+                            $solicitudData['edu_posgrado_carrera'] = $datosEdu['posgrado']['carrera_programa'];
+                        if (array_key_exists('estado', $datosEdu['posgrado']))
+                            $solicitudData['edu_posgrado_estado'] = $datosEdu['posgrado']['estado'];
+                        if (array_key_exists('anio', $datosEdu['posgrado']))
+                            $solicitudData['edu_posgrado_anio'] = $datosEdu['posgrado']['anio'];
+                    }
+
                     if (isset($datosEdu['cursos']) && is_array($datosEdu['cursos'])) {
                         $solicitud->cursos()->delete();
                         foreach ($datosEdu['cursos'] as $c) {
@@ -1346,6 +1499,13 @@ class TalentoHumanoController extends Controller
                     $solicitudData['salud_accidentes_laborales'] = isset($salud['accidentes_laborales']['aplica']) ? filter_var($salud['accidentes_laborales']['aplica'], FILTER_VALIDATE_BOOLEAN) : $solicitud->salud_accidentes_laborales;
                     if (array_key_exists('detalle', $salud['accidentes_laborales'] ?? []))
                         $solicitudData['salud_accidentes_laborales_detalle'] = $salud['accidentes_laborales']['detalle'];
+                        
+                    if (isset($salud['alergias'])) {
+                        if (array_key_exists('aplica', $salud['alergias']))
+                            $solicitudData['salud_alergias'] = $salud['alergias']['aplica'] ?? 0;
+                        if (array_key_exists('detalle', $salud['alergias']))
+                            $solicitudData['salud_alergias_detalle'] = $salud['alergias']['detalle'];
+                    }
                         
                     if (array_key_exists('otros_antecedentes', $salud))
                         $solicitudData['salud_otros_antecedentes'] = $salud['otros_antecedentes'];
@@ -1484,25 +1644,15 @@ class TalentoHumanoController extends Controller
                     $solicitud->aprobacion_fecha = now();
                 }
 
-                // 2. Si el nuevo estado es APROBADO, ejecutar lógica de aprobacion (inserción en rh_mtrab)
+                // 2. Si el nuevo estado es APROBADO, ejecutar lógica de sincronización con producción
                 if ($nuevoEstado === 'APROBADO') {
-                    // Verificar si ya existe en rh_mtrab por cédula en SQL Server
-                    $existe = DB::connection('sql_prueba')->table('rh_mtrab')
+                    // --- LÓGICA DE SINCRONIZACIÓN CON PRODUCCIÓN (rh_mtrab) ---
+                    // Verificar si ya existe en rh_mtrab por cédula
+                    $registroExistente = DB::connection('sql_prueba')->table('rh_mtrab')
                         ->where('NUM_CEDULA', $solicitud->cedula)
-                        ->exists();
+                        ->first(['cod_trabaj']);
 
-                    if ($existe) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'El aspirante ya se encuentra registrado como trabajador en rh_mtrab (Cédula duplicada).'
-                        ], 409);
-                    }
-
-                    // Obtener nuevo COD_TRABAJ (MAX + 1) en SQL Server
-                    $ultimoCod = DB::connection('sql_prueba')->table('rh_mtrab')->max('COD_TRABAJ');
-                    $nuevoCod = ($ultimoCod ?? 0) + 1;
-
-                    // Mapeo de tipos de contrato a IDs numéricos para rh_mtrab
+                    // Mapeo de tipos de contrato a IDs numéricos
                     $mappingContratos = [
                         'A PRUEBA' => 1,
                         'CONTRATO PRODUCTIVO' => 2,
@@ -1512,20 +1662,16 @@ class TalentoHumanoController extends Controller
                         'POR TEMPORADA' => 6,
                         'DESTAJO' => 7
                     ];
-
                     $tipoContratoId = $mappingContratos[$solicitud->condiciones_tipo_contrato] ?? 0;
 
-                    // Formatear nombres: APELLIDOS NOMBRES (Estándar de Talento Humano)
+                    // Formatear nombres
                     $nombreCorto = strtoupper($solicitud->apellido_paterno . ' ' . $solicitud->apellido_materno . ' ' . $solicitud->nombres);
-
-                    // Extraer nombres individuales
                     $nombresArray = explode(' ', trim($solicitud->nombres));
                     $nombre1 = $nombresArray[0] ?? '';
                     $nombre2 = isset($nombresArray[1]) ? implode(' ', array_slice($nombresArray, 1)) : '';
 
-                    // Insertar en rh_mtrab (Base de datos SQL Server)
-                    DB::connection('sql_prueba')->table('rh_mtrab')->insert([
-                        'cod_trabaj' => $nuevoCod,
+                    // Datos comunes para INSERT/UPDATE
+                    $dataProduccion = [
                         'num_cedula' => $solicitud->cedula,
                         'apellido_1' => strtoupper($solicitud->apellido_paterno ?? ''),
                         'apellido_2' => strtoupper($solicitud->apellido_materno ?? ''),
@@ -1550,15 +1696,34 @@ class TalentoHumanoController extends Controller
                         'mail' => $solicitud->correo,
                         'sangre' => $solicitud->tipo_sangre,
                         'discapacitado' => $solicitud->tiene_discapacidad ? '1' : '0',
-                        'porc_disc' => (int)($solicitud->discapacidad_porcentaje ?? 0),
                         'vivecon' => mb_substr($solicitud->referencial_familiares_relacion ?? '', 0, 50),
-                        'observacion' => '',
                         'fec_ingreso' => $solicitud->fecha_ingreso ? Carbon::parse($solicitud->fecha_ingreso)->format('Ymd') : now()->format('Ymd'),
                         'estado' => 'A', // Activo
                         'usuario' => auth()->id() ?? 0,
                         'fec_sistema' => now()->format('Ymd H:i:s'),
                         'hobies' => strtoupper($solicitud->salud_deporte ?? ''),
-                    ]);
+                        'porc_disc' => $solicitud->discapacidad_porcentaje ?? 0,
+                    ];
+
+                    if ($registroExistente) {
+                        // CASO ACTUALIZACIÓN: Ya existe en rh_mtrab (reingreso o ficha nueva con misma cédula).
+                        // Actualizar datos pero PRESERVAR: cod_trabaj, num_cedula, fec_ingreso.
+                        $dataActualizacion = $dataProduccion;
+                        unset($dataActualizacion['cod_trabaj']);
+                        unset($dataActualizacion['num_cedula']);
+                        unset($dataActualizacion['fec_ingreso']);
+
+                        DB::connection('sql_prueba')->table('rh_mtrab')
+                            ->where('NUM_CEDULA', $solicitud->cedula)
+                            ->update($dataActualizacion);
+                    } else {
+                        // CASO NUEVO: No existe en rh_mtrab. Insertar con nuevo código.
+                        $ultimoCod = DB::connection('sql_prueba')->table('rh_mtrab')->max('COD_TRABAJ');
+                        $nuevoCod = ($ultimoCod ?? 0) + 1;
+                        $dataProduccion['cod_trabaj'] = $nuevoCod;
+                        
+                        DB::connection('sql_prueba')->table('rh_mtrab')->insert($dataProduccion);
+                    }
                 }
 
                 // 3. Actualizar estado en la tabla de solicitudes
@@ -1626,6 +1791,219 @@ class TalentoHumanoController extends Controller
         }
         catch (\Exception $e) {
             return $date; // Retornar original si falla (fallback)
+        }
+    }
+
+    /**
+     * Procesa una imagen en Base64 y la guarda físicamente.
+     */
+    private function processBase64Photo($base64Data)
+    {
+        if (empty($base64Data) || !is_string($base64Data)) return null;
+
+        // Limpiar el prefijo data:image/jpeg;base64, si existe
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+            $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
+            $extension = strtolower($type[1]); // png, jpg, etc
+        } else {
+            $extension = 'jpg'; // default
+        }
+
+        $imageData = base64_decode($base64Data);
+        if ($imageData === false) return null;
+
+        $fileName = 'foto_' . uniqid() . '.' . $extension;
+        $path = public_path('storage/fotos_solicitudes/' . $fileName);
+
+        // Asegurar directorio
+        if (!file_exists(public_path('storage/fotos_solicitudes'))) {
+            mkdir(public_path('storage/fotos_solicitudes'), 0777, true);
+        }
+
+        file_put_contents($path, $imageData);
+
+        return 'fotos_solicitudes/' . $fileName;
+    }
+
+    /**
+     * Limpia una URL de foto para guardar solo la ruta relativa a storage.
+     * Si la ruta tiene el prefijo de la URL de la app, extrae solo la parte de fotos_solicitudes.
+     * 
+     * @param string|null $url
+     * @return string|null
+     */
+    private function cleanFotoUrl($url)
+    {
+        if (empty($url)) return null;
+        if (!is_string($url)) return null;
+        
+        // Si es "[object Object]" o similar, ignorar
+        if (str_contains($url, '[object')) return null;
+
+        // Si ya es una ruta relativa que empieza por fotos_solicitudes, dejarla así
+        if (preg_match('/^fotos_solicitudes\//', $url)) {
+            $result = $url;
+        } else if (preg_match('/(fotos_solicitudes\/[^\s\?#]+)/', $url, $matches)) {
+            // Extraer la parte relativa de una URL absoluta o ruta de storage
+            $result = $matches[1];
+        } else {
+            $result = $url;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Crea un duplicado de una solicitud aprobada para un proceso de reingreso.
+     * Copia todos los datos personales, familiares y laborales a una nueva ficha en estado PENDIENTE.
+     * 
+     * @param int $id ID de la solicitud original aprobada.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reingreso(Request $request, $id)
+    {
+        try {
+            return DB::transaction(function () use ($request, $id) {
+                // 1. Obtener la solicitud original
+                $original = SolicitudEmpleo::findOrFail($id);
+                $cedula = $original->cedula;
+
+                // REGLA DE NEGOCIO: Solo se puede reingresar desde una ficha APROBADA
+                if ($original->estado_solicitud !== 'APROBADO') {
+                    return response()->json(['success' => false, 'message' => 'Solo se puede generar reingreso de fichas aprobadas.'], 403);
+                }
+
+                // REGLA DE NEGOCIO: Solo se puede reingresar desde la ficha aprobada MÁS RECIENTE
+                $ultimaAprobada = SolicitudEmpleo::where('cedula', $cedula)
+                    ->where('estado_solicitud', 'APROBADO')
+                    ->latest('created_at')
+                    ->first();
+                
+                if ($ultimaAprobada && $ultimaAprobada->id != $id) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Solo se permite generar reingreso desde la ficha aprobada más reciente (' . $ultimaAprobada->codigo_solicitud . ').'
+                    ], 403);
+                }
+
+                // REGLA DE NEGOCIO: No permitir si ya existe otro reingreso en curso (PENDIENTE o EN_REVISION)
+                $activa = SolicitudEmpleo::where('cedula', $cedula)
+                    ->whereIn('estado_solicitud', ['PENDIENTE', 'EN_REVISION', 'BORRADOR'])
+                    ->first();
+                
+                if ($activa) {
+                    return response()->json([
+                        'success' => false,
+                        'exists_active' => true,
+                        'message' => 'Ya existe un proceso de reingreso activo para este trabajador.',
+                        'active_id' => $activa->id,
+                        'active_code' => $activa->codigo_solicitud
+                    ], 409);
+                }
+
+                // Cargamos relaciones para el clon
+                $original->load([
+                    'hermanos', 'hijos', 'conyugesAnteriores', 'cursos',
+                    'experiencias', 'referenciasLaborales', 'referenciasPersonales',
+                    'familiaresEmpresa', 'observaciones'
+                ]);
+
+                // 2. Replicar el modelo principal
+                $nueva = $original->replicate([
+                    'id', 'created_at', 'updated_at', 
+                    'responsable_id', 'responsable_nombre', 'responsable_grupo', 'fecha_entrevista',
+                    'aprobado_por', 'aprobacion_grupo', 'aprobacion_fecha',
+                    'codigo_solicitud', 'reingreso_fecha', 'visto_por', 'visto_fecha'
+                ]);
+                
+                // Ajustar campos para la nueva solicitud
+                $nueva->estado_solicitud = 'EN_REVISION';
+                $nueva->codigo_solicitud = $this->generateCodigoSolicitud();
+                $nueva->reingreso_fecha = now()->toDateString(); 
+                
+                // Actualizar Auditoría con datos de la sesión actual
+                $nueva->responsable_id = $request->input('responsable_id');
+                $nueva->responsable_nombre = $request->input('responsable_nombre');
+                $nueva->responsable_grupo = $request->input('responsable_grupo');
+                $nueva->fecha_entrevista = now(); // Fecha de creación de esta ficha
+                
+                // Limpiar procesos antiguos
+                $nueva->aprobado_por = null;
+                $nueva->aprobacion_grupo = null;
+                $nueva->aprobacion_fecha = null;
+                
+                $nueva->save();
+
+                // 3. Replicar Relaciones
+                
+                // Hermanos
+                foreach ($original->hermanos as $item) {
+                    $nueva->hermanos()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Hijos
+                foreach ($original->hijos as $item) {
+                    $nueva->hijos()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Cónyuges Anteriores
+                foreach ($original->conyugesAnteriores as $item) {
+                    $nueva->conyugesAnteriores()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Cursos
+                foreach ($original->cursos as $item) {
+                    $nueva->cursos()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Experiencias
+                foreach ($original->experiencias as $item) {
+                    $nueva->experiencias()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Referencias Laborales
+                foreach ($original->referenciasLaborales as $item) {
+                    $nueva->referenciasLaborales()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Referencias Personales
+                foreach ($original->referenciasPersonales as $item) {
+                    $nueva->referenciasPersonales()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Familiares en Empresa
+                foreach ($original->familiaresEmpresa as $item) {
+                    $nueva->familiaresEmpresa()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                // Observaciones (Solo copiar y añadir una de auditoría)
+                foreach ($original->observaciones as $item) {
+                    $nueva->observaciones()->create($item->replicate(['id', 'solicitud_id', 'created_at', 'updated_at'])->toArray());
+                }
+
+                $nueva->observaciones()->create([
+                    'tipo' => 'SISTEMA',
+                    'comentario' => 'REINGRESO GENERADO DESDE FOLIO: ' . $original->codigo_solicitud,
+                    'usuario_nombre' => 'SISTEMA',
+                    'fecha' => now()
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reingreso generado correctamente. Nuevo folio: ' . $nueva->codigo_solicitud,
+                    'id' => $nueva->id,
+                    'nuevo_id' => $nueva->id, // Compatibilidad con frontend
+                    'codigo' => $nueva->codigo_solicitud
+                ]);
+            });
+        }
+        catch (\Exception $e) {
+            Log::error('Error en reingreso: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo generar el reingreso.',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
 

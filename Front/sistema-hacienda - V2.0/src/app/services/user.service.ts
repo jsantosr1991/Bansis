@@ -3,15 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
-import {Usuario} from '../interface/Usuario';
+import { Usuario } from '../interface/Usuario';
 
 export interface User {
   username: string;
   rol_id: number;
   group_id: number;
-  codempleado:string;
-  empresa_id:number;
-  empe_nom:string;
+  codempleado: string;
+  empresa_id: number;
+  empe_nom: string;
   // otros campos si quieres
 }
 
@@ -22,7 +22,7 @@ export class UserService {
   private baseUrl = environment.apiUrl;
   private user: User | null = null;
 
- constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   setUserFromToken(token: string) {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -31,7 +31,7 @@ export class UserService {
       codempleado: payload.codempleado,
       rol_id: payload.rol_id,
       group_id: payload.group_id,
-      empe_nom:payload.empe_nom,
+      empe_nom: payload.empe_nom,
       empresa_id: payload.empresa_id
     };
   }
@@ -76,22 +76,22 @@ export class UserService {
   }
 
   getUsuarios(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl+'/getlistadminsitrativos');
+    return this.http.get<any[]>(this.baseUrl + '/getlistadminsitrativos');
   }
 
-    getAdministrativos(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl+'/getlistadminsitrativos');
+  getAdministrativos(): Observable<any[]> {
+    return this.http.get<any[]>(this.baseUrl + '/getlistadminsitrativos');
   }
   getRol(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl+'/listarol');
+    return this.http.get<any[]>(this.baseUrl + '/listarol');
   }
   getGrupo(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl+'/listagrupo');
+    return this.http.get<any[]>(this.baseUrl + '/listagrupo');
   }
 
   // 🔍 Buscar usuario por nombre o apellido
   buscarUsuario(search: string): Observable<any[]> {
-   const url = `${this.baseUrl}/listadminsitrativos?search=${search}`;
+    const url = `${this.baseUrl}/listadminsitrativos?search=${search}`;
 
     return this.http.get<any[]>(`${this.baseUrl}/listadminsitrativos?search=${search}`);
 
@@ -110,14 +110,14 @@ export class UserService {
   actualizarStatus(id: number, status: number) {
     return this.http.put(`${this.baseUrl}/actualizarusuario/${id}`, { status });
   }
-//
+  //
   obtenerTodos(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl+'/privilegios');
+    return this.http.get<any[]>(this.baseUrl + '/privilegios');
   }
 
   otorgarPrivilegio(data: any): Observable<any> {
 
-    return this.http.post(this.baseUrl+'/privilegios', data);
+    return this.http.post(this.baseUrl + '/privilegios', data);
   }
 
   desactivarPrivilegio(id: number): Observable<any> {
@@ -126,6 +126,13 @@ export class UserService {
 
   obtenerActivos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/privilegios?activo=1`);
+  }
+
+  generarUsername(base: string) {
+    return this.http.post<any>(
+      `${this.baseUrl}/generar-username`,
+      { base }
+    );
   }
 
 

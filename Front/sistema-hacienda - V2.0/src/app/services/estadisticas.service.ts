@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../environments/environment';
-import {HttpClient} from '@angular/common/http';
-import {forkJoin, Observable} from 'rxjs';
+import { environment } from '../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,31 +9,31 @@ import {forkJoin, Observable} from 'rxjs';
 export class EstadisticasService {
 
   private baseUrl = environment.apiUrl;
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) { }
 
   //OBTENER SEMANA EN CURSO
-  getSemanaActual(data:any){
+  getSemanaActual(data: any) {
 
-    return this.http.post(`${this.baseUrl}/getsemcalendar`,data);
+    return this.http.post(`${this.baseUrl}/getsemcalendar`, data);
   }
   //para recobro
-  calendar(anio:any):Observable<any[]>{
+  calendar(anio: any): Observable<any[]> {
 
-    return this.http.post<any[]>(`${this.baseUrl}/calendar`,{anio:anio});
+    return this.http.post<any[]>(`${this.baseUrl}/calendar`, { anio: anio });
   }
   //enfunde
-  calendarenfunde(anio:any):Observable<any[]>{
-    return this.http.post<any[]>(`${this.baseUrl}/calendarenfunde`,{anio:anio});
+  calendarenfunde(anio: any): Observable<any[]> {
+    return this.http.post<any[]>(`${this.baseUrl}/calendarenfunde`, { anio: anio });
   }
 
   //SALDOS FINALES
-  getsaldosP(data:any){
-    return this.http.post(`${this.baseUrl}/saldosp`,data);
+  getsaldosP(data: any) {
+    return this.http.post(`${this.baseUrl}/saldosp`, data);
   }
 
 
   // Este método maneja la consulta solo según el ID
-  consultarConId(id: any, codigo:any): Observable<any> {
+  consultarConId(id: any, codigo: any): Observable<any> {
 
     let url = '';
     let url2 = '';
@@ -60,7 +60,7 @@ export class EstadisticasService {
   }
 
   // Este método maneja la consulta solo según el ID
-  consultarLote(id: any, codigo:any, lote:any): Observable<any> {
+  consultarLote(id: any, codigo: any, lote: any): Observable<any> {
 
     let url = '';
     let url2 = '';
@@ -87,32 +87,38 @@ export class EstadisticasService {
 
     // Realizamos las consultas concurrentes usando forkJoin
     return forkJoin([
-      this.http.post(url, { lote:lote, cinta: codigo }),  // Primera consulta
-      this.http.post(url2, { cinta: codigo, hacienda:id }),   // Segunda consulta
-      this.http.post(url3, { lote:lote, cinta: codigo }),  // tercera consulta
-      this.http.post(url4, { cinta: codigo, hacienda:id }),   // Segunda consulta
+      this.http.post(url, { lote: lote, cinta: codigo }),  // Primera consulta
+      this.http.post(url2, { cinta: codigo, hacienda: id }),   // Segunda consulta
+      this.http.post(url3, { lote: lote, cinta: codigo }),  // tercera consulta
+      this.http.post(url4, { cinta: codigo, hacienda: id }),   // Segunda consulta
     ]);
 
   }
   //obtener loteros con su lote
-  loteros(id: any, codigo:any, lote:any): Observable<any>{
+  loteros(id: any, codigo: any, lote: any): Observable<any> {
 
-    let url =  `${this.baseUrl}/enfloterocintas`;
+    let url = `${this.baseUrl}/enfloterocintas`;
 
-    return this.http.post(url,{cinta:codigo,hacienda:id,lote:lote})
+    return this.http.post(url, { cinta: codigo, hacienda: id, lote: lote })
 
   }
   //obtener loteros con total de enfunde
-  loterosenfunde(id: any, codigo:any): Observable<any>{
+  loterosenfunde(id: any, codigo: any): Observable<any> {
 
-    let url =  `${this.baseUrl}/enfloterosemana`;
-    let url2 =  `${this.baseUrl}/getloteroterrestre`;
+    let url = `${this.baseUrl}/enfloterosemana`;
+    let url2 = `${this.baseUrl}/getloteroterrestre`;
 
     return forkJoin([
-      this.http.post(url,{cinta:codigo,hacienda:id}),
-      this.http.post(url2,{hacienda:id})
+      this.http.post(url, { cinta: codigo, hacienda: id }),
+      this.http.post(url2, { hacienda: id })
     ])
 
+  }
+
+  getRacimosRecusados(data: any): Observable<any> {
+
+
+    return this.http.post(`${this.baseUrl}/getracimosrecusados`, data);
   }
 
 }

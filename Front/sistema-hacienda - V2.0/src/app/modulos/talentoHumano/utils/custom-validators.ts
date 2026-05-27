@@ -41,10 +41,11 @@ export class CustomValidators {
      * Validador para asegurar esquema de vacunación mínimo (2 dosis).
      */
     static covidVaccineValidator(group: AbstractControl): ValidationErrors | null {
+        const v0 = group.get('vacunaCovid0')?.value;
         const v1 = group.get('vacunaCovid1')?.value;
         const v2 = group.get('vacunaCovid2')?.value;
-        const count = (v1 ? 1 : 0) + (v2 ? 1 : 0);
-        return count >= 2 ? null : { minVaccinesRequired: true };
+        const count = (v1 ? 1 : 0) + (v2 ? 1 : 0) + (v0 ? 0 : 0);
+        return count >= 0 ? null : { minVaccinesRequired: true };
     }
 
     /**

@@ -1,0 +1,651 @@
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.erp-toolbar {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+/* =========================================
+   LEFT
+========================================= */
+
+.toolbar-left {
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* =========================================
+   BOTON FILTRO
+========================================= */
+
+.btn-filter {
+
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 11px 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    transition: .2s ease;
+}
+
+.btn-filter:hover {
+
+    background: #1e293b;
+    color: #fff;
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.toolbar-resume {
+
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.resume-chip {
+
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================================
+   KPIS
+========================================= */
+
+.toolbar-stats {
+
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #2563eb;
+    border-radius: 14px;
+    padding: 10px 16px;
+    min-width: 95px;
+    text-align: center;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, .05);
+}
+
+.stat-pill.success {
+
+    border-left-color: #22c55e;
+}
+
+.stat-pill.warning {
+
+    border-left-color: #facc15;
+}
+
+.stat-pill.danger {
+
+    border-left-color: #ef4444;
+}
+
+.stat-pill span {
+
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.stat-pill strong {
+
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+
+/* =========================================
+   CONTENEDOR FILTROS
+========================================= */
+
+.filters-container {
+
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, .05);
+
+    /* IMPORTANTE */
+    overflow: visible !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* =========================================
+   GRID
+========================================= */
+
+.filters-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(240px, 1fr));
+
+    gap: 16px;
+
+    align-items: end;
+
+    /* IMPORTANTE */
+    overflow: visible !important;
+}
+
+/* =========================================
+   FULL WIDTH
+========================================= */
+
+.full-width {
+
+    grid-column: 1 / -1;
+}
+
+/* =========================================
+   ITEMS
+========================================= */
+
+.filter-item,
+.premium-dropdown {
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   LABELS
+========================================= */
+
+.filter-item label,
+.premium-dropdown label {
+
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.form-control {
+
+    height: 48px;
+    border-radius: 14px;
+    border: 1px solid #dbe2ea;
+    background: #f8fafc;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.form-control:focus {
+
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 .15rem rgba(37, 99, 235, .10);
+}
+
+/* =========================================
+   CHIPS
+========================================= */
+
+.erp-chip-container {
+
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.erp-chip {
+
+    background: #f8fafc;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.erp-chip:hover {
+
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.erp-chip.active {
+
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* =========================================
+   SEMANA
+========================================= */
+
+.week-group .btn-week {
+
+    width: 42px;
+    border: 1px solid #dbe2ea;
+    background: #fff;
+    font-weight: 700;
+}
+
+.week-group .btn-week:hover {
+
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+
+
+
+/* =========================================
+   BOTON
+========================================= */
+
+.premium-btn {
+
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    border: 1px solid #dbe2ea;
+    background: #fff;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    transition: .2s ease;
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, .04);
+}
+
+.premium-btn:hover {
+
+    border-color: #2563eb;
+    background: #f8fbff;
+}
+
+.premium-btn span {
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* BOOTSTRAP SHOW */
+
+.premium-menu.show {
+
+    display: block;
+}
+
+/* =========================================
+   ITEMS MENU
+========================================= */
+
+.premium-menu .dropdown-item {
+
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-weight: 600;
+    transition: .2s ease;
+}
+
+.premium-menu .dropdown-item:hover {
+
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
+
+    .filters-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .filters-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .erp-toolbar {
+
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-stats {
+
+        justify-content: center;
+    }
+
+    .toolbar-left {
+
+        width: 100%;
+    }
+
+    .btn-filter {
+
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* =========================================
+   COLLAPSE
+========================================= */
+
+.filters-collapse {
+
+    visibility: hidden;
+    opacity: 0;
+
+    max-height: 0;
+
+    overflow: visible;
+
+    transition:
+        opacity .25s ease,
+        max-height .35s ease;
+
+}
+
+.filters-collapse.open {
+
+    visibility: visible;
+    opacity: 1;
+
+    max-height: 3000px;
+
+    overflow: visible;
+}
+
+/* =========================================
+   DROPDOWNS
+========================================= */
+
+.premium-dropdown {
+
+    position: relative;
+
+    z-index: 100;
+}
+
+/* =========================================
+   BOTON
+========================================= */
+
+.premium-btn {
+
+    width: 100%;
+
+    height: 48px;
+
+    border-radius: 14px;
+
+    border: 1px solid #dbe2ea;
+
+    background: #fff;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, .04);
+}
+
+/* =========================================
+   MENU
+========================================= */
+
+.premium-menu {
+
+    border: none !important;
+
+    border-radius: 16px;
+
+    padding: 8px;
+
+    margin-top: 8px;
+
+    background: #fff;
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, .18);
+
+    z-index: 999999 !important;
+
+    position: absolute !important;
+
+    inset: auto auto auto 0 !important;
+
+    transform: none !important;
+}
+
+/* =========================================
+   ITEMS
+========================================= */
+
+.premium-menu .dropdown-item {
+
+    border-radius: 12px;
+
+    padding: 11px 14px;
+
+    font-weight: 600;
+}
+
+.premium-menu .dropdown-item:hover {
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+/* =========================================
+   DROPDOWN MANUAL
+========================================= */
+
+.premium-dropdown {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+/* =========================================
+   BOTON
+========================================= */
+
+.premium-btn {
+
+    width: 100%;
+
+    height: 48px;
+
+    border-radius: 14px;
+
+    border: 1px solid #dbe2ea;
+
+    background: #fff;
+
+    padding: 0 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.premium-btn:hover {
+
+    border-color: #2563eb;
+
+    background: #f8fbff;
+}
+
+.premium-btn span {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+/* =========================================
+   MENU
+========================================= */
+
+.premium-menu {
+
+    position: absolute;
+
+    top: calc(100% + 8px);
+
+    left: 0;
+
+    width: 100%;
+
+    background: #fff;
+
+    border-radius: 16px;
+
+    padding: 8px;
+
+    z-index: 9999;
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, .18);
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+/* =========================================
+   ITEM
+========================================= */
+
+.dropdown-item {
+
+    border: none;
+
+    background: transparent;
+
+    text-align: left;
+
+    border-radius: 12px;
+
+    padding: 11px 14px;
+
+    font-weight: 600;
+
+    transition: .2s ease;
+}
+
+.dropdown-item:hover {
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+/* =========================================
+   KPI CRITICO
+========================================= */
+
+.critical-kpi {
+
+    border-left: 4px solid #dc2626;
+
+    background:
+        linear-gradient(135deg,
+            #fff5f5,
+            #ffffff);
+
+    min-width: 180px;
+}
+
+.critical-kpi strong {
+
+    color: #991b1b;
+
+    font-size: 20px;
+}
+
+.critical-kpi small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #7f1d1d;
+}

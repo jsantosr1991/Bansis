@@ -152,7 +152,7 @@
                     <i class="bi bi-check-circle-fill"></i>
 
                     <span>
-                        Usted ya cerró su parte semanal
+                        Usted ya cerró su labor semanal
                     </span>
 
                 </div>
@@ -232,6 +232,17 @@
                 <input class="form-control input-pro text-center" [value]="filtro.periodo">
 
             </div>
+            <!-- IMPRESION -->
+            <div class="col-md-1" *ngIf="cabecera?.estado === 'CERRADO'">
+
+                <label>Imprimir</label>
+
+                <button class="btn btn-dark" (click)="imprimirLabores()">
+                    <i class="bi bi-printer"></i>
+
+                </button>
+
+            </div>
 
             <!-- 👑 TIPO SOLO ADMIN -->
             <div class="col-md-2" *ngIf="esAdmin()">
@@ -270,7 +281,9 @@
 
                         <th>Labor</th>
                         <th>Cantidad</th>
-                        <th>Has</th>
+                        <th *ngIf="tipoSeleccionado !== 'FITO'">
+                            Has
+                        </th>
                         <th>Medida</th>
                         <th>Sección</th>
 
@@ -284,18 +297,39 @@
 
                         <!-- FILA PRINCIPAL -->
                         <tr class="row-main" (click)="toggleDetalle(l)" [class.active]="l.expandido" [ngClass]="{
-                'table-success': l.cantidad > 0,
-                'table-danger': l.cantidad == 0
-            }">
+
+                                        'table-success': l.cantidad > 0 && !l.yaReportada,
+
+                                        'table-warning shared-row': l.yaReportada,
+
+                                        'table-danger': l.cantidad == 0
+
+                                    }">
 
                             <!-- LABOR -->
                             <td>
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
 
-                                    <i class="bi bi-chevron-right" *ngIf="origenGuardadas">
-                                    </i>
+                                    <span>
+                                        {{ l.nombre }}
+                                    </span>
 
-                                    {{ l.nombre }}
+                                    <!-- COMPARTIDA -->
+                                    <span *ngIf="l.esCompartida"
+                                        class="badge rounded-pill bg-info-subtle text-dark border">
+
+                                        Compartida
+
+                                    </span>
+
+                                    <!-- YA REPORTADA -->
+                                    <span *ngIf="l.yaReportada" class="badge rounded-pill bg-success">
+
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+
+                                        Ya reportada
+
+                                    </span>
 
                                 </div>
                             </td>
@@ -321,7 +355,7 @@
                             </td>
 
                             <!-- HAS -->
-                            <td width="180">
+                            <td width="180" *ngIf="tipoSeleccionado !== 'FITO'">
 
                                 <!-- FITO -->
                                 <ng-container *ngIf="tipoSeleccionado !== 'MMEDIOS'">
@@ -388,7 +422,7 @@
                             </td>
 
                             <!-- SECCIÓN -->
-                            <td width="180">
+                            <td width="340">
 
                                 <!-- VISUAL -->
                                 <div *ngIf="!l.editandoSeccion"
@@ -414,8 +448,9 @@
                                 <!-- MODO EDICIÓN -->
                                 <div *ngIf="l.editandoSeccion" class="d-flex gap-1 align-items-center">
 
-                                    <input type="text" class="form-control form-control-sm" [(ngModel)]="l.seccionTemp"
-                                        maxlength="10">
+                                    <textarea rows="2" class="form-control form-control-sm" [(ngModel)]="l.seccionTemp"
+                                        maxlength="150">
+                                        </textarea>
 
                                     <!-- GUARDAR -->
                                     <button class="btn btn-success btn-sm" type="button"
@@ -575,4 +610,68 @@
 
     </div>
 
+</div>
+
+
+<!-- ====================================================== -->
+<!-- REPORTE IMPRESION -->
+<!-- ====================================================== -->
+
+<div class="print-container"> <!-- HEADER -->
+    <div class="print-header">
+        <div class="header-top">
+            <div>
+                <h1>CUMPLIMIENTO DE LABORES AGRICOLAS</h1>
+                <div class="empresa"> {{ namehacienda }} </div>
+            </div>
+            <div class="header-info">
+                <div> <span>Semana:</span> {{ filtro.semana }} </div>
+                <div> <span>Año:</span> {{ filtro.anio }} </div>
+            </div>
+        </div>
+    </div> <!-- TABLA -->
+    <table class="erp-print-table">
+        <thead>
+            <tr>
+                <th style="width: 70%">Labor</th>
+                <th style="width: 30%" class="text-end"> TOTAL SACOS APLICADOS </th>
+            </tr>
+        </thead>
+        <tbody> <ng-container *ngFor="let item of imprimirData"> <!-- FILA PRINCIPAL -->
+                <tr class="labor-row">
+                    <td class="labor-name"> {{ item.nombre_labor }} </td>
+
+                    <td class="text-end fw-bold cantidad-cell">
+
+                        <span class="cantidad-print">
+                            {{ item.cantidad | number:'1.0-2' }}
+                        </span>
+
+                        <!-- MEDIDA SOLO SI NO ES FERTILIZACIÓN -->
+                        <span *ngIf="!item.nombre_labor?.toUpperCase().includes('FERT')" class="unidad-print">
+
+                            {{ item.medida }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- DETALLE SOLO FERTILIZACIÓN -->
+                <tr *ngIf="item.nombre_labor?.toUpperCase().includes('FERT')" class="fert-detail">
+                    <td colspan="2">
+                        <div class="fert-box">
+                            <div class="fert-item">
+                                <div class="fert-label"> Hectáreas Aplicadas </div>
+                                <div class="fert-value"> {{ item.has | number:'1.0-2' }} </div>
+                            </div>
+                            <div class="fert-item">
+                                <div class="fert-label"> Sacos Aplicados por Ha. </div>
+                                <div class="fert-value"> {{ item.sacos | number:'1.0-2' }} </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-container> </tbody>
+    </table> <!-- FOOTER -->
+    <div class="print-footer"> Documento generado automáticamente por el ERP Agrícola </div>
 </div>

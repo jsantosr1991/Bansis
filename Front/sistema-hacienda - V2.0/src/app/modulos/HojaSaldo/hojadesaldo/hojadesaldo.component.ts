@@ -99,10 +99,11 @@ export class HojadesaldoComponent implements OnInit {
       });
   }
   cargarCodigo(anio: number): void {
+    this.loading = true;
     this.cintaService.calendar(anio).subscribe({
       next: (data: any) => {
         this.codigos = data;
-
+        this.loading = false
       },
       error: (error) => {
         this.codigos = [];
@@ -165,34 +166,76 @@ export class HojadesaldoComponent implements OnInit {
   }
 
   procesarDatos() {
+
     const agrupado: { [color: string]: any[] } = {};
     const totalesPorColor: { [color: string]: any } = {};
 
-    // ------------------------------
-    // 🔥 UNIFICAR COLORES
-    // ------------------------------
+    // ==================================================
+    // UNIFICAR COLORES
+    // ==================================================
+
     const coloresSet = new Set<string>();
 
     this.datos.forEach(d => coloresSet.add(d.color));
     this.datosEnfunde.forEach(d => coloresSet.add(d.color));
     this.datosCaidas.forEach(d => coloresSet.add(d.color));
 
-    const colores = Array.from(coloresSet);
+    const colores = Array.from(coloresSet).sort((a, b) => {
 
-    // ------------------------------
-    // 🔥 AGRUPAR COSECHA
-    // ------------------------------
+      const codigoA =
+        parseInt(
+          this.datos.find(d => d.color === a)?.codigo || '0',
+          10
+        );
+
+      const codigoB =
+        parseInt(
+          this.datos.find(d => d.color === b)?.codigo || '0',
+          10
+        );
+
+      // 🔥 DESCENDENTE
+      return codigoB - codigoA;
+    });
+
+    // ==================================================
+    // AGRUPAR COSECHA
+    // ==================================================
+
     this.datos.forEach(item => {
+
       const color = item.color;
       const fecha = item.cs_fecha;
+
+      // 🔥 ESTOS FALTABAN
+      const semana = item.semana;
+      const edad = item.edad;
+
       const cantidad = parseInt(item.cantidad, 10);
 
-      if (!agrupado[color]) agrupado[color] = [];
+      if (!agrupado[color]) {
+        agrupado[color] = [];
+      }
 
-      let fila = agrupado[color].find(f => f.fecha === fecha);
+      let fila =
+        agrupado[color].find(f => f.fecha === fecha);
+
       if (!fila) {
-        fila = { fecha, totalFecha: 0 };
-        this.secciones.forEach(sec => (fila[sec] = 0));
+
+        fila = {
+          fecha,
+
+          // 🔥 GUARDARLOS EN LA FILA
+          semana,
+          edad,
+
+          totalFecha: 0
+        };
+
+        this.secciones.forEach(sec => {
+          fila[sec] = 0;
+        });
+
         agrupado[color].push(fila);
       }
 
@@ -200,100 +243,158 @@ export class HojadesaldoComponent implements OnInit {
       fila.totalFecha += cantidad;
 
       if (!totalesPorColor[color]) {
-        totalesPorColor[color] = { totalColor: 0 };
-        this.secciones.forEach(sec => (totalesPorColor[color][sec] = 0));
+
+        totalesPorColor[color] = {
+          totalColor: 0
+        };
+
+        this.secciones.forEach(sec => {
+          totalesPorColor[color][sec] = 0;
+        });
       }
 
       totalesPorColor[color][item.cs_seccion] += cantidad;
       totalesPorColor[color].totalColor += cantidad;
+
     });
 
     this.datosPivotados = [];
 
-    // ------------------------------
-    // 🔥 RECORRER TODOS LOS COLORES
-    // ------------------------------
+    // ==================================================
+    // RECORRER COLORES
+    // ==================================================
+
     colores.forEach(color => {
 
-      if (!agrupado[color]) agrupado[color] = [];
+      if (!agrupado[color]) {
+        agrupado[color] = [];
+      }
 
       const codigoColor =
         this.datos.find(d => d.color === color)?.codigo ||
         this.datosEnfunde.find(d => d.color === color)?.codigo ||
         '';
 
-      const totalesColor = totalesPorColor[color] || { totalColor: 0 };
-      const totalDatos = totalesColor.totalColor || 0;
+      const totalesColor =
+        totalesPorColor[color] || { totalColor: 0 };
 
-      // ------------------------------
-      // ⭐ CABECERA
-      // ------------------------------
-      const filaCabecera: any = {
+      const totalDatos =
+        totalesColor.totalColor || 0;
+
+      // ==================================================
+      // CABECERA
+      // ==================================================
+
+      const filaCabeceraInicial: any = {
         color,
         codigo: codigoColor,
         fecha: '',
         esCabecera: true,
         total: ''
       };
-      this.secciones.forEach(sec => filaCabecera[sec] = '');
-      this.datosPivotados.push(filaCabecera);
 
-      // ------------------------------
-      // ⭐ ENFUNDE
-      // ------------------------------
-      const metasPorColor = this.datosEnfunde.filter(m => m.color === color);
+      this.secciones.forEach(sec => {
+        filaCabeceraInicial[sec] = '';
+      });
+
+      this.datosPivotados.push(filaCabeceraInicial);
+
+      // ==================================================
+      // ENFUNDE
+      // ==================================================
+
+      const metasPorColor =
+        this.datosEnfunde.filter(m => m.color === color);
+
       let totalMeta = 0;
 
       if (metasPorColor.length) {
+
         const filaMeta: any = {
           color,
           fecha: 'ENFUNDE',
-          total: metasPorColor.reduce((sum, m) => sum + parseInt(m.enfunde, 10), 0)
+          total: metasPorColor.reduce(
+            (sum, m) => sum + parseInt(m.enfunde, 10),
+            0
+          )
         };
 
         totalMeta = filaMeta.total;
 
         this.secciones.forEach(sec => {
-          const metaSeccion = metasPorColor.find(m => m.cs_seccion === sec);
-          filaMeta[sec] = metaSeccion ? parseInt(metaSeccion.enfunde, 10) : 0;
+
+          const metaSeccion =
+            metasPorColor.find(
+              m => m.cs_seccion === sec
+            );
+
+          filaMeta[sec] =
+            metaSeccion
+              ? parseInt(metaSeccion.enfunde, 10)
+              : 0;
         });
 
         this.datosPivotados.push(filaMeta);
       }
 
-      // ------------------------------
-      // ⭐ CAIDAS
-      // ------------------------------
-      const caidasPorColor = this.datosCaidas.filter(c => c.color === color);
+      // ==================================================
+      // CAIDAS
+      // ==================================================
+
+      const caidasPorColor =
+        this.datosCaidas.filter(c => c.color === color);
 
       if (caidasPorColor.length) {
+
         const filaCaidas: any = {
           color,
           fecha: 'CAIDAS',
-          total: caidasPorColor.reduce((sum, c) => sum + parseInt(c.cantidad, 10), 0)
+          total: caidasPorColor.reduce(
+            (sum, c) => sum + parseInt(c.cantidad, 10),
+            0
+          )
         };
 
         this.secciones.forEach(sec => {
-          const item = caidasPorColor.find(c => c.pe_seccion === sec);
-          filaCaidas[sec] = item ? parseInt(item.cantidad, 10) : 0;
+
+          const item =
+            caidasPorColor.find(
+              c => c.pe_seccion === sec
+            );
+
+          filaCaidas[sec] =
+            item
+              ? parseInt(item.cantidad, 10)
+              : 0;
         });
 
         this.datosPivotados.push(filaCaidas);
       }
 
-      // ------------------------------
-      // ⭐ DATOS COSECHA
-      // ------------------------------
+      // ==================================================
+      // DATOS COSECHA
+      // ==================================================
+
       agrupado[color]
-        .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
+        .sort((a, b) =>
+          new Date(a.fecha).getTime() -
+          new Date(b.fecha).getTime()
+        )
         .forEach(fila => {
+
           fila.total = fila.totalFecha;
-          this.datosPivotados.push({ color, codigo: codigoColor, ...fila });
+
+          this.datosPivotados.push({
+            color,
+            codigo: codigoColor,
+            ...fila
+          });
         });
 
-      // ------------------------------
-      // ⭐ TOTAL COSECHA
-      // ------------------------------
+      // ==================================================
+      // TOTAL COSECHA
+      // ==================================================
+
       this.datosPivotados.push({
         color,
         fecha: 'TOTAL COSECHA',
@@ -301,13 +402,25 @@ export class HojadesaldoComponent implements OnInit {
         total: totalDatos
       });
 
-      // ------------------------------
-      // ⭐ SALDO + RECOBRO
-      // ------------------------------
+      // ==================================================
+      // SALDO + RECOBRO
+      // ==================================================
+
       if (totalMeta > 0) {
 
-        const totalCaidas = caidasPorColor.reduce((sum, c) => sum + parseInt(c.cantidad, 10), 0);
-        const totalTrabajo = totalDatos + totalCaidas;
+        const totalCaidas =
+          caidasPorColor.reduce(
+            (sum, c) =>
+              sum + parseInt(c.cantidad, 10),
+            0
+          );
+
+        const totalTrabajo =
+          totalDatos + totalCaidas;
+
+        // ============================
+        // SALDO
+        // ============================
 
         const filaSaldo: any = {
           color,
@@ -316,51 +429,142 @@ export class HojadesaldoComponent implements OnInit {
         };
 
         this.secciones.forEach(sec => {
-          const cosechaSeccion = totalesColor[sec] || 0;
 
-          const caidaObj = caidasPorColor.find(c => c.pe_seccion === sec);
-          const caidaSeccion = caidaObj ? parseInt(caidaObj.cantidad, 10) : 0;
+          const cosechaSeccion =
+            totalesColor[sec] || 0;
 
-          const metaSeccionObj = this.datosEnfunde.find(
-            m => m.color === color && m.cs_seccion === sec
-          );
-          const metaSeccion = metaSeccionObj ? parseInt(metaSeccionObj.enfunde, 10) : 0;
+          const caidaObj =
+            caidasPorColor.find(
+              c => c.pe_seccion === sec
+            );
 
-          filaSaldo[sec] = metaSeccion - (cosechaSeccion + caidaSeccion);
+          const caidaSeccion =
+            caidaObj
+              ? parseInt(caidaObj.cantidad, 10)
+              : 0;
+
+          const metaSeccionObj =
+            this.datosEnfunde.find(
+              m =>
+                m.color === color &&
+                m.cs_seccion === sec
+            );
+
+          const metaSeccion =
+            metaSeccionObj
+              ? parseInt(metaSeccionObj.enfunde, 10)
+              : 0;
+
+          filaSaldo[sec] =
+            metaSeccion -
+            (cosechaSeccion + caidaSeccion);
+
         });
 
         this.datosPivotados.push(filaSaldo);
 
+        // ============================
+        // RECOBRO %
+        // ============================
+
         const filaPorcentaje: any = {
           color,
           fecha: 'RECOBRO',
-          total: totalMeta > 0
-            ? ((totalTrabajo / totalMeta) * 100).toFixed(2) + '%'
-            : '0%'
+          total:
+            totalMeta > 0
+              ? (
+                (totalTrabajo / totalMeta) * 100
+              ).toFixed(2) + '%'
+              : '0%'
         };
 
         this.secciones.forEach(sec => {
-          const cosechaSeccion = totalesColor[sec] || 0;
 
-          const caidaObj = caidasPorColor.find(c => c.pe_seccion === sec);
-          const caidaSeccion = caidaObj ? parseInt(caidaObj.cantidad, 10) : 0;
+          const cosechaSeccion =
+            totalesColor[sec] || 0;
 
-          const metaSeccionObj = this.datosEnfunde.find(
-            m => m.color === color && m.cs_seccion === sec
-          );
-          const metaSeccion = metaSeccionObj ? parseInt(metaSeccionObj.enfunde, 10) : 0;
+          const caidaObj =
+            caidasPorColor.find(
+              c => c.pe_seccion === sec
+            );
+
+          const caidaSeccion =
+            caidaObj
+              ? parseInt(caidaObj.cantidad, 10)
+              : 0;
+
+          const metaSeccionObj =
+            this.datosEnfunde.find(
+              m =>
+                m.color === color &&
+                m.cs_seccion === sec
+            );
+
+          const metaSeccion =
+            metaSeccionObj
+              ? parseInt(metaSeccionObj.enfunde, 10)
+              : 0;
 
           filaPorcentaje[sec] =
             metaSeccion > 0
-              ? ((cosechaSeccion + caidaSeccion) / metaSeccion * 100).toFixed(2) + '%'
+              ? (
+                (
+                  (cosechaSeccion + caidaSeccion)
+                  / metaSeccion
+                ) * 100
+              ).toFixed(2) + '%'
               : '0%';
+
         });
 
         this.datosPivotados.push(filaPorcentaje);
+
+        // ==================================================
+        // FILA VACÍA SEPARADORA
+        // ==================================================
+
+        const filaEspacio: any = {
+          color: '',
+          fecha: '',
+          total: '',
+          esSeparador: true
+        };
+
+        this.secciones.forEach(sec => {
+          filaEspacio[sec] = '';
+        });
+
+        this.datosPivotados.push(filaEspacio);
+
+        // ==================================================
+        // CABECERA REPETIDA
+        // ==================================================
+
+        const filaCabeceraExcel: any = {
+          color: 'Color',
+          fecha: '',
+          total: 'Total',
+          esCabeceraExcel: true
+        };
+
+        this.secciones.forEach(sec => {
+          filaCabeceraExcel[sec] = sec;
+        });
+
+        // 🔥 SOLO agregar cabecera si NO es el último color
+        const esUltimoColor = color === colores[colores.length - 1];
+
+        if (!esUltimoColor) {
+          this.datosPivotados.push(filaCabeceraExcel);
+        }
+
       }
 
     });
+
   }
+
+
 
   reinicializarDataTable() {
     if (!this.datosPivotados || this.datosPivotados.length === 0) return;
@@ -410,18 +614,33 @@ export class HojadesaldoComponent implements OnInit {
             </div>
           `;
           } else {
+
+            const semana =
+              row.semana
+                ? `${row.semana} `
+                : '';
+
+            const edad =
+              row.edad
+                ? ` ${row.edad}`
+                : '';
+
             return `
-            <div style="
-              font-size: 0.85em;
-              color: ${colorTexto};
-              background-color: ${colorFondo};
-              padding: 2px 6px;
-              border-radius: 4px;
-              display: inline-block;
-            ">
-              ${row.fecha}
-            </div>
-          `;
+    <div style="
+      font-size:0.80em;
+      color:${colorTexto};
+      background-color:${colorFondo};
+      padding:2px 6px;
+      border-radius:4px;
+      display:inline-block;
+      white-space:nowrap;
+      line-height:1.2;
+    ">
+      ${semana}
+      ${row.fecha || ''}
+      ${edad}
+    </div>
+  `;
           }
         }
       },
@@ -440,7 +659,7 @@ export class HojadesaldoComponent implements OnInit {
       paging: true,
       ordering: false,
       dom: '<"d-flex justify-content-between align-items-center mb-2"<"length-div"l><"search-div"f>>Brtip',
-      lengthMenu: [[50, 100, -1], [50, 100, "Todos"]],
+      lengthMenu: [[75, 100, -1], [75, 100, "Todos"]],
       data: this.datosPivotados,
       columns: columns,
       columnDefs: [{ targets: 0, orderable: false }],
@@ -448,14 +667,14 @@ export class HojadesaldoComponent implements OnInit {
         {
           extend: 'copyHtml5',
           text: '<i class="bi bi-clipboard"></i>',
-          className: 'btn btn-outline-primary btn-sm me-1',
+          className: 'btn btn-primary btn-sm me-1',
           titleAttr: 'Copiar'
         },
 
         {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel"></i>',
-          className: 'btn btn-outline-success btn-sm me-1',
+          className: 'btn btn-success btn-sm me-1',
           titleAttr: 'Exportar Excel',
 
           action: (e: any, dt: any, button: any, config: any) => {
@@ -484,136 +703,441 @@ export class HojadesaldoComponent implements OnInit {
           title: null,
 
           customize: (xlsx: any) => {
-            // 🔥 TU MISMO CÓDIGO (NO CAMBIA)
+
             const sheet = xlsx.xl.worksheets['sheet1.xml'];
             const sheetData = sheet.getElementsByTagName('sheetData')[0];
             const rows = sheetData.getElementsByTagName('row');
+            const styles = xlsx.xl['styles.xml'];
+
+            // =====================================================
+            // CREAR ESTILOS
+            // =====================================================
+
+            const fills = styles.getElementsByTagName('fills')[0];
+            const borders = styles.getElementsByTagName('borders')[0];
+            const cellXfs = styles.getElementsByTagName('cellXfs')[0];
+
+            // 🔥 Fill amarillo
+            fills.innerHTML += `
+    <fill>
+      <patternFill patternType="solid">
+        <fgColor rgb="FFFF00"/>
+        <bgColor indexed="64"/>
+      </patternFill>
+    </fill>
+  `;
+
+            const fillId = fills.children.length - 1;
+
+            // 🔥 Border completo
+            borders.innerHTML += `
+    <border>
+      <left style="thin"><color auto="1"/></left>
+      <right style="thin"><color auto="1"/></right>
+      <top style="thin"><color auto="1"/></top>
+      <bottom style="thin"><color auto="1"/></bottom>
+    </border>
+  `;
+
+            const borderId = borders.children.length - 1;
+
+            // 🔥 estilo borde normal
+            cellXfs.innerHTML += `
+    <xf numFmtId="0"
+        fontId="0"
+        fillId="0"
+        borderId="${borderId}"
+        applyBorder="1"/>
+  `;
+
+            const estiloBorde =
+              (cellXfs.children.length - 1).toString();
+
+            // 🔥 estilo amarillo + borde
+            cellXfs.innerHTML += `
+    <xf numFmtId="0"
+        fontId="0"
+        fillId="${fillId}"
+        borderId="${borderId}"
+        applyFill="1"
+        applyBorder="1"/>
+  `;
+
+            const estiloAmarillo =
+              (cellXfs.children.length - 1).toString();
+
+            // =====================================================
+            // MOVER FILAS
+            // =====================================================
 
             const filasExtras = 5;
 
             for (let i = rows.length - 1; i >= 0; i--) {
-              const row = rows[i];
-              const r = parseInt(row.getAttribute('r') || '0');
-              row.setAttribute('r', (r + filasExtras).toString());
 
-              const cells = row.getElementsByTagName('c');
+              const row = rows[i];
+
+              const r =
+                parseInt(row.getAttribute('r') || '0');
+
+              row.setAttribute(
+                'r',
+                (r + filasExtras).toString()
+              );
+
+              const cells =
+                row.getElementsByTagName('c');
+
               for (let j = 0; j < cells.length; j++) {
-                const ref = cells[j].getAttribute('r');
+
+                const ref =
+                  cells[j].getAttribute('r');
+
                 if (ref) {
-                  const col = ref.replace(/\d+/g, '');
-                  cells[j].setAttribute('r', col + (r + filasExtras));
+
+                  const col =
+                    ref.replace(/\d+/g, '');
+
+                  cells[j].setAttribute(
+                    'r',
+                    col + (r + filasExtras)
+                  );
                 }
               }
             }
 
+            // =====================================================
+            // CABECERA
+            // =====================================================
+
             const fecha = new Date();
-            const fechaStr = fecha.toLocaleDateString();
-            const horaStr = fecha.toLocaleTimeString();
+
+            const fechaStr =
+              fecha.toLocaleDateString();
+
+            const horaStr =
+              fecha.toLocaleTimeString();
 
             const nuevasFilas = `
-        <row r="1"><c t="inlineStr"><is><t>HOJA DE SALDOS</t></is></c></row>
-        <row r="2"><c t="inlineStr"><is><t>Hacienda:</t></is></c><c t="inlineStr"><is><t>${this.haciendaSeleccionada || 'N/A'}</t></is></c></row>
-        <row r="3"><c t="inlineStr"><is><t>Usuario:</t></is></c><c t="inlineStr"><is><t>${this.usuarioActual}</t></is></c></row>
-        <row r="4"><c t="inlineStr"><is><t>Fecha:</t></is></c><c t="inlineStr"><is><t>${fechaStr} ${horaStr}</t></is></c></row>
-        <row r="5"></row>
-      `;
+    <row r="1">
+  <c t="inlineStr">
+    <is>
+      <r>
+        <rPr><b/></rPr>
+        <t>ENFUNDE VS RECOBRO SEMANAL POR LOTES</t>
+      </r>
+    </is>
+  </c>
+</row>
 
-            sheetData.insertAdjacentHTML('afterbegin', nuevasFilas);
-          }
-        },
+    <row r="2">
+  <c t="inlineStr">
+    <is>
+      <r>
+        <rPr><b/></rPr>
+        <t>Hacienda:</t>
+      </r>
+      <r>
+        <t>${this.haciendaSeleccionada || 'N/A'}</t>
+      </r>
+    </is>
+  </c>
+</row>
 
-        {
-          extend: 'pdfHtml5',
-          text: '<i class="bi bi-file-earmark-pdf"></i>',
-          className: 'btn btn-outline-danger btn-sm me-1',
-          titleAttr: 'Exportar PDF',
+    <row r="3">
+      <c t="inlineStr">
+        <is><t>Usuario:</t></is>
+      </c>
+      <c t="inlineStr">
+        <is><t>${this.usuarioActual}</t></is>
+      </c>
+    </row>
 
-          action: (e: any, dt: any, button: any, config: any) => {
+    <row r="4">
+      <c t="inlineStr">
+        <is><t>Fecha:</t></is>
+      </c>
+      <c t="inlineStr">
+        <is><t>${fechaStr} ${horaStr}</t></is>
+      </c>
+    </row>
 
-            this.alertService.loading('Generando PDF...');
+    <row r="5"></row>
+  `;
 
-            // 🔥 dejar que DataTables haga su trabajo SOLO
-            setTimeout(() => {
-              try {
+            sheetData.insertAdjacentHTML(
+              'afterbegin',
+              nuevasFilas
+            );
 
-                // 👉 EJECUCIÓN ORIGINAL (SIN TOCAR CONTEXTO)
-                (window as any).jQuery.fn.dataTable.ext.buttons.pdfHtml5.action(
-                  e, dt, button, config
-                );
+            // =====================================================
+            // APLICAR ESTILOS
+            // =====================================================
 
-                // 🔥 cerrar después de generar
-                setTimeout(() => {
-                  this.alertService.close();
-                  this.alertService.success('PDF generado correctamente');
-                }, 1000);
+            const todasLasFilas =
+              sheet.getElementsByTagName('row');
 
-              } catch (error) {
-                this.alertService.close();
-                this.alertService.success('PDF generado correctamente');
-                console.error(error);
-              }
-            }, 100);
-          },
+            for (let i = 0; i < todasLasFilas.length; i++) {
 
-          filename: () => {
-            const fecha = new Date();
-            const dd = String(fecha.getDate()).padStart(2, '0');
-            const mm = String(fecha.getMonth() + 1).padStart(2, '0');
-            const yyyy = fecha.getFullYear();
-            return `Hojadesaldo_${dd}${mm}${yyyy}`;
-          },
+              const row = todasLasFilas[i];
 
-          title: 'HOJA DE SALDOS',
-          orientation: 'landscape',
-          pageSize: 'A2',
-          exportOptions: { columns: ':visible' },
+              const cells =
+                row.getElementsByTagName('c');
 
-          customize: (doc: any) => {
-            const fecha = new Date();
-            const fechaStr = fecha.toLocaleDateString();
-            const horaStr = fecha.toLocaleTimeString();
 
-            doc.content.unshift({
-              margin: [0, 0, 0, 10],
-              alignment: 'left',
-              stack: [
-                { text: `Hacienda: ${this.haciendaSeleccionada || 'N/A'}`, bold: true },
-                { text: `Usuario: ${this.usuarioActual}`, bold: true },
-                { text: `Fecha: ${fechaStr} ${horaStr}`, bold: true },
-              ]
-            });
+              let esSaldo = false;
+              let esRecobro = false;
 
-            doc.pageMargins = [10, 10, 10, 10];
-            doc.defaultStyle = 7;
-            doc.styles.tableHeader.fontSize = 8;
+              // detectar fila SALDO
+              for (let j = 0; j < cells.length; j++) {
 
-            const tabla = doc.content.find((c: any) => c.table);
+                const texto =
+                  cells[j].textContent || '';
 
-            if (tabla && tabla.table?.body?.length) {
-              const columnCount = tabla.table.body[0].length;
+                if (texto.includes('SALDO')) {
 
-              const widths = [];
-              for (let i = 0; i < columnCount; i++) {
-                if (i === 0) widths.push(60);
-                else if (i === columnCount - 1) widths.push(60);
-                else widths.push(35);
+                  esSaldo = true;
+                  break;
+                }
+                if (texto.includes('RECOBRO')) {
+
+                  esRecobro = true;
+                }
               }
 
-              tabla.table.width = widths;
+              // recorrer celdas
+              for (let j = 0; j < cells.length; j++) {
+
+                const cell = cells[j];
+
+                const texto =
+                  cell.textContent?.trim() || '';
+
+                // ocultar ceros
+                if (
+                  texto === '0' ||
+                  texto === '0.00'
+                ) {
+
+                  cell.textContent = '';
+                }
+
+                // ==================================
+                // FILA RECOBRO
+                // ==================================
+
+                if (esSaldo) {
+
+                  // 🔥 aplicar amarillo + bordes SIEMPRE
+                  cell.setAttribute(
+                    's',
+                    estiloAmarillo
+                  );
+
+                  // 🔥 si la celda está vacía crear valor vacío
+                  // para que Excel pinte el borde
+                  if (!cell.textContent || cell.textContent.trim() === '') {
+
+                    cell.setAttribute('t', 'inlineStr');
+
+                    cell.innerHTML = `
+                                <is><t>0</t></is>
+                              `;
+                  }
+
+                  continue;
+                }
+
+                // ==================================
+                // RESTO TABLA = BORDES
+                // ==================================
+
+                const estiloActual =
+                  cell.getAttribute('s');
+
+                // 🔥 conservar fechas y formatos
+                if (!estiloActual) {
+
+                  cell.setAttribute(
+                    's',
+                    estiloBorde
+                  );
+                }
+              }
             }
+
+            // ============================================
+            // ESPACIO VISUAL ENTRE TABLAS
+            // ============================================
+
+            for (let i = 0; i < todasLasFilas.length; i++) {
+
+              const row = todasLasFilas[i];
+
+              const textoFila =
+                row.textContent || '';
+
+
+            }
+
+            // ============================================
+            // 🔥 AJUSTAR ANCHO DE COLUMNAS
+            // ============================================
+
+            const cols = sheet.getElementsByTagName('cols')[0];
+
+            if (cols) {
+              cols.innerHTML = '';
+
+              // Primera columna (Color)
+              cols.innerHTML += `
+    <col min="1" max="1" width="18" customWidth="1"/>
+  `;
+
+              // Columnas de secciones
+              for (let i = 0; i < this.secciones.length; i++) {
+
+                cols.innerHTML += `
+      <col min="${i + 2}" max="${i + 2}" width="8" customWidth="1"/>
+    `;
+              }
+
+              // Última columna (Total)
+              cols.innerHTML += `
+    <col min="${this.secciones.length + 2}" 
+         max="${this.secciones.length + 2}" 
+         width="12" 
+         customWidth="1"/>
+  `;
+            }
+
           }
         },
-
-        {
-          extend: 'print',
-          text: '<i class="bi bi-printer"></i>',
-          className: 'btn btn-outline-primary btn-sm me-1',
-          titleAttr: 'Imprimir',
-          title: 'Hoja de saldos'
-        }
+        /* 
+                {
+                  extend: 'pdfHtml5',
+                  text: '<i class="bi bi-file-earmark-pdf"></i>',
+                  className: 'btn btn-outline-danger btn-sm me-1',
+                  titleAttr: 'Exportar PDF',
+        
+                  action: (e: any, dt: any, button: any, config: any) => {
+        
+                    this.alertService.loading('Generando PDF...');
+        
+                    // 🔥 dejar que DataTables haga su trabajo SOLO
+                    setTimeout(() => {
+                      try {
+        
+                        // 👉 EJECUCIÓN ORIGINAL (SIN TOCAR CONTEXTO)
+                        (window as any).jQuery.fn.dataTable.ext.buttons.pdfHtml5.action(
+                          e, dt, button, config
+                        );
+        
+                        // 🔥 cerrar después de generar
+                        setTimeout(() => {
+                          this.alertService.close();
+                          this.alertService.success('PDF generado correctamente');
+                        }, 1000);
+        
+                      } catch (error) {
+                        this.alertService.close();
+                        this.alertService.success('PDF generado correctamente');
+                        console.error(error);
+                      }
+                    }, 100);
+                  },
+        
+                  filename: () => {
+                    const fecha = new Date();
+                    const dd = String(fecha.getDate()).padStart(2, '0');
+                    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const yyyy = fecha.getFullYear();
+                    return `Hojadesaldo_${dd}${mm}${yyyy}`;
+                  },
+        
+                  title: 'HOJA DE SALDOS',
+                  orientation: 'landscape',
+                  pageSize: 'A2',
+                  exportOptions: { columns: ':visible' },
+        
+                  customize: (doc: any) => {
+                    const fecha = new Date();
+                    const fechaStr = fecha.toLocaleDateString();
+                    const horaStr = fecha.toLocaleTimeString();
+        
+                    doc.content.unshift({
+                      margin: [0, 0, 0, 10],
+                      alignment: 'left',
+                      stack: [
+                        { text: `Hacienda: ${this.haciendaSeleccionada || 'N/A'}`, bold: true },
+                        { text: `Usuario: ${this.usuarioActual}`, bold: true },
+                        { text: `Fecha: ${fechaStr} ${horaStr}`, bold: true },
+                      ]
+                    });
+        
+                    doc.pageMargins = [10, 10, 10, 10];
+                    doc.defaultStyle = 7;
+                    doc.styles.tableHeader.fontSize = 8;
+        
+                    const tabla = doc.content.find((c: any) => c.table);
+        
+                    if (tabla && tabla.table?.body?.length) {
+                      const columnCount = tabla.table.body[0].length;
+        
+                      const widths = [];
+                      for (let i = 0; i < columnCount; i++) {
+                        if (i === 0) widths.push(60);
+                        else if (i === columnCount - 1) widths.push(60);
+                        else widths.push(35);
+                      }
+        
+                      tabla.table.width = widths;
+                    }
+                  }
+                }, */
+        /* 
+                {
+                  extend: 'print',
+                  text: '<i class="bi bi-printer"></i>',
+                  className: 'btn btn-outline-primary btn-sm me-1',
+                  titleAttr: 'Imprimir',
+                  title: 'Hoja de saldos'
+                } */
       ],
+
       createdRow: (row: any, data: any) => {
+        if (data.esSeparador) {
+
+          $(row).css({
+            'height': '25px',
+            'background-color': '#ffffff'
+          });
+
+          $(row).find('td').css({
+            'border': 'none',
+            'background-color': '#ffffff'
+          });
+
+          return;
+        }
+
+        // =======================================
+        // 🔥 CABECERA REPETIDA
+        // =======================================
+
+        if (data.esCabeceraExcel) {
+
+          $(row).find('td').css({
+            'font-weight': 'bold',
+            'background-color': '#d9d9d9',
+            'border': '1px solid #000',
+            'color': '#000'
+          });
+
+          return;
+        }
+
         const $row = $(row);
+
         const $celdas = $row.find('td');
         const primeraCelda = $celdas.eq(0);
 

@@ -159,14 +159,14 @@ return [
 
         'sqlxassP' => [
             'driver' => 'sqlsrv',
-            'host' => env('DB_HOST_SQL_XASS' ),
-          //  'port' => env('DB_PORT_SQL_XASS',1433),
+            'host' => env('DB_HOST_SQL_XASS'),
+            //  'port' => env('DB_PORT_SQL_XASS',1433),
             'database' => env('DB_DATABASE_SQL_XASS'),
             'username' => env('DB_USERNAME_SQL_XASS'),
             'password' => env('DB_PASSWORD_SQL_XASS'),
             'charset' => 'utf8',
             'prefix' => '',
-           'options' => [
+            'options' => [
                 'Encrypt' => false,
                 'TrustServerCertificate' => true,
             ],
@@ -174,21 +174,21 @@ return [
         ],
         'sqlxassS' => [
             'driver' => 'sqlsrv',
-            'host' => env('DB_HOST_SQL_XASS' ),
-          //  'port' => env('DB_PORT_SQL_XASS',1433),
+            'host' => env('DB_HOST_SQL_XASS'),
+            //  'port' => env('DB_PORT_SQL_XASS',1433),
             'database' => env('DB_DATABASE_SQL_XASS2'),
             'username' => env('DB_USERNAME_SQL_XASS'),
             'password' => env('DB_PASSWORD_SQL_XASS'),
             'charset' => 'utf8',
             'prefix' => '',
-           'options' => [
+            'options' => [
                 'Encrypt' => false,
                 'TrustServerCertificate' => true,
             ],
 
         ],
 
-        'sql_prueba' => [
+        'sql_local' => [
             'driver' => 'sqlsrv',
             'host' => env('DB_HOST_SQL_PRUEBA', '192.168.191.1'),
             'port' => env('DB_PORT_SQL_PRUEBA', '1433'),
@@ -233,7 +233,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
